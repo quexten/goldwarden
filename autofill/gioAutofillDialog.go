@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"gioui.org/app"
@@ -19,6 +20,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
+	gops "github.com/mitchellh/go-ps"
 )
 
 type AutofillEntry struct {
@@ -31,12 +33,65 @@ var autofillEntries = []AutofillEntry{}
 var onAutofill func(string, chan bool)
 var selectedEntry = 0
 
+type scoredAutofillEntry struct {
+	autofillEntry AutofillEntry
+	score         int
+}
+
+func getProcesses() []string {
+	var processes []string
+	procs, err := gops.Processes()
+	if err != nil {
+		return []string{}
+	}
+
+	for _, proc := range procs {
+		processes = append(processes, proc.Executable())
+	}
+
+	return processes
+}
+
 func GetFilteredAutofillEntries(entries []AutofillEntry, filter string) []AutofillEntry {
-	var filteredEntries []AutofillEntry
-	for _, entry := range autofillEntries {
-		if strings.Contains(strings.ToLower(entry.Username), strings.ToLower(filter)) || strings.Contains(strings.ToLower(entry.Name), strings.ToLower(filter)) {
-			filteredEntries = append(filteredEntries, entry)
+	if len(filter) < 2 {
+		return []AutofillEntry{}
+	}
+
+	processes := getProcesses()
+
+	scoredEntries := []scoredAutofillEntry{}
+	for _, entry := range entries {
+		score := 0
+		if strings.Contains(strings.ToLower(entry.Name), strings.ToLower(filter)) {
+			score += 10
 		}
+		if strings.HasPrefix(strings.ToLower(entry.Name), strings.ToLower(filter)) {
+			score += 5
+		}
+		if strings.Contains(strings.ToLower(entry.Username), strings.ToLower(filter)) {
+			score += 3
+		}
+		if strings.HasPrefix(strings.ToLower(entry.Username), strings.ToLower(filter)) {
+			score += 2
+		}
+
+		for _, process := range processes {
+			if strings.Contains(strings.ToLower(entry.Name), strings.ToLower(process)) {
+				score += 5
+				break
+			}
+		}
+
+		scoredEntries = append(scoredEntries, scoredAutofillEntry{entry, score})
+	}
+
+	sort.Slice(scoredEntries, func(i, j int) bool {
+		return scoredEntries[i].score > scoredEntries[j].score
+	})
+
+	var filteredEntries []AutofillEntry
+	for _, scoredEntry := range scoredEntries {
+		filteredEntries = append(filteredEntries, scoredEntry.autofillEntry)
 	}
 
 	return filteredEntries
