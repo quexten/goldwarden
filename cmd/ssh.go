@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/atotto/clipboard"
 	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
@@ -42,6 +43,8 @@ var sshAddCmd = &cobra.Command{
 		case ipc.CreateSSHKeyResponse:
 			response := result.(ipc.CreateSSHKeyResponse)
 			fmt.Println(response.Digest)
+			clipboard.WriteAll(string(response.Digest))
+			break
 		case ipc.ActionResponse:
 			println("Error: " + result.(ipc.ActionResponse).Message)
 			return
@@ -80,5 +83,6 @@ func init() {
 	sshCmd.AddCommand(sshAddCmd)
 	sshAddCmd.PersistentFlags().String("name", "", "")
 	sshAddCmd.MarkFlagRequired("name")
+	sshAddCmd.PersistentFlags().Bool("--clipboard", false, "Copy the public key to the clipboard")
 	sshCmd.AddCommand(listSSHCmd)
 }
