@@ -31,7 +31,7 @@ func SendToAgent(request interface{}) (interface{}, error) {
 	if err != nil {
 		panic(err)
 	}
-	// home := "/home/quexten"
+
 	c, err := net.Dial("unix", home+"/.goldwarden.sock")
 	if err != nil {
 		return nil, err
