@@ -13,6 +13,18 @@ import (
 )
 
 func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+	if !cfg.HasPin() {
+		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+			Success: false,
+			Message: "No pin set. Set a pin first!",
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return
+	}
+
 	req := msg.ParsedPayload().(ipc.DoLoginRequest)
 
 	ctx := context.Background()

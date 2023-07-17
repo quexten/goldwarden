@@ -41,7 +41,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	if err != nil {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
-			Message: "wrong pin",
+			Message: "wrong pin: " + err.Error(),
 		})
 		if err != nil {
 			panic(err)
@@ -50,15 +50,17 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 		return
 	}
 
-	token, err := cfg.GetToken()
-	if err == nil {
-		if token.AccessToken != "" {
-			ctx := context.Background()
-			bitwarden.RefreshToken(ctx, cfg)
-			token, err := cfg.GetToken()
-			err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, nil)
-			if err != nil {
-				fmt.Println(err)
+	if cfg.IsLoggedIn() {
+		token, err := cfg.GetToken()
+		if err == nil {
+			if token.AccessToken != "" {
+				ctx := context.Background()
+				bitwarden.RefreshToken(ctx, cfg)
+				token, err := cfg.GetToken()
+				err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, nil)
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
 		}
 	}

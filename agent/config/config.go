@@ -74,6 +74,10 @@ func (c *Config) IsLocked() bool {
 	return c.key == nil
 }
 
+func (c *Config) IsLoggedIn() bool {
+	return c.ConfigFile.EncryptedMasterPasswordHash != ""
+}
+
 func (c *Config) Unlock(password string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -150,11 +154,11 @@ func (c *Config) UpdatePin(password string, write bool) {
 	if err5 == nil {
 		c.ConfigFile.EncryptedMasterKey, err5 = c.encryptString(plaintextMasterKey)
 	}
+	c.mu.Unlock()
 
 	if write {
 		c.WriteConfig()
 	}
-	c.mu.Unlock()
 }
 
 func (c *Config) GetToken() (LoginToken, error) {
@@ -366,18 +370,23 @@ func (cfg *Config) TryUnlock(vault *vault.Vault) error {
 	if err != nil {
 		return err
 	}
-	cfg.Unlock(pin)
+	success := cfg.Unlock(pin)
+	if !success {
+		return errors.New("invalid PIN")
+	}
 
-	userKey, err := cfg.GetUserSymmetricKey()
-	if err == nil {
-		key, err := crypto.SymmetricEncryptionKeyFromBytes(userKey)
-		if err != nil {
+	if cfg.IsLoggedIn() {
+		userKey, err := cfg.GetUserSymmetricKey()
+		if err == nil {
+			key, err := crypto.SymmetricEncryptionKeyFromBytes(userKey)
+			if err != nil {
+				return err
+			}
+			vault.Keyring.AccountKey = &key
+		} else {
+			cfg.Lock()
 			return err
 		}
-		vault.Keyring.AccountKey = &key
-	} else {
-		cfg.Lock()
-		return err
 	}
 
 	return nil
