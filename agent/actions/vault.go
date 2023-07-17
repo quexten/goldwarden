@@ -57,7 +57,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 				ctx := context.Background()
 				bitwarden.RefreshToken(ctx, cfg)
 				token, err := cfg.GetToken()
-				err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, nil)
+				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, nil, true)
 				if err != nil {
 					fmt.Println(err)
 				}

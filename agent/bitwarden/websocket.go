@@ -107,7 +107,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 						websocketLog.Error("Error getting token %s", err)
 						break
 					}
-					SyncToVault(context.WithValue(ctx, AuthToken{}, token.AccessToken), vault, cfg, nil)
+					DoFullSync(context.WithValue(ctx, AuthToken{}, token.AccessToken), vault, cfg, nil, false)
 					break
 				case SyncCipherDelete:
 					websocketLog.Warn("Delete requested for cipher " + cipherid)

@@ -96,7 +96,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		}
 		return
 	}
-	err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey)
+	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey, false)
 
 	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 		Success: true,

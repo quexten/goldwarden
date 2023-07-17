@@ -2,7 +2,9 @@ package bitwarden
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -13,20 +15,30 @@ import (
 
 var log = llamalog.NewLogger("Goldwarden", "Bitwarden API")
 
+const path = "/.cache/goldwarden-vault.json"
+
 func Sync(ctx context.Context, config *config.Config) (models.SyncData, error) {
 	var sync models.SyncData
 	if err := authenticatedHTTPGet(ctx, config.ConfigFile.ApiUrl+"/sync", &sync); err != nil {
 		return models.SyncData{}, fmt.Errorf("could not sync: %v", err)
 	}
+
+	home, _ := os.UserHomeDir()
+	WriteVault(sync, home+path)
 	return sync, nil
 }
 
-func SyncToVault(ctx context.Context, vault *vault.Vault, config *config.Config, userSymmetricKey *crypto.SymmetricEncryptionKey) error {
+func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, userSymmetricKey *crypto.SymmetricEncryptionKey, allowCache bool) error {
 	log.Info("Performing full sync...")
 
 	sync, err := Sync(ctx, config)
 	if err != nil {
-		return err
+		if allowCache {
+			home, _ := os.UserHomeDir()
+			sync, err = ReadVault(home + path)
+		} else {
+			return err
+		}
 	}
 
 	if userSymmetricKey != nil {
@@ -51,4 +63,42 @@ func SyncToVault(ctx context.Context, vault *vault.Vault, config *config.Config,
 	}
 
 	return nil
+}
+
+func WriteVault(data models.SyncData, path string) error {
+	dataJson, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// write to disk
+	os.Remove(path)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	_, err = file.Write(dataJson)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReadVault(path string) (models.SyncData, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return models.SyncData{}, err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	data := models.SyncData{}
+	err = decoder.Decode(&data)
+	if err != nil {
+		return models.SyncData{}, err
+	}
+	return data, nil
 }

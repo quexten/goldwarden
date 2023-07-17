@@ -125,7 +125,7 @@ func StartUnixAgent(path string) error {
 				}
 				protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
 
-				err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey)
+				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -150,7 +150,7 @@ func StartUnixAgent(path string) error {
 					}
 					protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
 
-					err = bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey)
+					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 					if err != nil {
 						fmt.Println(err)
 					}
@@ -181,7 +181,7 @@ func StartUnixAgent(path string) error {
 					continue
 				}
 
-				bitwarden.SyncToVault(context.WithValue(ctx, bitwarden.AuthToken{}, token), vault, &cfg, nil)
+				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token), vault, &cfg, nil, false)
 			}
 		}
 	}()
