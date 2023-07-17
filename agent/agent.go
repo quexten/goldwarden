@@ -114,7 +114,7 @@ func StartUnixAgent(path string) error {
 		cfg.WriteConfig()
 	}
 	if !cfg.IsLocked() {
-		log.Warn("Config is not locked. PLEASE SET A PIN!!")
+		log.Warn("Config is not locked. SET A PIN!!")
 		token, err := cfg.GetToken()
 		if err == nil {
 			if token.AccessToken != "" {
