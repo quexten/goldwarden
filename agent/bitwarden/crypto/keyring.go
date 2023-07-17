@@ -26,7 +26,7 @@ func (keyring *Keyring) Lock() {
 	keyring.OrganizationKeys = nil
 }
 
-func (keyring Keyring) GetSymmetricKeyForOrganization(uuid string) (SymmetricEncryptionKey, error) {
+func (keyring *Keyring) GetSymmetricKeyForOrganization(uuid string) (SymmetricEncryptionKey, error) {
 	if key, ok := keyring.OrganizationKeys[uuid]; ok {
 		decryptedOrgKey, err := DecryptWithAsymmetric([]byte(key), keyring.AsymmetricEncyryptionKey)
 		if err != nil {

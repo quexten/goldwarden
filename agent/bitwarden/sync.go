@@ -41,12 +41,12 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 		}
 	}
 
+	var orgKeys map[string]string = make(map[string]string)
+	for _, org := range sync.Profile.Organizations {
+		orgId := org.Id.String()
+		orgKeys[orgId] = org.Key
+	}
 	if userSymmetricKey != nil {
-		var orgKeys map[string]string = make(map[string]string)
-		for _, org := range sync.Profile.Organizations {
-			orgId := org.Id.String()
-			orgKeys[orgId] = org.Key
-		}
 		crypto.InitKeyringFromUserSymmetricKey(vault.Keyring, *userSymmetricKey, sync.Profile.PrivateKey, orgKeys)
 	}
 

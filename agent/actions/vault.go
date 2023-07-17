@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/quexten/goldwarden/agent/bitwarden"
+	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
@@ -57,7 +58,15 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 				ctx := context.Background()
 				bitwarden.RefreshToken(ctx, cfg)
 				token, err := cfg.GetToken()
-				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, nil, true)
+				userSymmkey, err := cfg.GetUserSymmetricKey()
+				if err != nil {
+					fmt.Println(err)
+				}
+				safeUserSymmkey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmkey)
+				if err != nil {
+					fmt.Println(err)
+				}
+				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &safeUserSymmkey, true)
 				if err != nil {
 					fmt.Println(err)
 				}
