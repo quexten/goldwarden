@@ -40,4 +40,13 @@
         <allow_active>auth_self</allow_active>
       </defaults>
     </action>
+    <action id="com.quexten.goldwarden.browserbiometrics">
+      <description>Browser Biometrics</description>
+      <message>Authenticate to allow Goldwarden to unlock your browser.</message>
+      <defaults>
+        <allow_any>auth_self</allow_any>
+        <allow_inactive>auth_self</allow_inactive>
+        <allow_active>auth_self</allow_active>
+      </defaults>
+    </action>
 </policyconfig>

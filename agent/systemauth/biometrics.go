@@ -10,9 +10,11 @@ var log = llamalog.NewLogger("Goldwarden", "Systemauth")
 type Approval string
 
 const (
-	AccessCredential Approval = "com.quexten.goldwarden.accesscredential"
-	ChangePin        Approval = "com.quexten.goldwarden.changepin"
-	SSHKey           Approval = "com.quexten.goldwarden.usesshkey"
+	AccessCredential  Approval = "com.quexten.goldwarden.accesscredential"
+	ChangePin         Approval = "com.quexten.goldwarden.changepin"
+	SSHKey            Approval = "com.quexten.goldwarden.usesshkey"
+	ModifyVault       Approval = "com.quexten.goldwarden.modifyvault"
+	BrowserBiometrics Approval = "com.quexten.goldwarden.browserbiometrics"
 )
 
 func (a Approval) String() string {

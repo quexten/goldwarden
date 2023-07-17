@@ -35,6 +35,7 @@ type ConfigFile struct {
 	EncryptedToken              string
 	EncryptedUserSymmetricKey   string
 	EncryptedMasterPasswordHash string
+	EncryptedMasterKey          string
 }
 
 type LoginToken struct {
@@ -63,6 +64,7 @@ func DefaultConfig() Config {
 			EncryptedToken:              "",
 			EncryptedUserSymmetricKey:   "",
 			EncryptedMasterPasswordHash: "",
+			EncryptedMasterKey:          "",
 		},
 		sync.Mutex{},
 	}
@@ -111,6 +113,7 @@ func (c *Config) Purge() {
 	c.ConfigFile.EncryptedToken = ""
 	c.ConfigFile.EncryptedUserSymmetricKey = ""
 	c.ConfigFile.ConfigKeyHash = ""
+	c.ConfigFile.EncryptedMasterKey = ""
 	c.key = memguard.NewBuffer(32)
 }
 
@@ -131,6 +134,7 @@ func (c *Config) UpdatePin(password string, write bool) {
 	plaintextToken, err1 := c.decryptString(c.ConfigFile.EncryptedToken)
 	plaintextUserSymmetricKey, err3 := c.decryptString(c.ConfigFile.EncryptedUserSymmetricKey)
 	plaintextEncryptedMasterPasswordHash, err4 := c.decryptString(c.ConfigFile.EncryptedMasterPasswordHash)
+	plaintextMasterKey, err5 := c.decryptString(c.ConfigFile.EncryptedMasterKey)
 
 	c.key = memguard.NewBufferFromBytes(newKey)
 
@@ -142,6 +146,9 @@ func (c *Config) UpdatePin(password string, write bool) {
 	}
 	if err4 == nil {
 		c.ConfigFile.EncryptedMasterPasswordHash, err4 = c.encryptString(plaintextEncryptedMasterPasswordHash)
+	}
+	if err5 == nil {
+		c.ConfigFile.EncryptedMasterKey, err5 = c.encryptString(plaintextMasterKey)
 	}
 
 	if write {
@@ -236,6 +243,32 @@ func (c *Config) SetMasterPasswordHash(hash []byte) error {
 	c.ConfigFile.EncryptedMasterPasswordHash = encryptedHash
 	// c.mu.Unlock()
 
+	c.WriteConfig()
+	return nil
+}
+
+func (c *Config) GetMasterKey() ([]byte, error) {
+	if c.IsLocked() {
+		return []byte{}, errors.New("config is locked")
+	}
+	decrypted, err := c.decryptString(c.ConfigFile.EncryptedMasterKey)
+	if err != nil {
+		return []byte{}, err
+	}
+	return []byte(decrypted), nil
+}
+
+func (c *Config) SetMasterKey(key []byte) error {
+	if c.IsLocked() {
+		return errors.New("config is locked")
+	}
+	encryptedKey, err := c.encryptString(string(key))
+	if err != nil {
+		return err
+	}
+	// c.mu.Lock()
+	c.ConfigFile.EncryptedMasterKey = encryptedKey
+	// c.mu.Unlock()
 	c.WriteConfig()
 	return nil
 }

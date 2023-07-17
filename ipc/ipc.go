@@ -47,6 +47,9 @@ const (
 
 	IPCMessageTypeSetAPIUrlRequest      IPCMessageType = 30
 	IPCMessageTypeSetIdentityURLRequest IPCMessageType = 31
+
+	IPCMessageTypeGetBiometricsKeyRequest  IPCMessageType = 8
+	IPCMessageTypeGetBiometricsKeyResponse IPCMessageType = 9
 )
 
 type IPCMessage struct {
@@ -194,6 +197,20 @@ func (m IPCMessage) ParsedPayload() interface{} {
 			panic("Unmarshal: " + err.Error())
 		}
 		return res
+	case IPCMessageTypeGetBiometricsKeyRequest:
+		var res GetBiometricsKeyRequest
+		err := json.Unmarshal(m.Payload, &res)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return res
+	case IPCMessageTypeGetBiometricsKeyResponse:
+		var res GetBiometricsKeyResponse
+		err := json.Unmarshal(m.Payload, &res)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return res
 	default:
 		return nil
 	}
@@ -326,6 +343,16 @@ func IPCMessageFromPayload(payload interface{}) (IPCMessage, error) {
 			Type:    IPCMessageListLoginsRequest,
 			Payload: jsonBytes,
 		}, nil
+	case GetBiometricsKeyRequest:
+		return IPCMessage{
+			Type:    IPCMessageTypeGetBiometricsKeyRequest,
+			Payload: jsonBytes,
+		}, nil
+	case GetBiometricsKeyResponse:
+		return IPCMessage{
+			Type:    IPCMessageTypeGetBiometricsKeyResponse,
+			Payload: jsonBytes,
+		}, nil
 	default:
 		payloadBytes, err := json.Marshal(payload)
 		if err != nil {
@@ -453,4 +480,11 @@ type SetIdentityURLRequest struct {
 }
 
 type ListLoginsRequest struct {
+}
+
+type GetBiometricsKeyRequest struct {
+}
+
+type GetBiometricsKeyResponse struct {
+	Key string
 }

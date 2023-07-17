@@ -71,6 +71,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 
 	cfg.SetUserSymmetricKey(vault.Keyring.AccountKey.Bytes())
 	cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
+	cfg.SetMasterKey([]byte(masterKey.GetBytes()))
 	protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(vault.Keyring.AccountKey.Bytes())
 	if err != nil {
 		var payload = ipc.ActionResponse{
