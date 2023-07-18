@@ -29,6 +29,7 @@ var sshAddCmd = &cobra.Command{
 	The variables are stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name, _ := cmd.Flags().GetString("name")
+		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
 
 		result, err := client.SendToAgent(ipc.CreateSSHKeyRequest{
 			Name: name,
@@ -43,7 +44,10 @@ var sshAddCmd = &cobra.Command{
 		case ipc.CreateSSHKeyResponse:
 			response := result.(ipc.CreateSSHKeyResponse)
 			fmt.Println(response.Digest)
-			clipboard.WriteAll(string(response.Digest))
+
+			if copyToClipboard {
+				clipboard.WriteAll(string(response.Digest))
+			}
 			break
 		case ipc.ActionResponse:
 			println("Error: " + result.(ipc.ActionResponse).Message)
@@ -83,6 +87,6 @@ func init() {
 	sshCmd.AddCommand(sshAddCmd)
 	sshAddCmd.PersistentFlags().String("name", "", "")
 	sshAddCmd.MarkFlagRequired("name")
-	sshAddCmd.PersistentFlags().Bool("--clipboard", false, "Copy the public key to the clipboard")
+	sshAddCmd.PersistentFlags().Bool("clipboard", false, "Copy the public key to the clipboard")
 	sshCmd.AddCommand(listSSHCmd)
 }
