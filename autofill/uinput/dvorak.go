@@ -224,11 +224,11 @@ func (d Dvorak) TypeKey(key Key, keyboard uinput.Keyboard) error {
 	case Key0:
 		keyboard.KeyPress(uinput.Key0)
 		break
-	case KeyHyphen:
-		keyboard.KeyPress(uinput.KeyApostrophe)
-		break
 	case KeyTab:
 		keyboard.KeyPress(uinput.KeyTab)
+		break
+	case KeyHyphen:
+		keyboard.KeyPress(uinput.KeyApostrophe)
 		break
 	case KeyExclamationMark:
 		keyboard.KeyDown(uinput.KeyLeftshift)
@@ -240,7 +240,61 @@ func (d Dvorak) TypeKey(key Key, keyboard uinput.Keyboard) error {
 		keyboard.KeyPress(uinput.Key2)
 		keyboard.KeyUp(uinput.KeyLeftshift)
 		break
-
+	case KeyHash:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key3)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyDollar:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key4)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyPercent:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key5)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyCaret:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key6)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyAmpersand:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key7)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyAsterisk:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.Key8)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeyDot:
+		keyboard.KeyPress(uinput.KeyE)
+		break
+	case KeyComma:
+		keyboard.KeyPress(uinput.KeyW)
+		break
+	case KeyQuestionMark:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.KeyLeftbrace)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeySemicolon:
+		keyboard.KeyPress(uinput.KeyZ)
+		break
+	case KeyColon:
+		keyboard.KeyDown(uinput.KeyLeftshift)
+		keyboard.KeyPress(uinput.KeyZ)
+		keyboard.KeyUp(uinput.KeyLeftshift)
+		break
+	case KeySlash:
+		keyboard.KeyPress(uinput.KeyLeftbrace)
+		break
+	case KeyApostrophe:
+		keyboard.KeyPress(uinput.KeyQ)
+		break
 	case KeySpace:
 		keyboard.KeyPress(uinput.KeySpace)
 		break

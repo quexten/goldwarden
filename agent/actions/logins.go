@@ -3,7 +3,10 @@ package actions
 import (
 	"fmt"
 	"runtime/debug"
+	"strings"
+	"time"
 
+	"github.com/pquerna/otp/totp"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
@@ -63,6 +66,19 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 		decryptedNotes, err := crypto.DecryptWith(*login.Notes, cipherKey)
 		if err == nil {
 			decryptedLogin.Notes = string(decryptedNotes)
+		}
+	}
+	if !login.Login.Totp.IsNull() {
+		decryptedTotp, err := crypto.DecryptWith(login.Login.Totp, cipherKey)
+		if err == nil {
+			code, err := totp.GenerateCode(string(strings.ReplaceAll(string(decryptedTotp), " ", "")), time.Now())
+			if err == nil {
+				decryptedLogin.TwoFactorCode = code
+			} else {
+				fmt.Println(err)
+			}
+		} else {
+			fmt.Println(string(decryptedTotp))
 		}
 	}
 

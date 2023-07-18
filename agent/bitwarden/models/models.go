@@ -132,7 +132,7 @@ type LoginCipher struct {
 	URI      crypto.EncString
 	URIs     []URI
 	Username crypto.EncString `json:",omitempty"`
-	Totp     string           `json:",omitempty"`
+	Totp     crypto.EncString `json:",omitempty"`
 }
 
 type URIMatch int

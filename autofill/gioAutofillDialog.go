@@ -5,7 +5,9 @@ import (
 	"image"
 	"image/color"
 	"log"
+	"math"
 	"os"
+	"os/user"
 	"sort"
 	"strings"
 
@@ -20,7 +22,7 @@ import (
 	"gioui.org/unit"
 	"gioui.org/widget"
 	"gioui.org/widget/material"
-	gops "github.com/mitchellh/go-ps"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 type AutofillEntry struct {
@@ -38,50 +40,85 @@ type scoredAutofillEntry struct {
 	score         int
 }
 
-func getProcesses() []string {
-	var processes []string
-	procs, err := gops.Processes()
+func getUserProcs() []string {
+	procNames := []string{}
+
+	procs, err := process.Processes()
 	if err != nil {
 		return []string{}
 	}
-
 	for _, proc := range procs {
-		processes = append(processes, proc.Executable())
+		user, err := user.Current()
+		if err != nil {
+			continue
+		}
+
+		procuser, err := proc.Username()
+		if err != nil {
+			continue
+		}
+		if procuser == user.Username {
+			procName, err := proc.Name()
+			if err != nil {
+				continue
+			}
+			procNames = append(procNames, strings.ToLower(procName))
+		}
+
 	}
 
-	return processes
+	return procNames
 }
 
 func GetFilteredAutofillEntries(entries []AutofillEntry, filter string) []AutofillEntry {
-	if len(filter) < 2 {
+	if len(filter) == 0 {
 		return []AutofillEntry{}
 	}
 
-	processes := getProcesses()
+	filter = strings.ToLower(filter)
+
+	// filter entrien by whether they contain the filter string
+	filteredEntries := []AutofillEntry{}
+	for _, entry := range entries {
+		name := strings.ToLower(entry.Name)
+		if strings.HasPrefix(name, filter) {
+			filteredEntries = append(filteredEntries, entry)
+		}
+	}
+
+	processes := getUserProcs()
 
 	scoredEntries := []scoredAutofillEntry{}
-	for _, entry := range entries {
+	for _, entry := range filteredEntries {
 		score := 0
-		if strings.Contains(strings.ToLower(entry.Name), strings.ToLower(filter)) {
-			score += 10
-		}
-		if strings.HasPrefix(strings.ToLower(entry.Name), strings.ToLower(filter)) {
-			score += 5
-		}
-		if strings.Contains(strings.ToLower(entry.Username), strings.ToLower(filter)) {
-			score += 3
-		}
-		if strings.HasPrefix(strings.ToLower(entry.Username), strings.ToLower(filter)) {
-			score += 2
-		}
+		name := strings.ToLower(entry.Name)
+		filter = strings.ToLower(filter)
+
+		maxProcessScore := 0
 
 		for _, process := range processes {
-			if strings.Contains(strings.ToLower(entry.Name), strings.ToLower(process)) {
-				score += 5
-				break
+			score := 0
+
+			sharedPrefixLen := 0
+			for i := 0; i < len(process) && i < len(entry.Name); i++ {
+				if process[i] == name[i] {
+					sharedPrefixLen++
+				} else {
+					break
+				}
+			}
+			sharedPrefixLenPercent := float32(sharedPrefixLen) / float32(math.Min(float64(len(process)), float64(len(name))))
+
+			if sharedPrefixLen > 0 {
+				score += int(sharedPrefixLenPercent * 7)
+			}
+
+			if score > maxProcessScore {
+				maxProcessScore = score
 			}
 		}
 
+		score += maxProcessScore
 		scoredEntries = append(scoredEntries, scoredAutofillEntry{entry, score})
 	}
 
@@ -89,12 +126,15 @@ func GetFilteredAutofillEntries(entries []AutofillEntry, filter string) []Autofi
 		return scoredEntries[i].score > scoredEntries[j].score
 	})
 
-	var filteredEntries []AutofillEntry
+	var filteredEntries1 []AutofillEntry
 	for _, scoredEntry := range scoredEntries {
-		filteredEntries = append(filteredEntries, scoredEntry.autofillEntry)
+		if scoredEntry.score == 0 {
+			continue
+		}
+		filteredEntries1 = append(filteredEntries1, scoredEntry.autofillEntry)
 	}
 
-	return filteredEntries
+	return filteredEntries1
 }
 
 func RunAutofill(entries []AutofillEntry, onAutofillFunc func(string, chan bool)) {

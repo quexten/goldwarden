@@ -77,27 +77,27 @@ const (
 	Key7      Key = "7"
 	Key8      Key = "8"
 	Key9      Key = "9"
+
 	KeyHyphen Key = "-"
-	KeyAtSign Key = "@"
 
 	KeySpace           Key = " "
 	KeyExclamationMark Key = "!"
+	KeyAtSign          Key = "@"
+	KeyHash            Key = "#"
 	KeyDollar          Key = "$"
-	KeyEqual           Key = "="
-	KeySemicolon       Key = ";"
-	KeyColon           Key = ":"
-	KeyComma           Key = ","
-	KeyPeriod          Key = "."
-	KeySlash           Key = "/"
-	KeyBackslash       Key = "\\"
-	KeyPound           Key = "#"
 	KeyPercent         Key = "%"
 	KeyCaret           Key = "^"
 	KeyAmpersand       Key = "&"
 	KeyAsterisk        Key = "*"
-	KeyPlus            Key = "+"
-	KeyEquals          Key = "="
-	KeyUnderscore      Key = "_"
+
+	KeyDot          Key = "."
+	KeyComma        Key = ","
+	KeySlash        Key = "/"
+	KeyBackslash    Key = "\\"
+	KeyQuestionMark Key = "?"
+	KeySemicolon    Key = ";"
+	KeyColon        Key = ":"
+	KeyApostrophe   Key = "'"
 
 	KeyTab Key = "\t"
 )
@@ -138,6 +138,7 @@ func TypeString(text string, layout string) error {
 		if err != nil {
 			fmt.Println(err)
 		}
+		time.Sleep(10 * time.Millisecond)
 	}
 
 	err = keyboard.Close()

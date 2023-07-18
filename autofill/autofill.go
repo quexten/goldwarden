@@ -1,4 +1,5 @@
 //go:build autofill
+
 package autofill
 
 import (
@@ -48,7 +49,7 @@ func ListLogins() ([]ipc.DecryptedLoginCipher, error) {
 	}
 }
 
-func Run(layout string) {
+func Run(layout string, useCopyPaste bool) {
 	logins, err := ListLogins()
 	if err != nil {
 		panic(err)
@@ -68,13 +69,20 @@ func Run(layout string) {
 		if err != nil {
 			panic(err)
 		}
-		// todo implement alternative auto type
-		clipboard.WriteAll(string(login.Username))
-		uinput.Paste(layout)
-		uinput.TypeString(string(uinput.KeyTab), layout)
-		clipboard.WriteAll(login.Password)
-		uinput.Paste(layout)
-		clipboard.WriteAll("")
+
+		if useCopyPaste {
+			clipboard.WriteAll(string(login.Username))
+			uinput.Paste(layout)
+			uinput.TypeString(string(uinput.KeyTab), layout)
+			clipboard.WriteAll(login.Password)
+			uinput.Paste(layout)
+		} else {
+			uinput.TypeString(string(login.Username), layout)
+			uinput.TypeString(string(uinput.KeyTab), layout)
+			uinput.TypeString(string(login.Password), layout)
+		}
+
+		clipboard.WriteAll(login.TwoFactorCode)
 		c <- true
 	})
 }

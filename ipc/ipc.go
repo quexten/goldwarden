@@ -434,6 +434,7 @@ type DecryptedLoginCipher struct {
 	UUID          string
 	OrgaizationID string
 	Notes         string
+	TwoFactorCode string
 }
 
 type GetNotesRequest struct {
