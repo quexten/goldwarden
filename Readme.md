@@ -184,8 +184,12 @@ restic backup
 ```
 
 ### Autofill
-The autofill feature is a bit experimental. It copies the credentials to the clipboard, then creates paste events
-using uinput. 
+The autofill feature is a bit experimental. It autotypes the password via uinput. This needs a keyboardlayout to map the letters to 
+keycodes. Currently supported are qwerty and dvorak.
+`/goldwarden autofill --layout qwerty`
+`/goldwarden autofill --layout dvorak`
+
+You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
 
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
@@ -193,11 +197,9 @@ to approve the device.
 
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
-
-- Support browser biometrics (similar to my bw-bio-handler tool)
 - Paswordless sign in
 - Regular cli managment (add, delete, update, of logins / secure notes)
-- Scripts to properly set up the policies
+- Scripts to properly set up the policies/systemd/etc.
 
 If you have other interesting ideas, feel free to open an issue. I can't
 promise that I will implement it, but I'm open to suggestions.
