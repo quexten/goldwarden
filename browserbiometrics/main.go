@@ -31,6 +31,19 @@ func Main() {
 	readLoop()
 }
 
+func DetectAndInstallBrowsers() error {
+	var err error
+	err = detectAndInstallBrowsers(".config")
+	if err != nil {
+		return err
+	}
+	err = detectAndInstallBrowsers(".mozilla")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func detectAndInstallBrowsers(startPath string) error {
 	home := os.Getenv("HOME")
 	err := filepath.Walk(home+"/"+startPath, func(path string, info os.FileInfo, err error) error {
