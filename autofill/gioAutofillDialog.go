@@ -1,3 +1,5 @@
+//go:build autofill
+
 package autofill
 
 import (
