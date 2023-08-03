@@ -52,12 +52,17 @@ Finally, make the daemon auto start:
 ``` 
  ~/.config/systemd/user/goldwarden.service
 
- [Unit]
+[Unit]
 Description="Goldwarden daemon"
 
 [Service]
-ExecStart=/home/quexten/go/bin/goldwarden daemonize
+ExecStart=BINARY_PATH daemonize
+
+[Install]
+WantedBy=default.target
 ```
+
+where BINARY_PATH should be replaced by the path to the goldwarden binary.
 
 and enable it:
 ```
