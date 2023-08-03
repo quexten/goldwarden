@@ -200,8 +200,8 @@ restic backup
 
 The autofill feature is a bit experimental. It autotypes the password via uinput. This needs a keyboardlayout to map the letters to 
 keycodes. Currently supported are qwerty and dvorak.
-`/goldwarden autofill --layout qwerty`
-`/goldwarden autofill --layout dvorak`
+`goldwarden autofill --layout qwerty`
+`goldwarden autofill --layout dvorak`
 
 You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
 
