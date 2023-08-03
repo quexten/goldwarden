@@ -12,12 +12,18 @@ import (
 )
 
 func setupPolkit() {
-	file, err := os.OpenFile("/tmp/goldwarden-policy", os.O_CREATE, 0644)
+	file, err := os.Create("/tmp/goldwarden-policy")
 	if err != nil {
 		panic(err)
 	}
-	file.WriteString(systemauth.POLICY)
-	file.Close()
+	_, err = file.WriteString(systemauth.POLICY)
+	if err != nil {
+		panic(err)
+	}
+	err = file.Close()
+	if err != nil {
+		panic(err)
+	}
 
 	command := exec.Command("pkexec", "mv", "/tmp/goldwarden-policy", "/usr/share/polkit-1/actions/com.quexten.goldwarden.policy")
 	err = command.Run()
@@ -25,7 +31,12 @@ func setupPolkit() {
 		panic(err)
 	}
 
-	os.Remove("/tmp/goldwarden-policy")
+	fmt.Println("Polkit setup successfully")
+}
+
+func IsPolkitSetup() bool {
+	_, err := os.Stat("/usr/share/polkit-1/actions/com.quexten.goldwarden.policy")
+	return !os.IsNotExist(err)
 }
 
 var polkitCmd = &cobra.Command{
@@ -67,6 +78,14 @@ func setupSystemd() {
 	}
 
 	os.Remove("/tmp/goldwarden.service")
+
+	command2 := exec.Command("systemctl", "--now", "--user", "enable", "goldwarden.service")
+	err = command2.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Systemd setup successfully")
 }
 
 var systemdCmd = &cobra.Command{
