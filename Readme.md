@@ -18,15 +18,16 @@ If you want an officially supported way to manage your Bitwarden vault, you shou
 If you are looking to manage secrets for machine to machine communication, you should use bitwarden secret manager or something like 
 hashicorp vault.
 
-
-Parts of the code still need major refactor, and the code needs more testing. Expect some features to break.
-Setup is a bit involed atm. 
-
 ### Requirements
 Right now, Goldwarden is only tested on Linux. It should be possible to port to mac / bsd, I'm open to PRs.
-On Linux, you need at least a working Polkit installation, and a pinentry agent are required.
+On Linux, you need at least a working Polkit installation, and a pinentry agent are required. Both X11 and Wayland are supported for autofill, albeit only Wayland is tested.
 
 ### Installation
+Download the latest release binary and put it into a location you want to have it in, f.e `/usr/bin`.
+Then run `goldwarden setup polkit`.
+Optionally run: `goldwarden setup systemd` and `goldwarden setup browserbiometrics`.
+
+### Building
 
 To build, you will need libfido2-dev. And a go toolchain. 
 
@@ -43,43 +44,6 @@ or:
 go build
 go build -tags autofill
 ```
-
-Make sure you have the binary in your path.
-Next, you have to set up the polkit policy. Copy com.quexten.goldwarden.policy to /usr/share/polkit-1/actions/.
-Consider having your shell source the goldwarden.env file, and edit it to your needs.
-
-Finally, make the daemon auto start:
-``` 
- ~/.config/systemd/user/goldwarden.service
-
-[Unit]
-Description="Goldwarden daemon"
-
-[Service]
-ExecStart=BINARY_PATH daemonize
-
-[Install]
-WantedBy=default.target
-```
-
-where BINARY_PATH should be replaced by the path to the goldwarden binary.
-
-and enable it:
-```
-systemctl --user enable goldwarden
-systemctl --user start goldwarden
-```
-
-### Design
-The tool is split into CLI and daemon, which communicate via a unix socket.
-
-The vault is never written to disk and is only kept in encrypted form in memory, it is re-downloaded upon startup. The encryption keys are stored in secure enclaves (using the memguard library) and only decrypted briefly when needed. This protects from memory dumps. Vault entries are also only decrypted when needed.
-
-When entries change, the daemon gets notified via websockets and updates automatically.
-
-The sensitive parts of the config file are encrypted using a pin. The key is derrived using argon2, and the encryption used is chacha20poly1305. The config is also only held in memory in encrypted form and decrypted using key stored in kernel secured memory when needed.
-
-When accessing a vault entry, the daemon will authenticate against a polkit policy. This allows using biometrics.
 
 ### Usage
 
@@ -208,6 +172,18 @@ You can bind this to a hotkey in your desktop environment (i.e i3/sway config fi
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
 to approve the device.
+
+
+### Design
+The tool is split into CLI and daemon, which communicate via a unix socket.
+
+The vault is never written to disk and is only kept in encrypted form in memory, it is re-downloaded upon startup. The encryption keys are stored in secure enclaves (using the memguard library) and only decrypted briefly when needed. This protects from memory dumps. Vault entries are also only decrypted when needed.
+
+When entries change, the daemon gets notified via websockets and updates automatically.
+
+The sensitive parts of the config file are encrypted using a pin. The key is derrived using argon2, and the encryption used is chacha20poly1305. The config is also only held in memory in encrypted form and decrypted using key stored in kernel secured memory when needed.
+
+When accessing a vault entry, the daemon will authenticate against a polkit policy. This allows using biometrics.
 
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
