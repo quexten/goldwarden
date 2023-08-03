@@ -159,7 +159,7 @@ To use the SSH agent for git signing, you need to add the following to your git 
 ```
 
 ### Environment Variables
-[Screencast from 2023-08-03 02-22-24.webm](https://github.com/quexten/goldwarden/assets/11866552/1287d9d7-5c76-4779-8d5f-09248f42d75d)
+[Screencast from 2023-08-03 02-25-30.webm](https://github.com/quexten/goldwarden/assets/11866552/78f04eb8-78a2-492d-a8c8-ac57204c5eeb)
 
 Goldwarden can inject environment variables into the environment of a cli command.
 
