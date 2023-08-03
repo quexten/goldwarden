@@ -20,7 +20,7 @@ hashicorp vault.
 
 
 Parts of the code still need major refactor, and the code needs more testing. Expect some features to break.
-Setup is a bit inloved atm. 
+Setup is a bit involed atm. 
 
 ### Requirements
 Right now, Goldwarden is only tested on Linux. It should be possible to port to mac / bsd, I'm open to PRs.
