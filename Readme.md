@@ -20,7 +20,7 @@ hashicorp vault.
 
 ### Requirements
 Right now, Goldwarden is only tested on Linux. It should be possible to port to mac / bsd, I'm open to PRs.
-On Linux, you need at least a working Polkit installation, and a pinentry agent are required. Both X11 and Wayland are supported for autofill, albeit only Wayland is tested.
+On Linux, you need at least a working Polkit installation and a pinentry agent. Both X11 and Wayland are supported for autofill, albeit only Wayland is tested.
 
 ### Installation
 Download the latest release binary and put it into a location you want to have it in, f.e `/usr/bin`.
