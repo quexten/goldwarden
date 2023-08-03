@@ -58,7 +58,7 @@ ExecStart=BINARY_PATH daemonize
 WantedBy=default.target`
 
 func setupSystemd() {
-	file, err := os.OpenFile("/tmp/goldwarden.service", os.O_CREATE, 0644)
+	file, err := os.Create("/tmp/goldwarden.service")
 	if err != nil {
 		panic(err)
 	}
@@ -76,8 +76,6 @@ func setupSystemd() {
 	if err != nil {
 		panic(err)
 	}
-
-	os.Remove("/tmp/goldwarden.service")
 
 	command2 := exec.Command("systemctl", "--now", "--user", "enable", "goldwarden.service")
 	err = command2.Run()
