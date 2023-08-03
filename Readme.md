@@ -27,27 +27,9 @@ Download the latest release binary and put it into a location you want to have i
 Then run `goldwarden setup polkit`.
 Optionally run: `goldwarden setup systemd` and `goldwarden setup browserbiometrics`.
 
-### Building
-
-To build, you will need libfido2-dev. And a go toolchain. 
-
-Additionally, if you want the autofill feature you will need some dependencies. Everything from https://gioui.org/doc/install linux and wl-clipboard (or xclipboard) should be installed.
-
-Run:
-```
-go install github.com/quexten/goldwarden@latest
-go install -tags autofill github.com/quexten/goldwarden@latest
-```
-
-or:
-```
-go build
-go build -tags autofill
-```
-
 ### Usage
 
-Start the daemon:
+Start the daemon (this is done by systemd automatically, when set up with `goldwarden setup systemd`):
 ```
 goldwarden daemon
 ```
@@ -55,6 +37,15 @@ goldwarden daemon
 Set a pin
 ```
 goldwarden set pin
+```
+
+Optionally set the api/identity url for a custom bitwarden server:
+```
+goldwarden config set-api-url https://my.bitwarden.domain/api
+```
+
+```
+goldwarden config set-identity-url https://my.bitwarden.domain/identity
 ```
 
 Login
@@ -79,7 +70,6 @@ goldwarden autofill --layout <keyboard-layout>
 (Create a hotkey for this depending on your desktop environment)
 
 #### SSH Agent
-[Screencast from 2023-08-03 02-14-45.webm](https://github.com/quexten/goldwarden/assets/11866552/4a602c0d-a99e-40d2-a919-c2b0bdefb63b)
 
 
 The SSH agent listens on a socket on `~/.goldwarden-ssh-agent.sock`. This can be used f.e by doing:
@@ -108,7 +98,6 @@ public-key: <contents of id_ed25519.pub>
 Then add the private key to bitwarden. The public key can be added to your github account f.e.
 
 ##### Git Signing
-[Screencast from 2023-08-03 02-17-24.webm](https://github.com/quexten/goldwarden/assets/11866552/68ee8363-6fb5-41f4-b742-42127d4fd71e)
 
 To use the SSH agent for git signing, you need to add the following to your git config:
 ```
@@ -123,7 +112,6 @@ To use the SSH agent for git signing, you need to add the following to your git 
 ```
 
 ### Environment Variables
-[Screencast from 2023-08-03 02-25-30.webm](https://github.com/quexten/goldwarden/assets/11866552/78f04eb8-78a2-492d-a8c8-ac57204c5eeb)
 
 Goldwarden can inject environment variables into the environment of a cli command.
 
@@ -160,7 +148,6 @@ restic backup
 ```
 
 ### Autofill
-[Screencast from 2023-08-03 02-13-15.webm](https://github.com/quexten/goldwarden/assets/11866552/9293ebb9-ce1f-47b7-95f3-af2c61f3d388)
 
 The autofill feature is a bit experimental. It autotypes the password via uinput. This needs a keyboardlayout to map the letters to 
 keycodes. Currently supported are qwerty and dvorak.
@@ -173,6 +160,24 @@ You can bind this to a hotkey in your desktop environment (i.e i3/sway config fi
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
 to approve the device.
 
+
+### Building
+
+To build, you will need libfido2-dev. And a go toolchain. 
+
+Additionally, if you want the autofill feature you will need some dependencies. Everything from https://gioui.org/doc/install linux and wl-clipboard (or xclipboard) should be installed.
+
+Run:
+```
+go install github.com/quexten/goldwarden@latest
+go install -tags autofill github.com/quexten/goldwarden@latest
+```
+
+or:
+```
+go build
+go build -tags autofill
+```
 
 ### Design
 The tool is split into CLI and daemon, which communicate via a unix socket.
