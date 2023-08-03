@@ -70,6 +70,7 @@ goldwarden autofill --layout <keyboard-layout>
 (Create a hotkey for this depending on your desktop environment)
 
 #### SSH Agent
+[goldwarden_ssh.webm](https://github.com/quexten/goldwarden/assets/11866552/9058f734-60e0-4dd3-b9f8-1d77f7cf4c65)
 
 
 The SSH agent listens on a socket on `~/.goldwarden-ssh-agent.sock`. This can be used f.e by doing:
@@ -98,6 +99,7 @@ public-key: <contents of id_ed25519.pub>
 Then add the private key to bitwarden. The public key can be added to your github account f.e.
 
 ##### Git Signing
+[goldwarden_git.webm](https://github.com/quexten/goldwarden/assets/11866552/f47dcd93-789d-4fcc-954b-d43d9033e213)
 
 To use the SSH agent for git signing, you need to add the following to your git config:
 ```
@@ -112,6 +114,7 @@ To use the SSH agent for git signing, you need to add the following to your git 
 ```
 
 ### Environment Variables
+[goldwarden_run_restic.webm](https://github.com/quexten/goldwarden/assets/11866552/9a342df5-feec-4174-a0e9-6a399c2feb65)
 
 Goldwarden can inject environment variables into the environment of a cli command.
 
@@ -148,6 +151,7 @@ restic backup
 ```
 
 ### Autofill
+[goldwarden_autofill.webm](https://github.com/quexten/goldwarden/assets/11866552/6ac7cdc2-0cd7-42fd-9fd0-cfff26e2ceee)
 
 The autofill feature is a bit experimental. It autotypes the password via uinput. This needs a keyboardlayout to map the letters to 
 keycodes. Currently supported are qwerty and dvorak.
