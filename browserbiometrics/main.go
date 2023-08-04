@@ -60,13 +60,18 @@ func detectAndInstallBrowsers(startPath string) error {
 			return nil
 		}
 
+		binPath, err := os.Executable()
+		if err != nil {
+			return err
+		}
+
 		if info.IsDir() && info.Name() == "native-messaging-hosts" {
 			fmt.Printf("Found mozilla-like browser: %s\n", path)
-			manifest := strings.Replace(templateMozilla, "PATH", os.Getenv("PWD")+"/bw-bio-handler", 1)
+			manifest := strings.Replace(templateMozilla, "PATH", binPath, 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0644)
 		} else if info.IsDir() && info.Name() == "NativeMessagingHosts" {
 			fmt.Printf("Found chrome-like browser: %s\n", path)
-			manifest := strings.Replace(templateChrome, "PATH", os.Getenv("PWD")+"/bw-bio-handler", 1)
+			manifest := strings.Replace(templateChrome, "PATH", binPath, 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0644)
 		}
 
