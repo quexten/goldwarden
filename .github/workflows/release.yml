@@ -39,7 +39,7 @@ jobs:
         updpkgsums: true
 
     - name: Build ArchLinux package
-      uses: mijailr/arch-makepkg-action@v1
+      uses: mijailr/arch-makepkg-action@v1.0.1
 
       
     - uses: AButler/upload-release-assets@v2.0
