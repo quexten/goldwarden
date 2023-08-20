@@ -37,7 +37,7 @@ jobs:
         flags: ''
         namcap: true
     - name: Publish AUR package
-      uses: KSXGitHub/github-actions-deploy-aur@v2.0.2
+      uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
       with:
         pkgname: goldwarden
         pkgbuild: ./PKGBUILD
