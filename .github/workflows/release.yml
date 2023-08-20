@@ -36,16 +36,16 @@ jobs:
       with:
         flags: ''
         namcap: true
-        updpkgsums: true
-
-    - name: Build ArchLinux package
-      uses: mijailr/arch-makepkg-action@v1.0.1
-
-      
-    - uses: AButler/upload-release-assets@v2.0
+    - name: Publish AUR package
+      uses: KSXGitHub/github-actions-deploy-aur@<TAG>
       with:
-        files: './*.pkg.tar.zst'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        pkgname: goldwarden
+        pkgbuild: ./PKGBUILD
+        commit_username: ${{ secrets.AUR_USERNAME }}
+        commit_email: ${{ secrets.AUR_EMAIL }}
+        ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        commit_message: Update AUR package from GitHub Actions automation
+        ssh_keyscan_types: ed25519
 
 
   
