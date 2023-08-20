@@ -31,10 +31,21 @@ jobs:
         files: './goldwarden'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Validate package
+    - name: Validate ArchLinux PKGBUILD
       uses: hapakaien/archlinux-package-action@v2
       with:
         flags: ''
         namcap: true
         updpkgsums: true
+
+    - name: Build ArchLinux package
+      uses: mijailr/arch-makepkg-action@v1
+
+      
+    - uses: AButler/upload-release-assets@v2.0
+      with:
+        files: './*.pkg.tar.zst'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+
   
