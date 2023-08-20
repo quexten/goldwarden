@@ -169,3 +169,7 @@ func Paste(layout string) error {
 	keyboard.KeyUp(uinput.KeyLeftctrl)
 	return nil
 }
+
+func Sleep() {
+	time.Sleep(20 * time.Millisecond)
+}
