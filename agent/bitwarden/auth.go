@@ -146,7 +146,7 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 		default:
 			authRequestData, err := GetAuthRequest(ctx, data.ID, cfg)
 			if err != nil {
-				log.Error("Could not get auth request: ", err)
+				log.Error("Could not get auth request: %s", err.Error())
 			}
 			if authRequestData.RequestApproved {
 				masterKey, err := crypto.DecryptWithAsymmetric([]byte(authRequestData.Key), publicKey)
