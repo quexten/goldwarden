@@ -305,7 +305,11 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 			log.Warn().Err(err).Msg("Failed to get key for cipher " + cipher.ID.String())
 			continue
 		}
-		if name != "" && !cipher.Name.IsNull() {
+		if name != "" {
+			if cipher.Name.IsNull() {
+				continue
+			}
+
 			decryptedName, err := crypto.DecryptWith(cipher.Name, key)
 			if err != nil {
 				log.Warn().Err(err).Msg("Failed to decrypt name for cipher " + cipher.ID.String())
@@ -316,7 +320,11 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 			}
 		}
 
-		if username != "" && !cipher.Login.Username.IsNull() {
+		if username != "" {
+			if cipher.Login.Username.IsNull() {
+				continue
+			}
+
 			decryptedUsername, err := crypto.DecryptWith(cipher.Login.Username, key)
 			if err != nil {
 				log.Warn().Err(err).Msg("Failed to decrypt username for cipher " + cipher.ID.String())
