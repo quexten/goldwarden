@@ -23,12 +23,18 @@ jobs:
     - name: Install gio dependencies
       run: sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
   
-    - name: Build with Autofill
-      run: go build -tags autofill -o goldwarden -v .
-
+    - name: Build with All features
+      run: go build -o goldwarden -v .
     - uses: AButler/upload-release-assets@v2.0
       with:
         files: './goldwarden'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Build minimal featureset
+      run: go build -tags nofido2 -tags noautofill -o goldwarden-minimal -v .
+    - uses: AButler/upload-release-assets@v2.0
+      with:
+        files: './goldwarden-minimal'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Validate ArchLinux PKGBUILD
