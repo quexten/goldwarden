@@ -69,10 +69,6 @@ func sync(ctx context.Context, vault *vault.Vault, cfg *config.Config) bool {
 
 func ensureIsNotLocked(action Action) Action {
 	return func(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (interface{}, error) {
-		if cfg.ConfigFile.RuntimeConfig.DisablePinRequirement {
-			return action(request, cfg, vault, ctx)
-		}
-
 		if cfg.IsLocked() {
 			err := cfg.TryUnlock(vault)
 			ctx1 := context.Background()
