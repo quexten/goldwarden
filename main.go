@@ -27,7 +27,9 @@ func main() {
 	configPath = strings.ReplaceAll(configPath, "~", userHome)
 
 	runtimeConfig := config.RuntimeConfig{
-		DisableAuth:           os.Getenv("GOLDWARDEN_WEBSOCKET_DISABLED") == "true",
+		WebsocketDisabled:     os.Getenv("GOLDWARDEN_WEBSOCKET_DISABLED") == "true",
+		DisableSSHAgent:       os.Getenv("GOLDWARDEN_SSH_AGENT_DISABLED") == "true",
+		DisableAuth:           os.Getenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED") == "true",
 		DisablePinRequirement: os.Getenv("GOLDWARDEN_PIN_REQUIREMENT_DISABLED") == "true",
 		DoNotPersistConfig:    os.Getenv("GOLDWARDEN_DO_NOT_PERSIST_CONFIG") == "true",
 		ApiURI:                os.Getenv("GOLDWARDEN_API_URI"),
