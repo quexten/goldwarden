@@ -99,7 +99,7 @@ func handlePayloadMessage(msg PayloadMessage, appID string) {
 	case "biometricUnlock":
 		logging.Debugf("Biometric unlock requested")
 		// logging.Debugf("Biometrics authorized: %t", isAuthorized)
-		result, err := client.SendToAgent(ipc.GetBiometricsKeyRequest{})
+		result, err := client.NewUnixSocketClient().SendToAgent(ipc.GetBiometricsKeyRequest{})
 		if err != nil {
 			logging.Errorf("Unable to send message to agent: %s", err.Error())
 			return

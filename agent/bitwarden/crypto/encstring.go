@@ -210,6 +210,20 @@ func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (En
 	return s, nil
 }
 
+func GenerateAsymmetric() (AsymmetricEncryptionKey, error) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return AsymmetricEncryptionKey{}, err
+	}
+
+	encKey, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		return AsymmetricEncryptionKey{}, err
+	}
+
+	return AssymmetricEncryptionKeyFromBytes(encKey)
+}
+
 func DecryptWithAsymmetric(s []byte, asymmetrickey AsymmetricEncryptionKey) ([]byte, error) {
 	key, err := asymmetrickey.encKey.Open()
 	if err != nil {

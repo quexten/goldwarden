@@ -28,7 +28,15 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 	req := msg.ParsedPayload().(ipc.DoLoginRequest)
 
 	ctx := context.Background()
-	token, masterKey, masterpasswordHash, err := bitwarden.LoginWithMasterpassword(ctx, req.Email, cfg, vault)
+	var token bitwarden.LoginResponseToken
+	var masterKey crypto.MasterKey
+	var masterpasswordHash string
+
+	if req.Passwordless {
+		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithDevice(ctx, req.Email, cfg, vault)
+	} else {
+		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithMasterpassword(ctx, req.Email, cfg, vault)
+	}
 	if err != nil {
 		var payload = ipc.ActionResponse{
 			Success: false,

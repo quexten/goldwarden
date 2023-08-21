@@ -76,6 +76,9 @@ func (a Approval) String() string {
 
 func CheckBiometrics(approvalType Approval) bool {
 	log.Info("Checking biometrics for %s", approvalType.String())
+	if authDisabled {
+		return true
+	}
 
 	authority, err := polkit.NewAuthority()
 	if err != nil {

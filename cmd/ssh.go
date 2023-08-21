@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/atotto/clipboard"
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +30,7 @@ var sshAddCmd = &cobra.Command{
 		name, _ := cmd.Flags().GetString("name")
 		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
 
-		result, err := client.SendToAgent(ipc.CreateSSHKeyRequest{
+		result, err := commandClient.SendToAgent(ipc.CreateSSHKeyRequest{
 			Name: name,
 		})
 		if err != nil {
@@ -61,7 +60,7 @@ var listSSHCmd = &cobra.Command{
 	Short: "Lists all SSH keys in your vault",
 	Long:  `Lists all SSH keys in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		result, err := client.SendToAgent(ipc.GetSSHKeysRequest{})
+		result, err := commandClient.SendToAgent(ipc.GetSSHKeysRequest{})
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")

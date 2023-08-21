@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +16,7 @@ var setPinCmd = &cobra.Command{
 	Short: "Set a new pin",
 	Long:  `Set a new pin. The pin is used to unlock the vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		result, err := client.SendToAgent(ipc.UpdateVaultPINRequest{})
+		result, err := commandClient.SendToAgent(ipc.UpdateVaultPINRequest{})
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")
@@ -42,7 +41,7 @@ var pinStatusCmd = &cobra.Command{
 	Short: "Check if a pin is set",
 	Long:  `Check if a pin is set. The pin is used to unlock the vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		result, err := client.SendToAgent(ipc.GetVaultPINRequest{})
+		result, err := commandClient.SendToAgent(ipc.GetVaultPINRequest{})
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")

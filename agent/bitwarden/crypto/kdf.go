@@ -60,3 +60,7 @@ func DeriveMasterKey(password memguard.LockedBuffer, email string, kdfConfig KDF
 
 	return MasterKey{memguard.NewEnclave(key)}, nil
 }
+
+func MasterKeyFromBytes(key []byte) MasterKey {
+	return MasterKey{memguard.NewEnclave(key)}
+}

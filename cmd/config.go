@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +18,7 @@ var setApiUrlCmd = &cobra.Command{
 		request := ipc.SetApiURLRequest{}
 		request.Value = url
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")
@@ -53,7 +52,7 @@ var setIdentityURLCmd = &cobra.Command{
 		request := ipc.SetIdentityURLRequest{}
 		request.Value = url
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")

@@ -9,6 +9,14 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 )
 
+type CreateAuthRequestData struct {
+	AccessCode       string `json:"accessCode"`
+	DeviceIdentifier string `json:"deviceIdentifier"`
+	Email            string `json:"email"`
+	PublicKey        string `json:"publicKey"`
+	Type             int    `json:"type"`
+}
+
 type AuthRequestData struct {
 	CreationDate       time.Time `json:"creationDate"`
 	ID                 string    `json:"id"`
@@ -79,4 +87,21 @@ func CreateAuthResponse(ctx context.Context, authRequest AuthRequestData, keyrin
 		Requestapproved:    true,
 	})
 	return authRequestResponse, err
+}
+
+func CreateAuthRequest(ctx context.Context, code string, deviceIdentifier string, email string, publicKey string, config *config.Config) (AuthRequestData, error) {
+	var authrequestData AuthRequestData
+	err := authenticatedHTTPPost(ctx, config.ConfigFile.ApiUrl+"/auth-requests/", &authrequestData, &CreateAuthRequestData{
+		AccessCode:       code,
+		DeviceIdentifier: deviceIdentifier,
+		Email:            email,
+		PublicKey:        publicKey,
+		Type:             0,
+	})
+
+	if err != nil {
+		return AuthRequestData{}, err
+	} else {
+		return authrequestData, nil
+	}
 }

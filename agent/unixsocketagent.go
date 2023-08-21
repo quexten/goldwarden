@@ -102,7 +102,7 @@ type AgentState struct {
 	config *config.ConfigFile
 }
 
-func StartUnixAgent(path string) error {
+func StartUnixAgent(path string, websocket bool, sshAgent bool) error {
 	ctx := context.Background()
 
 	// check if exists
@@ -134,33 +134,37 @@ func StartUnixAgent(path string) error {
 	}
 
 	disableDumpable()
-	go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
+	if websocket {
+		go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
+	}
 
-	vaultAgent := ssh.NewVaultAgent(vault)
-	vaultAgent.SetUnlockRequestAction(func() bool {
-		err := cfg.TryUnlock(vault)
-		if err == nil {
-			token, err := cfg.GetToken()
+	if sshAgent {
+		vaultAgent := ssh.NewVaultAgent(vault)
+		vaultAgent.SetUnlockRequestAction(func() bool {
+			err := cfg.TryUnlock(vault)
 			if err == nil {
-				if token.AccessToken != "" {
-					bitwarden.RefreshToken(ctx, &cfg)
-					userSymmetricKey, err := cfg.GetUserSymmetricKey()
-					if err != nil {
-						fmt.Println(err)
-					}
-					protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				token, err := cfg.GetToken()
+				if err == nil {
+					if token.AccessToken != "" {
+						bitwarden.RefreshToken(ctx, &cfg)
+						userSymmetricKey, err := cfg.GetUserSymmetricKey()
+						if err != nil {
+							fmt.Println(err)
+						}
+						protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
 
-					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
-					if err != nil {
-						fmt.Println(err)
+						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
+						if err != nil {
+							fmt.Println(err)
+						}
 					}
 				}
+				return true
 			}
-			return true
-		}
-		return false
-	})
-	go vaultAgent.Serve()
+			return false
+		})
+		go vaultAgent.Serve()
+	}
 
 	go func() {
 		for {

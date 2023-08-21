@@ -1,18 +1,20 @@
-package bitwarden
+//go:build !nofido2
+
+package twofactor
 
 import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/url"
-	"strconv"
 
 	"github.com/keys-pub/go-libfido2"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
 )
+
+const isFido2Enabled = true
 
 type Fido2Response struct {
 	Id         string `json:"id"`
@@ -50,7 +52,7 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	for i, cred := range credentials {
 		decodedPublicKey, err := base64.RawURLEncoding.DecodeString(cred)
 		if err != nil {
-			websocketLog.Fatal(err.Error())
+			twofactorLog.Fatal(err.Error())
 		}
 		creds[i] = decodedPublicKey
 	}
@@ -61,7 +63,7 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 
 	pin, err := systemauth.GetPassword("Fido2 PIN", "Enter your token's PIN")
 	if err != nil {
-		websocketLog.Fatal(err.Error())
+		twofactorLog.Fatal(err.Error())
 	}
 
 	assertion, err := device.Assertion(
@@ -101,71 +103,3 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	respjson, err := json.Marshal(resp)
 	return string(respjson), nil
 }
-
-func performSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactorProvider, []byte, error) {
-	if resp.TwoFactorProviders2[WebAuthn] != nil {
-		chall := resp.TwoFactorProviders2[WebAuthn]["challenge"].(string)
-
-		var creds []string
-		for _, credential := range resp.TwoFactorProviders2[WebAuthn]["allowCredentials"].([]interface{}) {
-			publicKey := credential.(map[string]interface{})["id"].(string)
-			creds = append(creds, publicKey)
-		}
-
-		result, err := Fido2TwoFactor(chall, creds, cfg)
-		if err != nil {
-			return WebAuthn, nil, err
-		}
-		return WebAuthn, []byte(result), err
-	}
-	if resp.TwoFactorProviders2[Authenticator] != nil {
-		token, err := systemauth.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
-		return Authenticator, []byte(token), err
-	}
-	if resp.TwoFactorProviders2[Email] != nil {
-		token, err := systemauth.GetPassword("Email Second Factor", "Enter your two-factor auth code")
-		return Email, []byte(token), err
-	}
-
-	return Authenticator, []byte{}, errors.New("no second factor available")
-}
-
-type TwoFactorProvider int
-
-const (
-	Authenticator         TwoFactorProvider = 0
-	Email                 TwoFactorProvider = 1
-	Duo                   TwoFactorProvider = 2 //Not supported
-	YubiKey               TwoFactorProvider = 3 //Not supported
-	U2f                   TwoFactorProvider = 4 //Not supported
-	Remember              TwoFactorProvider = 5 //Not supported
-	OrganizationDuo       TwoFactorProvider = 6 //Not supported
-	WebAuthn              TwoFactorProvider = 7
-	_TwoFactorProviderMax                   = 8 //Not supported
-)
-
-func (t *TwoFactorProvider) UnmarshalText(text []byte) error {
-	i, err := strconv.Atoi(string(text))
-	if err != nil || i < 0 || i >= _TwoFactorProviderMax {
-		return fmt.Errorf("invalid two-factor auth provider: %q", text)
-	}
-	*t = TwoFactorProvider(i)
-	return nil
-}
-
-type TwoFactorResponse struct {
-	TwoFactorProviders2 map[TwoFactorProvider]map[string]interface{}
-}
-
-func urlValues(pairs ...string) url.Values {
-	if len(pairs)%2 != 0 {
-		panic("pairs must be of even length")
-	}
-	vals := make(url.Values)
-	for i := 0; i < len(pairs); i += 2 {
-		vals.Set(pairs[i], pairs[i+1])
-	}
-	return vals
-}
-
-var b64enc = base64.StdEncoding.Strict()

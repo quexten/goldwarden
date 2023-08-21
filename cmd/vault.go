@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +18,7 @@ var unlockCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		request := ipc.UnlockVaultRequest{}
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")
@@ -46,7 +45,7 @@ var lockCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		request := ipc.LockVaultRequest{}
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")
@@ -73,7 +72,7 @@ var purgeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		request := ipc.WipeVaultRequest{}
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")

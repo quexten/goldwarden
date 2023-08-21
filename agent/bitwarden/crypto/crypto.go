@@ -5,7 +5,9 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	cryptorand "crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -51,6 +53,20 @@ func (key SymmetricEncryptionKey) Bytes() []byte {
 func AssymmetricEncryptionKeyFromBytes(key []byte) (AsymmetricEncryptionKey, error) {
 	k := memguard.NewEnclave(key)
 	return AsymmetricEncryptionKey{k}, nil
+}
+
+func (key AsymmetricEncryptionKey) PublicBytes() []byte {
+	buffer, err := key.encKey.Open()
+	if err != nil {
+		panic(err)
+	}
+	privateKey, err := x509.ParsePKCS8PrivateKey(buffer.Bytes())
+	pub := (privateKey.(*rsa.PrivateKey)).Public()
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
+	if err != nil {
+		panic(err)
+	}
+	return publicKeyBytes
 }
 
 func isMacValid(message, messageMAC, key []byte) bool {

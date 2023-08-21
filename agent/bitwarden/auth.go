@@ -4,16 +4,20 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/url"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/LlamaNite/llamalog"
 	"github.com/awnumar/memguard"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
+	"github.com/quexten/goldwarden/agent/bitwarden/twofactor"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
@@ -99,11 +103,11 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
 	errsc, ok := err.(*errStatusCode)
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
-		var twoFactor TwoFactorResponse
+		var twoFactor twofactor.TwoFactorResponse
 		if err := json.Unmarshal(errsc.body, &twoFactor); err != nil {
 			return LoginResponseToken{}, crypto.MasterKey{}, "", err
 		}
-		provider, token, err := performSecondFactor(&twoFactor, cfg)
+		provider, token, err := twofactor.PerformSecondFactor(&twoFactor, cfg)
 		if err != nil {
 			return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not obtain two-factor auth token: %v", err)
 		}
@@ -124,6 +128,62 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 
 	authLog.Info("Logged in")
 	return loginResponseToken, masterKey, hashedPassword, nil
+}
+
+func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
+	timeout := 120 * time.Second
+
+	// 25 random letters & numbers
+	alphabet := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+	accessCode := ""
+	for i := 0; i < 25; i++ {
+		accessCode += string(alphabet[rand.Intn(len(alphabet))])
+	}
+	publicKey, err := crypto.GenerateAsymmetric()
+	if err != nil {
+		return LoginResponseToken{}, crypto.MasterKey{}, "", err
+	}
+	data, err := CreateAuthRequest(ctx, accessCode, cfg.ConfigFile.DeviceUUID, email, base64.StdEncoding.EncodeToString(publicKey.PublicBytes()), cfg)
+
+	timeoutChan := make(chan bool)
+	go func() {
+		time.Sleep(timeout)
+		timeoutChan <- true
+	}()
+
+	for {
+		select {
+		case <-timeoutChan:
+			return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("timed out waiting for device to be authorized")
+		default:
+			authRequestData, err := GetAuthRequest(ctx, data.ID, cfg)
+			if err != nil {
+				log.Error("Could not get auth request: ", err)
+			}
+			if authRequestData.RequestApproved {
+				masterKey, err := crypto.DecryptWithAsymmetric([]byte(authRequestData.Key), publicKey)
+				masterPasswordHash, err := crypto.DecryptWithAsymmetric([]byte(authRequestData.MasterPasswordHash), publicKey)
+				values := urlValues(
+					"grant_type", "password",
+					"username", email,
+					"password", string(accessCode),
+					"authRequest", authRequestData.ID,
+					"scope", loginScope,
+					"client_id", "connector",
+					"deviceType", deviceType(),
+					"deviceName", deviceName,
+					"deviceIdentifier", cfg.ConfigFile.DeviceUUID,
+				)
+
+				var loginResponseToken LoginResponseToken
+				err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
+				if err != nil {
+					return LoginResponseToken{}, crypto.MasterKey{}, "", err
+				}
+				return loginResponseToken, crypto.MasterKeyFromBytes(masterKey), string(masterPasswordHash), nil
+			}
+		}
+	}
 }
 
 func RefreshToken(ctx context.Context, cfg *config.Config) bool {
@@ -157,3 +217,16 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 
 	return true
 }
+
+func urlValues(pairs ...string) url.Values {
+	if len(pairs)%2 != 0 {
+		panic("pairs must be of even length")
+	}
+	vals := make(url.Values)
+	for i := 0; i < len(pairs); i += 2 {
+		vals.Set(pairs[i], pairs[i+1])
+	}
+	return vals
+}
+
+var b64enc = base64.StdEncoding.Strict()

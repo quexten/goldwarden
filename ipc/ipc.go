@@ -367,8 +367,9 @@ func IPCMessageFromPayload(payload interface{}) (IPCMessage, error) {
 }
 
 type DoLoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	Passwordless bool   `json:"passwordless"`
 }
 
 type LockVaultRequest struct {

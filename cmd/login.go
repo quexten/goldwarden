@@ -4,7 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -18,8 +17,10 @@ var loginCmd = &cobra.Command{
 		request := ipc.DoLoginRequest{}
 		email, _ := cmd.Flags().GetString("email")
 		request.Email = email
+		passwordless, _ := cmd.Flags().GetBool("passwordless")
+		request.Passwordless = passwordless
 
-		result, err := client.SendToAgent(request)
+		result, err := commandClient.SendToAgent(request)
 		if err != nil {
 			println("Error: " + err.Error())
 			println("Is the daemon running?")
@@ -43,4 +44,5 @@ func init() {
 	vaultCmd.AddCommand(loginCmd)
 	loginCmd.PersistentFlags().String("email", "", "")
 	loginCmd.MarkFlagRequired("email")
+	loginCmd.PersistentFlags().Bool("passwordless", false, "")
 }

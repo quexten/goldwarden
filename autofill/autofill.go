@@ -1,4 +1,4 @@
-//go:build autofill
+//go:build !noautofill
 
 package autofill
 

@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +28,7 @@ var runCmd = &cobra.Command{
 
 		env := []string{}
 
-		result, err := client.SendToAgent(ipc.GetCLICredentialsRequest{
+		result, err := commandClient.SendToAgent(ipc.GetCLICredentialsRequest{
 			ApplicationName: executable,
 		})
 		if err != nil {
