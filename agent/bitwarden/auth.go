@@ -179,6 +179,7 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 				}
 				return loginResponseToken, crypto.MasterKeyFromBytes(masterKey), string(masterPasswordHash), nil
 			}
+			time.Sleep(1 * time.Second)
 		}
 	}
 }
