@@ -8,17 +8,17 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/awnumar/memguard"
 	"github.com/gorilla/websocket"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
+	"github.com/quexten/goldwarden/logging"
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-var websocketLog = llamalog.NewLogger("Goldwarden", "Websocket")
+var websocketLog = logging.GetLogger("Goldwarden", "Websocket")
 
 type NotificationMessageType int64
 

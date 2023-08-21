@@ -14,17 +14,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/awnumar/memguard"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/twofactor"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
+	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/crypto/pbkdf2"
 )
 
-var authLog = llamalog.NewLogger("Goldwarden", "Auth")
+var authLog = logging.GetLogger("Goldwarden", "Auth")
 
 type preLoginRequest struct {
 	Email string `json:"email"`
@@ -103,22 +103,10 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
 	errsc, ok := err.(*errStatusCode)
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
-		var twoFactor twofactor.TwoFactorResponse
-		if err := json.Unmarshal(errsc.body, &twoFactor); err != nil {
+		loginResponseToken, err = Perform2FA(values, errsc, cfg, ctx)
+		if err != nil {
 			return LoginResponseToken{}, crypto.MasterKey{}, "", err
 		}
-		provider, token, err := twofactor.PerformSecondFactor(&twoFactor, cfg)
-		if err != nil {
-			return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not obtain two-factor auth token: %v", err)
-		}
-		values.Set("twoFactorProvider", strconv.Itoa(int(provider)))
-		values.Set("twoFactorToken", string(token))
-		values.Set("twoFactorRemember", "1")
-		loginResponseToken = LoginResponseToken{}
-		if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values); err != nil {
-			return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via two-factor: %v", err)
-		}
-		authLog.Info("2FA login successful")
 	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
 
@@ -177,8 +165,17 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 
 				var loginResponseToken LoginResponseToken
 				err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
-				if err != nil {
-					return LoginResponseToken{}, crypto.MasterKey{}, "", err
+				errsc, ok := err.(*errStatusCode)
+				if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
+					loginResponseToken, err = Perform2FA(values, errsc, cfg, ctx)
+					if err != nil {
+						return LoginResponseToken{}, crypto.MasterKey{}, "", err
+					}
+				} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
+					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
+
+				} else if err != nil {
+					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %v", err)
 				}
 				return loginResponseToken, crypto.MasterKeyFromBytes(masterKey), string(masterPasswordHash), nil
 			}
@@ -216,6 +213,26 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 	authLog.Info("Token refreshed")
 
 	return true
+}
+
+func Perform2FA(values url.Values, errsc *errStatusCode, cfg *config.Config, ctx context.Context) (LoginResponseToken, error) {
+	var twoFactor twofactor.TwoFactorResponse
+	if err := json.Unmarshal(errsc.body, &twoFactor); err != nil {
+		return LoginResponseToken{}, err
+	}
+	provider, token, err := twofactor.PerformSecondFactor(&twoFactor, cfg)
+	if err != nil {
+		return LoginResponseToken{}, fmt.Errorf("could not obtain two-factor auth token: %v", err)
+	}
+	values.Set("twoFactorProvider", strconv.Itoa(int(provider)))
+	values.Set("twoFactorToken", string(token))
+	values.Set("twoFactorRemember", "1")
+	loginResponseToken := LoginResponseToken{}
+	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values); err != nil {
+		return LoginResponseToken{}, fmt.Errorf("could not login via two-factor: %v", err)
+	}
+	authLog.Info("2FA login successful")
+	return loginResponseToken, nil
 }
 
 func urlValues(pairs ...string) url.Values {

@@ -11,7 +11,7 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func GetLoginByUUID(uuid string) (ipc.DecryptedLoginCipher, error) {
+func GetLoginByUUID(uuid string, client client.Client) (ipc.DecryptedLoginCipher, error) {
 	resp, err := client.SendToAgent(ipc.GetLoginRequest{
 		UUID: uuid,
 	})
@@ -31,7 +31,7 @@ func GetLoginByUUID(uuid string) (ipc.DecryptedLoginCipher, error) {
 	}
 }
 
-func ListLogins() ([]ipc.DecryptedLoginCipher, error) {
+func ListLogins(client client.Client) ([]ipc.DecryptedLoginCipher, error) {
 	resp, err := client.SendToAgent(ipc.ListLoginsRequest{})
 	if err != nil {
 		return []ipc.DecryptedLoginCipher{}, err
@@ -49,8 +49,8 @@ func ListLogins() ([]ipc.DecryptedLoginCipher, error) {
 	}
 }
 
-func Run(layout string, useCopyPaste bool) {
-	logins, err := ListLogins()
+func Run(layout string, useCopyPaste bool, client client.Client) {
+	logins, err := ListLogins(client)
 	if err != nil {
 		panic(err)
 	}
@@ -65,7 +65,7 @@ func Run(layout string, useCopyPaste bool) {
 	}
 
 	RunAutofill(autofillEntries, func(uuid string, c chan bool) {
-		login, err := GetLoginByUUID(uuid)
+		login, err := GetLoginByUUID(uuid, client)
 		if err != nil {
 			panic(err)
 		}

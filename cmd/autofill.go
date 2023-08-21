@@ -1,4 +1,4 @@
-//go:build autofill
+//go:build !noautofill
 
 package cmd
 
@@ -14,7 +14,7 @@ var autofillCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		layout := cmd.Flag("layout").Value.String()
 		useCopyPaste, _ := cmd.Flags().GetBool("use-copy-paste")
-		autofill.Run(layout, useCopyPaste)
+		autofill.Run(layout, useCopyPaste, commandClient)
 	},
 }
 

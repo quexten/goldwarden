@@ -2,12 +2,9 @@ package systemauth
 
 import (
 	"errors"
-	"os"
 
 	"github.com/twpayne/go-pinentry"
 )
-
-var authDisabled = false
 
 func GetPassword(title string, description string) (string, error) {
 	client, err := pinentry.NewClient(
@@ -40,8 +37,7 @@ func GetPassword(title string, description string) (string, error) {
 }
 
 func GetApproval(title string, description string) (bool, error) {
-	if authDisabled {
-		log.Info("Skipping approval because system auth is disabled")
+	if systemAuthDisabled {
 		return true, nil
 	}
 
@@ -68,12 +64,5 @@ func GetApproval(title string, description string) (bool, error) {
 	default:
 		log.Info("Got approval from user")
 		return true, nil
-	}
-}
-
-func init() {
-	envAuthDisabled := os.Getenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED")
-	if envAuthDisabled == "true" {
-		authDisabled = true
 	}
 }

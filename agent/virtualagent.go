@@ -70,18 +70,29 @@ func serveVirtualAgent(recv chan []byte, send chan []byte, ctx context.Context, 
 	}
 }
 
-func StartVirtualAgent() (chan []byte, chan []byte) {
+func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []byte) {
 	ctx := context.Background()
 
 	// check if exists
 	keyring := crypto.NewKeyring(nil)
 	var vault = vault.NewVault(&keyring)
-	cfg, err := config.ReadConfig()
+	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
 		var cfg = config.DefaultConfig()
 		cfg.WriteConfig()
 	}
-	if !cfg.IsLocked() {
+	cfg.ConfigFile.RuntimeConfig = runtimeConfig
+	if cfg.ConfigFile.RuntimeConfig.ApiURI != "" {
+		cfg.ConfigFile.ApiUrl = cfg.ConfigFile.RuntimeConfig.ApiURI
+	}
+	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
+		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
+	}
+	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
+		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID
+	}
+
+	if !cfg.IsLocked() && !cfg.ConfigFile.RuntimeConfig.DoNotPersistConfig {
 		log.Warn("Config is not locked. SET A PIN!!")
 		token, err := cfg.GetToken()
 		if err == nil {

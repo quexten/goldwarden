@@ -1,11 +1,11 @@
 package systemauth
 
 import (
-	"github.com/LlamaNite/llamalog"
 	"github.com/amenzhinsky/go-polkit"
+	"github.com/quexten/goldwarden/logging"
 )
 
-var log = llamalog.NewLogger("Goldwarden", "Systemauth")
+var log = logging.GetLogger("Goldwarden", "Systemauth")
 
 type Approval string
 
@@ -75,10 +75,11 @@ func (a Approval) String() string {
 }
 
 func CheckBiometrics(approvalType Approval) bool {
-	log.Info("Checking biometrics for %s", approvalType.String())
-	if authDisabled {
+	if systemAuthDisabled {
 		return true
 	}
+
+	log.Info("Checking biometrics for %s", approvalType.String())
 
 	authority, err := polkit.NewAuthority()
 	if err != nil {

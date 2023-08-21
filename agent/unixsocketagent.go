@@ -8,7 +8,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/actions"
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -17,6 +16,7 @@ import (
 	"github.com/quexten/goldwarden/agent/ssh"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/sys/unix"
 )
 
@@ -25,7 +25,7 @@ const (
 	TokenRefreshInterval = 30 * time.Minute
 )
 
-var log = llamalog.NewLogger("Goldwarden", "Agent")
+var log = logging.GetLogger("Goldwarden", "Agent")
 
 func writeError(c net.Conn, errMsg error) error {
 	payload := ipc.ActionResponse{
@@ -102,17 +102,28 @@ type AgentState struct {
 	config *config.ConfigFile
 }
 
-func StartUnixAgent(path string, websocket bool, sshAgent bool) error {
+func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	ctx := context.Background()
 
 	// check if exists
 	keyring := crypto.NewKeyring(nil)
 	var vault = vault.NewVault(&keyring)
-	cfg, err := config.ReadConfig()
+	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
 		var cfg = config.DefaultConfig()
 		cfg.WriteConfig()
 	}
+	cfg.ConfigFile.RuntimeConfig = runtimeConfig
+	if cfg.ConfigFile.RuntimeConfig.ApiURI != "" {
+		cfg.ConfigFile.ApiUrl = cfg.ConfigFile.RuntimeConfig.ApiURI
+	}
+	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
+		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
+	}
+	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
+		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID
+	}
+
 	if !cfg.IsLocked() {
 		log.Warn("Config is not locked. SET A PIN!!")
 		token, err := cfg.GetToken()
@@ -134,11 +145,11 @@ func StartUnixAgent(path string, websocket bool, sshAgent bool) error {
 	}
 
 	disableDumpable()
-	if websocket {
+	if !runtimeConfig.WebsocketDisabled {
 		go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
 	}
 
-	if sshAgent {
+	if !runtimeConfig.DisableSSHAgent {
 		vaultAgent := ssh.NewVaultAgent(vault)
 		vaultAgent.SetUnlockRequestAction(func() bool {
 			err := cfg.TryUnlock(vault)

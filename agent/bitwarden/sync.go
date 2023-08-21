@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/vault"
+	"github.com/quexten/goldwarden/logging"
 )
 
-var log = llamalog.NewLogger("Goldwarden", "Bitwarden API")
+var log = logging.GetLogger("Goldwarden", "Bitwarden API")
 
 const path = "/.cache/goldwarden-vault.json"
 

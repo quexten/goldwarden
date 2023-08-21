@@ -27,6 +27,8 @@ var sshAddCmd = &cobra.Command{
 	Long: `Runs a command with environment variables from your vault.
 	The variables are stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		loginIfRequired()
+
 		name, _ := cmd.Flags().GetString("name")
 		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
 
@@ -60,6 +62,8 @@ var listSSHCmd = &cobra.Command{
 	Short: "Lists all SSH keys in your vault",
 	Long:  `Lists all SSH keys in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		loginIfRequired()
+
 		result, err := commandClient.SendToAgent(ipc.GetSSHKeysRequest{})
 		if err != nil {
 			println("Error: " + err.Error())

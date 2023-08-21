@@ -4,11 +4,14 @@ import (
 	"os"
 
 	"github.com/quexten/goldwarden/agent"
+	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/client"
+	"github.com/quexten/goldwarden/ipc"
 	"github.com/spf13/cobra"
 )
 
 var commandClient client.Client
+var runtimeConfig config.RuntimeConfig
 
 var rootCmd = &cobra.Command{
 	Use:   "goldwarden",
@@ -18,7 +21,17 @@ var rootCmd = &cobra.Command{
 	biometric unlock, and more.`,
 }
 
-func Execute() {
+func Execute(cfg config.RuntimeConfig) {
+	runtimeConfig = cfg
+
+	goldwardenSingleProcess := os.Getenv("GOLDWARDEN_SINGLE_PROCESS")
+	if goldwardenSingleProcess == "true" {
+		recv, send := agent.StartVirtualAgent(runtimeConfig)
+		commandClient = client.NewVirtualClient(send, recv)
+	} else {
+		commandClient = client.NewUnixSocketClient()
+	}
+
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -26,13 +39,23 @@ func Execute() {
 }
 
 func init() {
-	goldwardenSingleProcess := os.Getenv("GOLDWARDEN_SINGLE_PROCESS")
-	if goldwardenSingleProcess == "true" {
-		recv, send := agent.StartVirtualAgent()
-		commandClient = client.NewVirtualClient(send, recv)
-	} else {
-		commandClient = client.NewUnixSocketClient()
+	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func loginIfRequired() error {
+	var err error
+
+	if runtimeConfig.AuthMethod == "password" {
+		_, err = commandClient.SendToAgent(ipc.DoLoginRequest{
+			Email:    runtimeConfig.User,
+			Password: runtimeConfig.Password,
+		})
+	} else if runtimeConfig.AuthMethod == "passwordless" {
+		_, err = commandClient.SendToAgent(ipc.DoLoginRequest{
+			Email:        runtimeConfig.User,
+			Passwordless: true,
+		})
 	}
 
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	return err
 }

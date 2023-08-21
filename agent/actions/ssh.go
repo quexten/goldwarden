@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
@@ -12,9 +11,10 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/logging"
 )
 
-var actionsLog = llamalog.NewLogger("Goldwarden", "Actions")
+var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 
 func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
 	req := msg.ParsedPayload().(ipc.CreateSSHKeyRequest)

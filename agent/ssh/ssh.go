@@ -8,15 +8,15 @@ import (
 	"net"
 	"os"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
+	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )
 
-var log = llamalog.NewLogger("Goldwarden", "SSH")
+var log = logging.GetLogger("Goldwarden", "SSH")
 
 type vaultAgent struct {
 	vault               *vault.Vault

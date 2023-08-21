@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/LlamaNite/llamalog"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/logging"
 )
 
-var twofactorLog = llamalog.NewLogger("Goldwarden", "TwoFactor")
+var twofactorLog = logging.GetLogger("Goldwarden", "TwoFactor")
 
 func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactorProvider, []byte, error) {
 	if resp.TwoFactorProviders2[WebAuthn] != nil {

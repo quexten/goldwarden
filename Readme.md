@@ -170,8 +170,24 @@ You can bind this to a hotkey in your desktop environment (i.e i3/sway config fi
 
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
-to approve the device.
+to approve the device. If you want to log into goldwarden using another device, add the "--passwordless" parameter to the login command.
 
+
+### Environment Variables
+```
+GOLDWARDEN_WEBSOCKET_DISABLED=true # disable websocket
+GOLDWARDEN_PIN_REQUIREMENT_DISABLED=true # disable pin requirement
+GOLDWARDEN_DO_NOT_PERSIST_CONFIG=true # do not persist config
+GOLDWARDEN_API_URI=https://my.bitwarden.domain/api # set api uri
+GOLDWARDEN_IDENTITY_URI=https://my.bitwarden.domain/identity # set identity uri
+GOLDWARDEN_SINGLE_PROCESS=true # run in single process mode, i.e no daemon
+GOLDWARDEN_DEVICE_UUID= # set device uuid
+GOLDWARDEN_AUTH_METHOD= # set auth method (password/passwordless)
+GOLDWARDEN_AUTH_USER= # set auth user
+GOLDWARDEN_AUTH_PASSWORD= # set auth password
+GOLDWARDEN_SILENT_LOGGING=true # disable logging
+GOLDWARDEN_SYSTEM_AUTH_DISABLED=true # disable system auth (biometrics / approval)
+```
 
 ### Building
 
@@ -204,7 +220,6 @@ When accessing a vault entry, the daemon will authenticate against a polkit poli
 
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
-- Paswordless sign in
 - Regular cli managment (add, delete, update, of logins / secure notes)
 - Scripts to properly set up the policies/systemd/etc.
 

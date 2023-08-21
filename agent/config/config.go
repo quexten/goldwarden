@@ -21,11 +21,28 @@ import (
 )
 
 const (
-	KDFIterations = 2
-	KDFMemory     = 2 * 1024 * 1024
-	KDFThreads    = 8
-	ConfigPath    = "/.config/goldwarden.json"
+	KDFIterations     = 2
+	KDFMemory         = 2 * 1024 * 1024
+	KDFThreads        = 8
+	DefaultConfigPath = "~/.config/goldwarden.json"
 )
+
+type RuntimeConfig struct {
+	DisableAuth           bool
+	DisablePinRequirement bool
+	AuthMethod            string
+	DoNotPersistConfig    bool
+	ConfigDirectory       string
+	DisableSSHAgent       bool
+	WebsocketDisabled     bool
+	ApiURI                string
+	IdentityURI           string
+	SingleProcess         bool
+	DeviceUUID            string
+	User                  string
+	Password              string
+	Pin                   string
+}
 
 type ConfigFile struct {
 	IdentityUrl                 string
@@ -36,6 +53,7 @@ type ConfigFile struct {
 	EncryptedUserSymmetricKey   string
 	EncryptedMasterPasswordHash string
 	EncryptedMasterKey          string
+	RuntimeConfig               RuntimeConfig `json:"-"`
 }
 
 type LoginToken struct {
@@ -65,13 +83,14 @@ func DefaultConfig() Config {
 			EncryptedUserSymmetricKey:   "",
 			EncryptedMasterPasswordHash: "",
 			EncryptedMasterKey:          "",
+			RuntimeConfig:               RuntimeConfig{},
 		},
 		sync.Mutex{},
 	}
 }
 
 func (c *Config) IsLocked() bool {
-	return c.key == nil
+	return c.key.EqualTo(make([]byte, 32)) && c.HasPin()
 }
 
 func (c *Config) IsLoggedIn() bool {
@@ -105,8 +124,7 @@ func (c *Config) Lock() {
 	if c.IsLocked() {
 		return
 	}
-	c.key.Destroy()
-	c.key = nil
+	c.key.Wipe()
 }
 
 func (c *Config) Purge() {
@@ -315,6 +333,10 @@ func (c *Config) decryptString(data string) (string, error) {
 }
 
 func (config *Config) WriteConfig() error {
+	if config.ConfigFile.RuntimeConfig.DoNotPersistConfig {
+		return nil
+	}
+
 	config.mu.Lock()
 	defer config.mu.Unlock()
 
@@ -323,13 +345,9 @@ func (config *Config) WriteConfig() error {
 		return err
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
 	// write to disk
-	os.Remove(home + ConfigPath)
-	file, err := os.OpenFile(home+ConfigPath, os.O_CREATE|os.O_WRONLY, 0600)
+	os.Remove(config.ConfigFile.RuntimeConfig.ConfigDirectory)
+	file, err := os.OpenFile(config.ConfigFile.RuntimeConfig.ConfigDirectory, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
 	}
@@ -342,14 +360,13 @@ func (config *Config) WriteConfig() error {
 	return nil
 }
 
-func ReadConfig() (Config, error) {
-	home, err := os.UserHomeDir()
+func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
+	file, err := os.Open(rtCfg.ConfigDirectory)
 	if err != nil {
-		panic(err)
-	}
-	file, err := os.Open(home + ConfigPath)
-	if err != nil {
-		return Config{ConfigFile: ConfigFile{}}, err
+		return Config{
+			key:        memguard.NewBuffer(32),
+			ConfigFile: ConfigFile{},
+		}, err
 	}
 	defer file.Close()
 
@@ -357,12 +374,21 @@ func ReadConfig() (Config, error) {
 	config := ConfigFile{}
 	err = decoder.Decode(&config)
 	if err != nil {
-		return Config{ConfigFile: ConfigFile{}}, err
+		return Config{
+			key:        memguard.NewBuffer(32),
+			ConfigFile: ConfigFile{},
+		}, err
 	}
 	if config.ConfigKeyHash == "" {
-		return Config{ConfigFile: config, key: memguard.NewBuffer(32)}, nil
+		return Config{
+			key:        memguard.NewBuffer(32),
+			ConfigFile: config,
+		}, nil
 	}
-	return Config{ConfigFile: config}, nil
+	return Config{
+		key:        memguard.NewBuffer(32),
+		ConfigFile: config,
+	}, nil
 }
 
 func (cfg *Config) TryUnlock(vault *vault.Vault) error {
