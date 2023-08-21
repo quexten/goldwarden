@@ -25,18 +25,12 @@ jobs:
   
     - name: Build with All features
       run: go build -o goldwarden -v .
-    - uses: AButler/upload-release-assets@v2.0
-      with:
-        files: './goldwarden'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        
     - name: Build minimal featureset
       run: go build -tags nofido2 -tags noautofill -o goldwarden-minimal -v .
     - uses: AButler/upload-release-assets@v2.0
       with:
-        files: './goldwarden-minimal'
+        files: './goldwarden;./goldwarden-minimal'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Validate ArchLinux PKGBUILD
       uses: hapakaien/archlinux-package-action@v2
       with:
