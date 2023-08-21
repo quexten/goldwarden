@@ -9,7 +9,7 @@ Goldwarden is a Bitwarden compatible CLI tool written in Go. It focuses on featu
 - Vault content is held encrypted in memory and only briefly decrypted when needed
 - Kernel level memory protection for keys (via the memguard library)
 - Additional measures to protect against memory dumps
-- Passwordless login (Approval of other login)
+- Passwordless login (Both logging in, and approving logins)
 - Fido2 (Webauthn) support
 - more to come...?
 
