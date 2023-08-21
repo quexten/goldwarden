@@ -29,6 +29,7 @@ var getLoginCmd = &cobra.Command{
 		uuid, _ := cmd.Flags().GetString("uuid")
 		name, _ := cmd.Flags().GetString("name")
 		username, _ := cmd.Flags().GetString("username")
+		fullOutput, _ := cmd.Flags().GetBool("full")
 
 		resp, err := commandClient.SendToAgent(ipc.GetLoginRequest{
 			Name:     name,
@@ -44,7 +45,11 @@ var getLoginCmd = &cobra.Command{
 		switch resp.(type) {
 		case ipc.GetLoginResponse:
 			response := resp.(ipc.GetLoginResponse)
-			fmt.Println(response.Result.Password)
+			if fullOutput {
+				fmt.Println(response.Result)
+			} else {
+				fmt.Println(response.Result.Password)
+			}
 			break
 		case ipc.ActionResponse:
 			println("Error: " + resp.(ipc.ActionResponse).Message)
@@ -59,4 +64,5 @@ func init() {
 	getLoginCmd.PersistentFlags().String("name", "", "")
 	getLoginCmd.PersistentFlags().String("username", "", "")
 	getLoginCmd.PersistentFlags().String("uuid", "", "")
+	getLoginCmd.PersistentFlags().Bool("full", false, "")
 }
