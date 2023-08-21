@@ -24,7 +24,7 @@ build() {
   export CGO_ENABLED=1
 
   go mod tidy
-  go build -tags autofill -o build/$pkgname .
+  go build -o build/$pkgname .
 }
 
 package() {
