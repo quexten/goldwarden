@@ -35,7 +35,9 @@ func (d Dvorak) TypeKey(key Key, keyboard uinput.Keyboard) error {
 		break
 	case KeyCUpper:
 		keyboard.KeyDown(uinput.KeyLeftshift)
+		Sleep()
 		keyboard.KeyPress(uinput.KeyI)
+		Sleep()
 		keyboard.KeyUp(uinput.KeyLeftshift)
 	case KeyD:
 		keyboard.KeyPress(uinput.KeyH)
