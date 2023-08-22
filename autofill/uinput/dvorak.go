@@ -239,7 +239,7 @@ func (d Dvorak) TypeKey(key Key, keyboard uinput.Keyboard) error {
 	case KeyZUpper:
 		keyboard.KeyDown(uinput.KeyLeftshift)
 		Sleep()
-		keyboard.KeyPress(uinput.ButtonBumperLeft)
+		keyboard.KeyPress(uinput.KeySlash)
 		Sleep()
 		keyboard.KeyUp(uinput.KeyLeftshift)
 	case Key1:
