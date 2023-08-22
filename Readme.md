@@ -61,6 +61,11 @@ Login
 goldwarden login --email <email>
 ```
 
+##### Login-with-device
+```
+goldwarden login --email <email> --passwordless
+```
+
 Create an ssh key
 ```
 goldwarden ssh add --name <name>
