@@ -226,15 +226,14 @@ When accessing a vault entry, the daemon will authenticate against a polkit poli
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
 - Regular cli managment (add, delete, update, of logins / secure notes)
-- Scripts to properly set up the policies/systemd/etc.
+- Insatllers
+- (MacOS & Windows support tracked in https://github.com/quexten/goldwarden/issues/4)
 
 If you have other interesting ideas, feel free to open an issue. I can't
 promise that I will implement it, but I'm open to suggestions.
 
 ### Unsuported
 Some things that are unsupported and not likely to develop myself:
-- MacOS / BSD support (should not be too much work, most things should work out of the box, some adjustments for pinentry and polkit would be needed)
-- Windows support (probably a lot of work, unix sockets don't really exist, and pinentry / polkit would have to be implemented otherwise. There might be go libraries for that, but I don't know)
 - Send support
 - Attachments
 - Credit cards / Identities
