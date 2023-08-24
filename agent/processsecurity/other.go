@@ -2,7 +2,7 @@
 
 package processsecurity
 
-func DisableDumpale() error {
+func DisableDumpable() error {
 	// no additional dumping protection
 	return nil
 }
