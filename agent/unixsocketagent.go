@@ -12,12 +12,12 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/quexten/goldwarden/logging"
-	"golang.org/x/sys/unix"
 )
 
 const (
@@ -93,10 +93,6 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 	}
 }
 
-func disableDumpable() error {
-	return unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0)
-}
-
 type AgentState struct {
 	vault  *vault.Vault
 	config *config.ConfigFile
@@ -144,7 +140,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		}
 	}
 
-	disableDumpable()
+	processsecurity.DisableDumpable()
 	if !runtimeConfig.WebsocketDisabled {
 		go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
 	}

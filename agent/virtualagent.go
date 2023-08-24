@@ -11,6 +11,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
@@ -111,7 +112,7 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 			}
 		}
 	}
-	disableDumpable()
+	processsecurity.DisableDumpable()
 	go func() {
 		for {
 			time.Sleep(TokenRefreshInterval)
