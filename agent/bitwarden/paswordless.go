@@ -63,10 +63,10 @@ func CreateAuthResponse(ctx context.Context, authRequest AuthRequestData, keyrin
 	if err != nil {
 		return authRequestResponse, err
 	}
-	masterPasswordHash, err := config.GetMasterPasswordHash()
-	if err != nil {
-		return authRequestResponse, err
-	}
+	//masterPasswordHash, err := config.GetMasterPasswordHash()
+	//if err != nil {
+	//	return authRequestResponse, err
+	//}
 
 	publicKey, err := base64.StdEncoding.DecodeString(authRequest.PublicKey)
 	requesterKey, err := crypto.AssymmetricEncryptionKeyFromBytes(publicKey)
@@ -75,16 +75,15 @@ func CreateAuthResponse(ctx context.Context, authRequest AuthRequestData, keyrin
 	if err != nil {
 		panic(err)
 	}
-	encryptedMasterPasswordHash, err := crypto.EncryptWithAsymmetric(masterPasswordHash, requesterKey)
-	if err != nil {
-		panic(err)
-	}
+	//encryptedMasterPasswordHash, err := crypto.EncryptWithAsymmetric(masterPasswordHash, requesterKey)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	err = authenticatedHTTPPut(ctx, config.ConfigFile.ApiUrl+"/auth-requests/"+authRequest.ID, &authRequestResponse, AuthRequestResponseData{
-		DeviceIdentifier:   config.ConfigFile.DeviceUUID,
-		Key:                string(encryptedUserSymmetricKey),
-		MasterPasswordHash: string(encryptedMasterPasswordHash),
-		Requestapproved:    true,
+		DeviceIdentifier: config.ConfigFile.DeviceUUID,
+		Key:              string(encryptedUserSymmetricKey),
+		Requestapproved:  true,
 	})
 	return authRequestResponse, err
 }
