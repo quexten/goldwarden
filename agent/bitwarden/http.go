@@ -99,6 +99,7 @@ func makeAuthenticatedHTTPRequest(ctx context.Context, req *http.Request, recv i
 	if token, ok := ctx.Value(AuthToken{}).(string); ok {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
+	req.Header.Set("device-type", deviceType())
 
 	res, err := httpClient.Do(req)
 	if err != nil {

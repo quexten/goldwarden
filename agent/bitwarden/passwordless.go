@@ -104,3 +104,9 @@ func CreateAuthRequest(ctx context.Context, code string, deviceIdentifier string
 		return authrequestData, nil
 	}
 }
+
+func GetAuthResponse(ctx context.Context, code string, requestUUID string, config *config.Config) (AuthRequestData, error) {
+	var authRequest AuthRequestData
+	err := authenticatedHTTPGet(ctx, config.ConfigFile.ApiUrl+"/auth-requests/"+requestUUID+"/response?code="+code, &authRequest)
+	return authRequest, err
+}

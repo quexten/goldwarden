@@ -144,7 +144,7 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 		case <-timeoutChan:
 			return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("timed out waiting for device to be authorized")
 		default:
-			authRequestData, err := GetAuthRequest(ctx, data.ID, cfg)
+			authRequestData, err := GetAuthResponse(ctx, accessCode, data.ID, cfg)
 			if err != nil {
 				log.Error("Could not get auth request: %s", err.Error())
 			}
