@@ -132,6 +132,9 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 	data, err := CreateAuthRequest(ctx, accessCode, cfg.ConfigFile.DeviceUUID, email, base64.StdEncoding.EncodeToString(publicKey.PublicBytes()), cfg)
+	if err != nil {
+		return LoginResponseToken{}, crypto.MasterKey{}, "", err
+	}
 
 	timeoutChan := make(chan bool)
 	go func() {
