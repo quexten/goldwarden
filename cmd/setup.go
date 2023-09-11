@@ -53,9 +53,10 @@ Description="Goldwarden daemon"
 
 [Service]
 ExecStart=BINARY_PATH daemonize
+Environment="DISPLAY=:0"
 
 [Install]
-WantedBy=default.target`
+WantedBy=graphical-session.target`
 
 func setupSystemd() {
 	file, err := os.Create("/tmp/goldwarden.service")
