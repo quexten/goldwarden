@@ -1,6 +1,12 @@
 package biometrics
 
-import "os"
+import (
+	"os"
+
+	"github.com/quexten/goldwarden/logging"
+)
+
+var log = logging.GetLogger("Goldwarden", "Biometrics")
 
 var biometricsDisabled = false
 

@@ -4,10 +4,7 @@ package biometrics
 
 import (
 	"github.com/amenzhinsky/go-polkit"
-	"github.com/quexten/goldwarden/logging"
 )
-
-var log = logging.GetLogger("Goldwarden", "Biometrics")
 
 const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policyconfig PUBLIC
