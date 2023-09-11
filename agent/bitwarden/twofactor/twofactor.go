@@ -13,12 +13,12 @@ import (
 var twofactorLog = logging.GetLogger("Goldwarden", "TwoFactor")
 
 func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactorProvider, []byte, error) {
-	if resp.TwoFactorProviders2[WebAuthn] != nil {
+	if provider, isInMap := resp.TwoFactorProviders2[WebAuthn]; isInMap {
 		if isFido2Enabled {
-			chall := resp.TwoFactorProviders2[WebAuthn]["challenge"].(string)
+			chall := provider["challenge"].(string)
 
 			var creds []string
-			for _, credential := range resp.TwoFactorProviders2[WebAuthn]["allowCredentials"].([]interface{}) {
+			for _, credential := range provider["allowCredentials"].([]interface{}) {
 				publicKey := credential.(map[string]interface{})["id"].(string)
 				creds = append(creds, publicKey)
 			}
@@ -32,11 +32,11 @@ func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactor
 			twofactorLog.Warn("WebAuthn is enabled for the account but goldwarden is not compiled with FIDO2 support")
 		}
 	}
-	if resp.TwoFactorProviders2[Authenticator] != nil {
+	if _, isInMap := resp.TwoFactorProviders2[Authenticator]; isInMap {
 		token, err := systemauth.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
 		return Authenticator, []byte(token), err
 	}
-	if resp.TwoFactorProviders2[Email] != nil {
+	if _, isInMap := resp.TwoFactorProviders2[Email]; isInMap {
 		token, err := systemauth.GetPassword("Email Second Factor", "Enter your two-factor auth code")
 		return Email, []byte(token), err
 	}
