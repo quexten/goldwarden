@@ -59,3 +59,11 @@ func loginIfRequired() error {
 
 	return err
 }
+
+func handleSendToAgentError(err error) {
+	if err != nil {
+		println("Error: " + err.Error())
+		println("Is the daemon running?")
+		return
+	}
+}

@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -37,8 +34,7 @@ var getLoginCmd = &cobra.Command{
 			UUID:     uuid,
 		})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 

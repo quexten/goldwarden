@@ -18,8 +18,7 @@ var setPinCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		result, err := commandClient.SendToAgent(ipc.UpdateVaultPINRequest{})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 
@@ -43,8 +42,7 @@ var pinStatusCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		result, err := commandClient.SendToAgent(ipc.GetVaultPINRequest{})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 

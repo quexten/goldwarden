@@ -20,8 +20,7 @@ var unlockCmd = &cobra.Command{
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 
@@ -47,8 +46,7 @@ var lockCmd = &cobra.Command{
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 
@@ -74,8 +72,7 @@ var purgeCmd = &cobra.Command{
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 

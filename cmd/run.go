@@ -32,8 +32,7 @@ var runCmd = &cobra.Command{
 			ApplicationName: executable,
 		})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 

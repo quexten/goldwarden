@@ -16,14 +16,18 @@ var loginCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		request := ipc.DoLoginRequest{}
 		email, _ := cmd.Flags().GetString("email")
+		if email == "" {
+			println("Error: No email specified")
+			return
+		}
+
 		request.Email = email
 		passwordless, _ := cmd.Flags().GetBool("passwordless")
 		request.Passwordless = passwordless
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 

@@ -36,8 +36,7 @@ var sshAddCmd = &cobra.Command{
 			Name: name,
 		})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 
@@ -66,8 +65,7 @@ var listSSHCmd = &cobra.Command{
 
 		result, err := commandClient.SendToAgent(ipc.GetSSHKeysRequest{})
 		if err != nil {
-			println("Error: " + err.Error())
-			println("Is the daemon running?")
+			handleSendToAgentError(err)
 			return
 		}
 
