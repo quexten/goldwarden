@@ -71,7 +71,8 @@ func setupSystemd() {
 	file.WriteString(strings.ReplaceAll(SYSTEMD_SERVICE, "BINARY_PATH", path))
 	file.Close()
 
-	command := exec.Command("pkexec", "mv", "/tmp/goldwarden.service", "/etc/systemd/system/goldwarden.service")
+	userDirectory := os.Getenv("HOME")
+	command := exec.Command("pkexec", "mv", "/tmp/goldwarden.service", userDirectory+"/.config/systemd/user/goldwarden.service")
 	err = command.Run()
 	if err != nil {
 		panic(err)
