@@ -7,6 +7,7 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -32,5 +33,5 @@ func handleGetBiometricsKey(request ipc.IPCMessage, cfg *config.Config, vault *v
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetBiometricsKeyRequest, ensureEverything(systemauth.BrowserBiometrics, handleGetBiometricsKey))
+	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetBiometricsKeyRequest, ensureEverything(biometrics.BrowserBiometrics, handleGetBiometricsKey))
 }

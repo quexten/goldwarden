@@ -10,6 +10,7 @@ import (
 
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/crypto/ssh"
@@ -99,7 +100,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		return nil, errors.New("Approval not given")
 	}
 
-	if !systemauth.CheckBiometrics(systemauth.SSHKey) {
+	if !biometrics.CheckBiometrics(biometrics.SSHKey) {
 		log.Info("Sign Request for key: %s denied", key.Marshal())
 		return nil, errors.New("Biometrics not checked")
 	}

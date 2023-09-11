@@ -1,3 +1,5 @@
+//go:build linux || freebsd
+
 package cmd
 
 import (
@@ -6,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/browserbiometrics"
 	"github.com/spf13/cobra"
 )
@@ -16,7 +18,7 @@ func setupPolkit() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = file.WriteString(systemauth.POLICY)
+	_, err = file.WriteString(biometrics.POLICY)
 	if err != nil {
 		panic(err)
 	}

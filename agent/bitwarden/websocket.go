@@ -14,6 +14,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 	"github.com/vmihailenco/msgpack/v5"
@@ -182,7 +183,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 						websocketLog.Info("AuthRequest denied")
 						break
 					}
-					if !systemauth.CheckBiometrics(systemauth.AccessCredential) {
+					if !biometrics.CheckBiometrics(biometrics.AccessCredential) {
 						websocketLog.Info("AuthRequest denied - biometrics required")
 						break
 					}

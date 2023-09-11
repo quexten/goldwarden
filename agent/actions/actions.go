@@ -7,7 +7,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -85,9 +85,9 @@ func ensureIsNotLocked(action Action) Action {
 	}
 }
 
-func ensureBiometricsAuthorized(approvalType systemauth.Approval, action Action) Action {
+func ensureBiometricsAuthorized(approvalType biometrics.Approval, action Action) Action {
 	return func(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (interface{}, error) {
-		if !systemauth.CheckBiometrics(approvalType) {
+		if !biometrics.CheckBiometrics(approvalType) {
 			return ipc.IPCMessageFromPayload(ipc.ActionResponse{
 				Success: false,
 				Message: "Polkit authorization failed required",
@@ -98,6 +98,6 @@ func ensureBiometricsAuthorized(approvalType systemauth.Approval, action Action)
 	}
 }
 
-func ensureEverything(approvalType systemauth.Approval, action Action) Action {
+func ensureEverything(approvalType biometrics.Approval, action Action) Action {
 	return ensureIsNotLocked(ensureIsLoggedIn(ensureBiometricsAuthorized(approvalType, action)))
 }

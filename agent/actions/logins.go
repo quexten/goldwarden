@@ -11,6 +11,7 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -156,6 +157,6 @@ func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageGetLoginRequest, ensureEverything(systemauth.AccessCredential, handleGetLoginCipher))
-	AgentActionsRegistry.Register(ipc.IPCMessageListLoginsRequest, ensureEverything(systemauth.AccessCredential, handleListLoginsRequest))
+	AgentActionsRegistry.Register(ipc.IPCMessageGetLoginRequest, ensureEverything(biometrics.AccessCredential, handleGetLoginCipher))
+	AgentActionsRegistry.Register(ipc.IPCMessageListLoginsRequest, ensureEverything(biometrics.AccessCredential, handleListLoginsRequest))
 }

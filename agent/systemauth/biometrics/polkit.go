@@ -1,21 +1,13 @@
-package systemauth
+//go:build linux || freebsd
+
+package biometrics
 
 import (
 	"github.com/amenzhinsky/go-polkit"
 	"github.com/quexten/goldwarden/logging"
 )
 
-var log = logging.GetLogger("Goldwarden", "Systemauth")
-
-type Approval string
-
-const (
-	AccessCredential  Approval = "com.quexten.goldwarden.accesscredential"
-	ChangePin         Approval = "com.quexten.goldwarden.changepin"
-	SSHKey            Approval = "com.quexten.goldwarden.usesshkey"
-	ModifyVault       Approval = "com.quexten.goldwarden.modifyvault"
-	BrowserBiometrics Approval = "com.quexten.goldwarden.browserbiometrics"
-)
+var log = logging.GetLogger("Goldwarden", "Biometrics")
 
 const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policyconfig PUBLIC
@@ -70,12 +62,8 @@ const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
     </action>
 </policyconfig>`
 
-func (a Approval) String() string {
-	return string(a)
-}
-
 func CheckBiometrics(approvalType Approval) bool {
-	if systemAuthDisabled {
+	if biometricsDisabled {
 		return true
 	}
 
