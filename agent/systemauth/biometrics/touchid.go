@@ -3,7 +3,7 @@
 package biometrics
 
 func CheckBiometrics(approvalType Approval) bool {
-	ok, err := touchid.Authenticate(approvalType.String()
+	ok, err := touchid.Authenticate(approvalType.String())
 	if err != nil {
 		log.Fatal(err)
 	}
