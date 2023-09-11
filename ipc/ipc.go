@@ -45,8 +45,9 @@ const (
 
 	IPCMessageTypeGetVaultPINStatusRequest IPCMessageType = 2
 
-	IPCMessageTypeSetAPIUrlRequest      IPCMessageType = 30
-	IPCMessageTypeSetIdentityURLRequest IPCMessageType = 31
+	IPCMessageTypeSetAPIUrlRequest           IPCMessageType = 30
+	IPCMessageTypeSetIdentityURLRequest      IPCMessageType = 31
+	IPCMessageTypeSetNotificationsURLRequest IPCMessageType = 34
 
 	IPCMessageTypeGetBiometricsKeyRequest  IPCMessageType = 8
 	IPCMessageTypeGetBiometricsKeyResponse IPCMessageType = 9
@@ -190,6 +191,13 @@ func (m IPCMessage) ParsedPayload() interface{} {
 			panic("Unmarshal: " + err.Error())
 		}
 		return req
+	case IPCMessageTypeSetNotificationsURLRequest:
+		var req SetNotificationsURLRequest
+		err := json.Unmarshal(m.Payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req
 	case IPCMessageGetLoginsResponse:
 		var res GetLoginsResponse
 		err := json.Unmarshal(m.Payload, &res)
@@ -296,6 +304,11 @@ func IPCMessageFromPayload(payload interface{}) (IPCMessage, error) {
 	case SetIdentityURLRequest:
 		return IPCMessage{
 			Type:    IPCMessageTypeSetIdentityURLRequest,
+			Payload: jsonBytes,
+		}, nil
+	case SetNotificationsURLRequest:
+		return IPCMessage{
+			Type:    IPCMessageTypeSetNotificationsURLRequest,
 			Payload: jsonBytes,
 		}, nil
 	case GetLoginRequest:
@@ -478,6 +491,10 @@ type SetApiURLRequest struct {
 }
 
 type SetIdentityURLRequest struct {
+	Value string
+}
+
+type SetNotificationsURLRequest struct {
 	Value string
 }
 

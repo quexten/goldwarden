@@ -39,7 +39,24 @@ func handleSetIdentity(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	})
 }
 
+func handleSetNotifications(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+	notifications := request.ParsedPayload().(ipc.SetNotificationsURLRequest).Value
+	cfg.ConfigFile.NotificationsUrl = notifications
+	err = cfg.WriteConfig()
+	if err != nil {
+		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		Success: true,
+	})
+}
+
 func init() {
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetIdentityURLRequest, handleSetIdentity)
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetAPIUrlRequest, handleSetApiURL)
+	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetNotificationsURLRequest, handleSetNotifications)
 }
