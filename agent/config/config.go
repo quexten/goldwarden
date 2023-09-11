@@ -37,6 +37,7 @@ type RuntimeConfig struct {
 	WebsocketDisabled     bool
 	ApiURI                string
 	IdentityURI           string
+	NotificationsURI      string
 	SingleProcess         bool
 	DeviceUUID            string
 	User                  string
@@ -47,6 +48,7 @@ type RuntimeConfig struct {
 type ConfigFile struct {
 	IdentityUrl                 string
 	ApiUrl                      string
+	NotificationsUrl            string
 	DeviceUUID                  string
 	ConfigKeyHash               string
 	EncryptedToken              string
@@ -75,8 +77,9 @@ func DefaultConfig() Config {
 	return Config{
 		memguard.NewBuffer(32),
 		ConfigFile{
-			IdentityUrl:                 "https://identity.bitwarden.com/",
-			ApiUrl:                      "https://identity.bitwarden.com/",
+			IdentityUrl:                 "https://vault.bitwarden.com/identity",
+			ApiUrl:                      "https://vault.bitwarden.com/api",
+			NotificationsUrl:            "https://notifications.bitwarden.com",
 			DeviceUUID:                  deviceUUID.String(),
 			ConfigKeyHash:               "",
 			EncryptedToken:              "",

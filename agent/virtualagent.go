@@ -89,6 +89,9 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
 		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
 	}
+	if cfg.ConfigFile.RuntimeConfig.NotificationsURI != "" {
+		cfg.ConfigFile.NotificationsUrl = cfg.ConfigFile.RuntimeConfig.NotificationsURI
+	}
 	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
 		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID
 	}

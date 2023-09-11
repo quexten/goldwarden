@@ -106,7 +106,8 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	var vault = vault.NewVault(&keyring)
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
-		var cfg = config.DefaultConfig()
+		cfg = config.DefaultConfig()
+		cfg.ConfigFile.RuntimeConfig = runtimeConfig
 		cfg.WriteConfig()
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig
@@ -115,6 +116,9 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}
 	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
 		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
+	}
+	if cfg.ConfigFile.RuntimeConfig.NotificationsURI != "" {
+		cfg.ConfigFile.NotificationsUrl = cfg.ConfigFile.RuntimeConfig.NotificationsURI
 	}
 	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
 		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID

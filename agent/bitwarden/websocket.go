@@ -3,6 +3,7 @@ package bitwarden
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
@@ -71,13 +72,13 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	url, err := url.Parse(cfg.ConfigFile.ApiUrl)
+	url, err := url.Parse(cfg.ConfigFile.NotificationsUrl)
 	if err != nil {
 		return err
 	}
 
 	token, err := cfg.GetToken()
-	var websocketURL = "wss://" + url.Host + "/notifications/hub?access_token=" + token.AccessToken
+	var websocketURL = "wss://" + url.Host + url.Path + "/hub?access_token=" + token.AccessToken
 	c, _, err := websocket.DefaultDialer.Dial(websocketURL, nil)
 	if err != nil {
 		return err
@@ -87,11 +88,14 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	websocketLog.Info("Connected to websocket server...")
 
 	done := make(chan struct{})
+	//handshake required for official bitwarden implementation
+	c.WriteMessage(1, []byte(`{"protocol":"messagepack","version":1}`))
 
 	go func() {
 		defer close(done)
 		for {
-			_, message, err := c.ReadMessage()
+			mt, message, err := c.ReadMessage()
+			fmt.Println(mt)
 			if err != nil {
 				websocketLog.Error("Error reading websocket message %s", err)
 				return
