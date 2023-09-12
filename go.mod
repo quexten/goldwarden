@@ -19,9 +19,9 @@ require (
 	github.com/tink-crypto/tink-go/v2 v2.0.0
 	github.com/twpayne/go-pinentry v0.2.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/crypto v0.11.0
+	golang.org/x/crypto v0.13.0
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
-	golang.org/x/sys v0.10.0
+	golang.org/x/sys v0.12.0
 )
 
 require (
@@ -38,7 +38,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/exp/shiny v0.0.0-20220827204233-334a2380cb91 // indirect
 	golang.org/x/image v0.5.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 )
 
 require (

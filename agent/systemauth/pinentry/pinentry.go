@@ -1,4 +1,4 @@
-package systemauth
+package pinentry
 
 import (
 	"os"
@@ -6,8 +6,7 @@ import (
 	"github.com/quexten/goldwarden/logging"
 )
 
-var log = logging.GetLogger("Goldwarden", "Systemauth")
-
+var log = logging.GetLogger("Goldwarden", "Pinentry")
 var systemAuthDisabled = false
 
 func init() {

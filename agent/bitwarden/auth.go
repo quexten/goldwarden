@@ -18,7 +18,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/twofactor"
 	"github.com/quexten/goldwarden/agent/config"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/crypto/pbkdf2"
@@ -76,7 +76,7 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	var masterKey crypto.MasterKey
 	var hashedPassword string
 
-	password, err := systemauth.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
+	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}

@@ -8,8 +8,8 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -140,7 +140,7 @@ func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 }
 
 func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
-	pin, err := systemauth.GetPassword("Pin Change", "Enter your desired pin")
+	pin, err := pinentry.GetPassword("Pin Change", "Enter your desired pin")
 	if err != nil {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,

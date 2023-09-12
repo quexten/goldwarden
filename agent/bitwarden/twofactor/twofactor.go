@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/quexten/goldwarden/agent/config"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/logging"
 )
 
@@ -33,11 +33,11 @@ func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactor
 		}
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Authenticator]; isInMap {
-		token, err := systemauth.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
+		token, err := pinentry.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
 		return Authenticator, []byte(token), err
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Email]; isInMap {
-		token, err := systemauth.GetPassword("Email Second Factor", "Enter your two-factor auth code")
+		token, err := pinentry.GetPassword("Email Second Factor", "Enter your two-factor auth code")
 		return Email, []byte(token), err
 	}
 

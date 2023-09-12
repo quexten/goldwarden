@@ -1,4 +1,6 @@
-package systemauth
+//go:build linux || freebsd
+
+package pinentry
 
 import (
 	"errors"

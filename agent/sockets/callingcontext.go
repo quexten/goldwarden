@@ -27,6 +27,7 @@ func GetCallingContext(connection net.Conn) CallingContext {
 	if err != nil {
 		panic(err)
 	}
+
 	parentProcess, err := gops.FindProcess(ppid)
 	if err != nil {
 		panic(err)

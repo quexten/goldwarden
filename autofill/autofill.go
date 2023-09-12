@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/atotto/clipboard"
-	"github.com/quexten/goldwarden/autofill/uinput"
+	"github.com/quexten/goldwarden/autofill/autotype"
 	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -72,14 +72,14 @@ func Run(layout string, useCopyPaste bool, client client.Client) {
 
 		if useCopyPaste {
 			clipboard.WriteAll(string(login.Username))
-			uinput.Paste(layout)
-			uinput.TypeString(string(uinput.KeyTab), layout)
+			autotype.Paste(layout)
+			autotype.TypeString("\t", layout)
 			clipboard.WriteAll(login.Password)
-			uinput.Paste(layout)
+			autotype.Paste(layout)
 		} else {
-			uinput.TypeString(string(login.Username), layout)
-			uinput.TypeString(string(uinput.KeyTab), layout)
-			uinput.TypeString(string(login.Password), layout)
+			autotype.TypeString(string(login.Username), layout)
+			autotype.TypeString("\t", layout)
+			autotype.TypeString(string(login.Password), layout)
 		}
 
 		clipboard.WriteAll(login.TwoFactorCode)

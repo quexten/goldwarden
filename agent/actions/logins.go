@@ -10,8 +10,8 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 )
@@ -83,7 +83,7 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 		}
 	}
 
-	if approved, err := systemauth.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for user %s on entry %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, decryptedLogin.Username, decryptedLogin.Name)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for user %s on entry %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, decryptedLogin.Username, decryptedLogin.Name)); err != nil || !approved {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
 			Message: "not approved",
@@ -101,7 +101,7 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 }
 
 func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
-	if approved, err := systemauth.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying to list credentials (name & username)", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying to list credentials (name & username)", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
 			Message: "not approved",

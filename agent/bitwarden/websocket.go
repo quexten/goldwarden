@@ -13,8 +13,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
-	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 	"github.com/vmihailenco/msgpack/v5"
@@ -179,7 +179,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					}
 					websocketLog.Info("AuthRequest details " + authRequest.RequestIpAddress + " " + authRequest.RequestDeviceType)
 
-					if approved, err := systemauth.GetApproval("Paswordless Login Request", "Do you want to allow "+authRequest.RequestIpAddress+" ("+authRequest.RequestDeviceType+") to login to your account?"); err != nil || !approved {
+					if approved, err := pinentry.GetApproval("Paswordless Login Request", "Do you want to allow "+authRequest.RequestIpAddress+" ("+authRequest.RequestDeviceType+") to login to your account?"); err != nil || !approved {
 						websocketLog.Info("AuthRequest denied")
 						break
 					}

@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/crypto/ssh"
@@ -95,7 +95,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 
 	message := fmt.Sprintf("%s on %s>%s>%s is requesting signage with key %s", vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
 
-	if approved, err := systemauth.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
+	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
 		log.Info("Sign Request for key: %s denied", sshKey.Name)
 		return nil, errors.New("Approval not given")
 	}

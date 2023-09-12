@@ -11,7 +11,7 @@ import (
 
 	"github.com/keys-pub/go-libfido2"
 	"github.com/quexten/goldwarden/agent/config"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 )
 
 const isFido2Enabled = true
@@ -61,7 +61,7 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	clientDataHash := sha256.Sum256([]byte(clientDataJson))
 	clientDataJson = base64.URLEncoding.EncodeToString([]byte(clientDataJson))
 
-	pin, err := systemauth.GetPassword("Fido2 PIN", "Enter your token's PIN")
+	pin, err := pinentry.GetPassword("Fido2 PIN", "Enter your token's PIN")
 	if err != nil {
 		twofactorLog.Fatal(err.Error())
 	}

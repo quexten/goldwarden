@@ -13,7 +13,7 @@ import (
 	"github.com/awnumar/memguard"
 	"github.com/google/uuid"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/tink-crypto/tink-go/v2/aead/subtle"
 	"golang.org/x/crypto/argon2"
@@ -395,7 +395,7 @@ func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
 }
 
 func (cfg *Config) TryUnlock(vault *vault.Vault) error {
-	pin, err := systemauth.GetPassword("Unlock Goldwarden", "Enter the vault PIN")
+	pin, err := pinentry.GetPassword("Unlock Goldwarden", "Enter the vault PIN")
 	if err != nil {
 		return err
 	}
