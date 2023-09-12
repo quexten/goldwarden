@@ -45,6 +45,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/keys-pub/go-libfido2 v1.5.3 h1:vtgHxlSB43u6lj0TSuA3VvT6z3E7VI+L1a2hvMFdECk=
 github.com/keys-pub/go-libfido2 v1.5.3/go.mod h1:P0V19qHwJNY0htZwZDe9Ilvs/nokGhdFX7faKFyZ6+U=
+github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0 h1:m81erW+1MD5vl3lKQ/+TYPHJ6Y9/C1COqxXPE51FkDk=
+github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0/go.mod h1:EHbIQzfC3kdWFI81pLOFjssnolF+ALfmVf8PUdWBxo4=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 h1:6E+4a0GO5zZEnZ81pIr0yLvtUWk2if982qA3F3QD6H4=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0/go.mod h1:zJYVVT2jmtg6P3p1VtQj7WsuWi/y4VnjVBn7F8KPB3I=
 github.com/mattn/go-colorable v0.1.12/go.mod h1:u5H1YNBxpqRaxsYJYSkiCWKzEfiAb1Gb520KVy5xxl4=

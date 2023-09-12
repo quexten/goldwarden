@@ -2,6 +2,8 @@
 
 package pinentry
 
+import "errors"
+
 func GetPassword(title string, description string) (string, error) {
 	log.Info("Asking for password is not implemented on this platform")
 	return "", errors.New("Not implemented")
