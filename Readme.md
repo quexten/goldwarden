@@ -56,6 +56,10 @@ goldwarden config set-api-url https://my.bitwarden.domain/api
 goldwarden config set-identity-url https://my.bitwarden.domain/identity
 ```
 
+```
+goldwarden config set-notifications-url https://my.bitwarden.domain/notifications
+```
+
 Login
 ```
 goldwarden login --email <email>
@@ -222,6 +226,8 @@ When entries change, the daemon gets notified via websockets and updates automat
 The sensitive parts of the config file are encrypted using a pin. The key is derrived using argon2, and the encryption used is chacha20poly1305. The config is also only held in memory in encrypted form and decrypted using key stored in kernel secured memory when needed.
 
 When accessing a vault entry, the daemon will authenticate against a polkit policy. This allows using biometrics.
+
+By default, credential entry is cached for 10 minutes. During this time, a parent program can invoke goldwarden multiple times, but biometrics are only confirmed the first time. Since this is per parent-program, this means that invokations from 2 tty's would independently each ask for biometrics confirmation the first time.
 
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
