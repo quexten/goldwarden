@@ -9,7 +9,7 @@ import (
 func CheckBiometrics(approvalType Approval) bool {
 	ok, err := touchid.Authenticate(approvalType.String())
 	if err != nil {
-		log.Error(err)
+		log.Error(err.Error())
 	}
 
 	if ok {

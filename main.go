@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics"
+	"github.com/quexten/goldwarden/client/setup"
 	"github.com/quexten/goldwarden/cmd"
 )
 
@@ -57,9 +56,8 @@ func main() {
 		os.Setenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED", "true")
 	}
 
-	if !cmd.IsPolkitSetup() && !runtimeConfig.DisableAuth {
-		fmt.Println("Polkit is not setup. Run 'goldwarden setup polkit' to set it up.")
-		time.Sleep(3 * time.Second)
+	if !setup.VerifySetup(runtimeConfig) {
+		return
 	}
 
 	cmd.Execute(runtimeConfig)
