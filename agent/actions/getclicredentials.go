@@ -11,7 +11,7 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	req := request.ParsedPayload().(ipc.GetCLICredentialsRequest)
 
 	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, req.ApplicationName)); err != nil || !approved {
@@ -20,7 +20,7 @@ func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *
 			Message: "not approved",
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return response, nil
 	}
@@ -32,7 +32,7 @@ func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *
 			Message: "no credentials found for " + req.ApplicationName,
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return response, nil
 	}

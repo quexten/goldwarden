@@ -7,7 +7,7 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleSetApiURL(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleSetApiURL(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	apiURL := request.ParsedPayload().(ipc.SetApiURLRequest).Value
 	cfg.ConfigFile.ApiUrl = apiURL
 	err = cfg.WriteConfig()
@@ -23,7 +23,7 @@ func handleSetApiURL(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	})
 }
 
-func handleSetIdentity(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleSetIdentity(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	identity := request.ParsedPayload().(ipc.SetIdentityURLRequest).Value
 	cfg.ConfigFile.IdentityUrl = identity
 	err = cfg.WriteConfig()
@@ -39,7 +39,7 @@ func handleSetIdentity(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	})
 }
 
-func handleSetNotifications(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleSetNotifications(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	notifications := request.ParsedPayload().(ipc.SetNotificationsURLRequest).Value
 	cfg.ConfigFile.NotificationsUrl = notifications
 	err = cfg.WriteConfig()

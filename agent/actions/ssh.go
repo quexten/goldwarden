@@ -16,7 +16,7 @@ import (
 
 var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 
-func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	req := msg.ParsedPayload().(ipc.CreateSSHKeyRequest)
 
 	cipher, publicKey := ssh.NewSSHKeyCipher(req.Name, vault.Keyring)
@@ -43,7 +43,7 @@ func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ca
 	return
 }
 
-func handleListSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleListSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	keys := vault.GetSSHKeys()
 	keyStrings := make([]string, 0)
 	for _, key := range keys {

@@ -63,7 +63,7 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 		responseBytes := []byte{}
 		if action, actionFound := actions.AgentActionsRegistry.Get(msg.Type); actionFound {
 			callingContext := sockets.GetCallingContext(c)
-			payload, err := action(msg, cfg, vault, callingContext)
+			payload, err := action(msg, cfg, vault, &callingContext)
 			if err != nil {
 				writeError(c, err)
 				continue

@@ -13,6 +13,9 @@ type CallingContext struct {
 	ProcessName            string
 	ParentProcessName      string
 	GrandParentProcessName string
+	ProcessPid             int
+	ParentProcessPid       int
+	GrandParentProcessPid  int
 }
 
 func GetCallingContext(connection net.Conn) CallingContext {
@@ -48,5 +51,8 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		ProcessName:            process.Executable(),
 		ParentProcessName:      parentProcess.Executable(),
 		GrandParentProcessName: parentParentProcess.Executable(),
+		ProcessPid:             pid,
+		ParentProcessPid:       ppid,
+		GrandParentProcessPid:  parentParentProcess.PPid(),
 	}
 }

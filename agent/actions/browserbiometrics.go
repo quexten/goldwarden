@@ -12,14 +12,14 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleGetBiometricsKey(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleGetBiometricsKey(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access your vault encryption key for browser biometric unlock.", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return response, nil
 	}

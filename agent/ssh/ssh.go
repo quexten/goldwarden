@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/quexten/goldwarden/agent/sockets"
+	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
@@ -75,6 +76,8 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		if !vaultAgent.unlockRequestAction() {
 			return nil, errors.New("vault is locked")
 		}
+
+		systemauth.CreateSession(vaultAgent.context)
 	}
 
 	var signer ssh.Signer
@@ -100,7 +103,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		return nil, errors.New("Approval not given")
 	}
 
-	if !biometrics.CheckBiometrics(biometrics.SSHKey) {
+	if !systemauth.CheckBiometrics(&vaultAgent.context, biometrics.SSHKey) {
 		log.Info("Sign Request for key: %s denied", key.Marshal())
 		return nil, errors.New("Biometrics not checked")
 	}

@@ -43,6 +43,7 @@ type RuntimeConfig struct {
 	User                  string
 	Password              string
 	Pin                   string
+	SessionToken          string
 }
 
 type ConfigFile struct {

@@ -14,7 +14,7 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	if !cfg.HasPin() {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
@@ -85,7 +85,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	return
 }
 
-func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	if !cfg.HasPin() {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
@@ -124,7 +124,7 @@ func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	return
 }
 
-func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	cfg.Purge()
 	cfg.WriteConfig()
 	vault.Clear()
@@ -139,7 +139,7 @@ func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	return
 }
 
-func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	pin, err := pinentry.GetPassword("Pin Change", "Enter your desired pin")
 	if err != nil {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
@@ -147,7 +147,7 @@ func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vau
 			Message: err.Error(),
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		} else {
 			return response, nil
 		}
@@ -161,7 +161,7 @@ func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vau
 	return
 }
 
-func handlePinStatus(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handlePinStatus(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	var pinStatus string
 	if cfg.HasPin() {
 		pinStatus = "enabled"

@@ -39,6 +39,7 @@ func main() {
 		User:                  os.Getenv("GOLDWARDEN_AUTH_USER"),
 		Password:              os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
 		Pin:                   os.Getenv("GOLDWARDEN_PIN"),
+		SessionToken:          os.Getenv("GOLDWARDEN_SESSION_TOKEN"),
 
 		ConfigDirectory: configPath,
 	}

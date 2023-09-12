@@ -16,7 +16,7 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	req := request.ParsedPayload().(ipc.GetLoginRequest)
 	login, err := vault.GetLoginByFilter(req.UUID, req.OrgId, req.Name, req.Username)
 	if err != nil {
@@ -89,7 +89,7 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 			Message: "not approved",
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return response, nil
 	}
@@ -100,14 +100,14 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 	})
 }
 
-func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx sockets.CallingContext) (response interface{}, err error) {
+func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying to list credentials (name & username)", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return response, nil
 	}

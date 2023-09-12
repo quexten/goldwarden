@@ -44,7 +44,7 @@ func serveVirtualAgent(recv chan []byte, send chan []byte, ctx context.Context, 
 				ParentProcessName:      parent,
 				GrandParentProcessName: grandparent,
 			}
-			payload, err := action(msg, cfg, vault, callingContext)
+			payload, err := action(msg, cfg, vault, &callingContext)
 			if err != nil {
 				writeErrorToLog(err)
 				continue

@@ -12,14 +12,14 @@ import (
 	"github.com/quexten/goldwarden/ipc"
 )
 
-func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext sockets.CallingContext) (response interface{}, err error) {
+func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
 	if !cfg.HasPin() && !cfg.ConfigFile.RuntimeConfig.DisablePinRequirement {
 		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
 			Success: false,
 			Message: "No pin set. Set a pin first!",
 		})
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 
 		return
@@ -44,7 +44,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		}
 		response, err = ipc.IPCMessageFromPayload(payload)
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return
 	}
@@ -65,7 +65,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		}
 		response, err = ipc.IPCMessageFromPayload(payload)
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return
 	}
@@ -84,7 +84,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		}
 		response, err = ipc.IPCMessageFromPayload(payload)
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return
 	}
@@ -100,7 +100,7 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		}
 		response, err = ipc.IPCMessageFromPayload(payload)
 		if err != nil {
-			return nil, err
+			return ipc.IPCMessage{}, err
 		}
 		return
 	}
