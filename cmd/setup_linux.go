@@ -33,6 +33,12 @@ func setupPolkit() {
 		panic(err)
 	}
 
+	command2 := exec.Command("pkexec", "chown", "root:root", "/usr/share/polkit-1/actions/com.quexten.goldwarden.policy")
+	err = command2.Run()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Polkit setup successfully")
 }
 
@@ -75,13 +81,15 @@ func setupSystemd() {
 	file.Close()
 
 	userDirectory := os.Getenv("HOME")
-	command := exec.Command("pkexec", "mv", "/tmp/goldwarden.service", userDirectory+"/.config/systemd/user/goldwarden.service")
+	command := exec.Command("mv", "/tmp/goldwarden.service", userDirectory+"/.config/systemd/user/goldwarden.service")
 	err = command.Run()
 	if err != nil {
 		panic(err)
 	}
 
 	command2 := exec.Command("systemctl", "--now", "--user", "enable", "goldwarden.service")
+	command2.Stdout = os.Stdout
+	command2.Stderr = os.Stderr
 	err = command2.Run()
 	if err != nil {
 		panic(err)
