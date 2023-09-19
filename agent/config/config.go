@@ -43,7 +43,6 @@ type RuntimeConfig struct {
 	User                  string
 	Password              string
 	Pin                   string
-	SessionToken          string
 }
 
 type ConfigFile struct {
@@ -119,6 +118,18 @@ func (c *Config) Unlock(password string) bool {
 
 	c.key = memguard.NewBufferFromBytes(key)
 	return true
+}
+
+func (c *Config) VerifyPin(password string) bool {
+	key := argon2.Key([]byte(password), []byte(c.ConfigFile.DeviceUUID), KDFIterations, KDFMemory, KDFThreads, 32)
+	debug.FreeOSMemory()
+	keyHash := sha3.Sum256(key)
+	configKeyHash := hex.EncodeToString(keyHash[:])
+	if cryptoSubtle.ConstantTimeCompare([]byte(configKeyHash), []byte(c.ConfigFile.ConfigKeyHash)) != 1 {
+		return false
+	} else {
+		return true
+	}
 }
 
 func (c *Config) Lock() {

@@ -8,7 +8,7 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
-	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
 	"github.com/quexten/goldwarden/logging"
@@ -57,6 +57,6 @@ func handleListSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, c
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeCreateSSHKeyRequest, ensureEverything(biometrics.SSHKey, handleAddSSH))
+	AgentActionsRegistry.Register(ipc.IPCMessageTypeCreateSSHKeyRequest, ensureEverything(systemauth.SSHKey, handleAddSSH))
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetSSHKeysRequest, ensureIsNotLocked(ensureIsLoggedIn(handleListSSH)))
 }

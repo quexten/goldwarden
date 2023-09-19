@@ -12,18 +12,9 @@ const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
  "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
 
 <policyconfig>
-    <action id="com.quexten.goldwarden.accesscredential">
-      <description>Allow Credential Access</description>
-      <message>Authenticate to allow access to a single credential</message>
-      <defaults>
-        <allow_any>auth_self</allow_any>
-        <allow_inactive>auth_self</allow_inactive>
-        <allow_active>auth_self</allow_active>
-      </defaults>
-    </action>
-    <action id="com.quexten.goldwarden.changepin">
-      <description>Approve Pin Change</description>
-      <message>Authenticate to change your Goldwarden PIN.</message>
+    <action id="com.quexten.goldwarden.accessvault">
+      <description>Allow access to the vault</description>
+      <message>Allows access to the vault entries</message>
       <defaults>
         <allow_any>auth_self</allow_any>
         <allow_inactive>auth_self</allow_inactive>
@@ -31,17 +22,8 @@ const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
       </defaults>
     </action>
     <action id="com.quexten.goldwarden.usesshkey">
-      <description>Use Bitwarden SSH Key</description>
+      <description>Use SSH Key</description>
       <message>Authenticate to use an SSH Key from your vault</message>
-      <defaults>
-        <allow_any>auth_self</allow_any>
-        <allow_inactive>auth_self</allow_inactive>
-        <allow_active>auth_self</allow_active>
-      </defaults>
-    </action>
-    <action id="com.quexten.goldwarden.modifyvault">
-      <description>Modify Bitwarden Vault</description>
-      <message>Authenticate to allow modification of your Bitvarden vault in Goldwarden</message>
       <defaults>
         <allow_any>auth_self</allow_any>
         <allow_inactive>auth_self</allow_inactive>
@@ -68,20 +50,51 @@ func CheckBiometrics(approvalType Approval) bool {
 
 	authority, err := polkit.NewAuthority()
 	if err != nil {
+		log.Error("Failed to create polkit authority: %s", err.Error())
 		return false
 	}
 
 	result, err := authority.CheckAuthorization(
 		approvalType.String(),
 		nil,
-		polkit.CheckAuthorizationAllowUserInteraction, "",
+		uint32(polkit.AuthenticationRequiredRetained), "",
 	)
 
 	if err != nil {
+		log.Error("Failed to create polkit authority: %s", err.Error())
 		return false
 	}
 
 	log.Info("Biometrics result: %t", result.IsAuthorized)
 
 	return result.IsAuthorized
+}
+
+func BiometricsWorking() bool {
+	if biometricsDisabled {
+		return false
+	}
+
+	authority, err := polkit.NewAuthority()
+	if err != nil {
+		return false
+	}
+
+	result, err := authority.EnumerateActions("en")
+	if err != nil {
+		return false
+	}
+
+	if len(result) == 0 {
+		return false
+	}
+
+	testFor := AccessVault
+	for _, action := range result {
+		if Approval(action.ActionID) == testFor {
+			return true
+		}
+	}
+
+	return false
 }

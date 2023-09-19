@@ -8,7 +8,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
+	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc"
@@ -181,6 +181,6 @@ func init() {
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeUnlockVaultRequest, handleUnlockVault)
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeLockVaultRequest, handleLockVault)
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeWipeVaultRequest, handleWipeVault)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeUpdateVaultPINRequest, ensureBiometricsAuthorized(biometrics.ChangePin, handleUpdateVaultPin))
+	AgentActionsRegistry.Register(ipc.IPCMessageTypeUpdateVaultPINRequest, ensureBiometricsAuthorized(systemauth.AccessVault, handleUpdateVaultPin))
 	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetVaultPINStatusRequest, handlePinStatus)
 }

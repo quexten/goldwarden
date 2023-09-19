@@ -150,7 +150,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}
 
 	if !runtimeConfig.DisableSSHAgent {
-		vaultAgent := ssh.NewVaultAgent(vault)
+		vaultAgent := ssh.NewVaultAgent(vault, &cfg)
 		vaultAgent.SetUnlockRequestAction(func() bool {
 			err := cfg.TryUnlock(vault)
 			if err == nil {

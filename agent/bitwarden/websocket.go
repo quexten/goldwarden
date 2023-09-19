@@ -179,11 +179,12 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					}
 					websocketLog.Info("AuthRequest details " + authRequest.RequestIpAddress + " " + authRequest.RequestDeviceType)
 
-					if approved, err := pinentry.GetApproval("Paswordless Login Request", "Do you want to allow "+authRequest.RequestIpAddress+" ("+authRequest.RequestDeviceType+") to login to your account?"); err != nil || !approved {
+					var message = "Do you want to allow " + authRequest.RequestIpAddress + " (" + authRequest.RequestDeviceType + ") to login to your account?"
+					if approved, err := pinentry.GetApproval("Paswordless Login Request", message); err != nil || !approved {
 						websocketLog.Info("AuthRequest denied")
 						break
 					}
-					if !biometrics.CheckBiometrics(biometrics.AccessCredential) {
+					if !biometrics.CheckBiometrics(biometrics.AccessVault) {
 						websocketLog.Info("AuthRequest denied - biometrics required")
 						break
 					}

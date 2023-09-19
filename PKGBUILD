@@ -31,4 +31,5 @@ package() {
   cd "$pkgname-$pkgver"
   install -Dm755 build/$pkgname "$pkgdir"/usr/bin/$pkgname
   install -Dm644 "$srcdir/$pkgname-$pkgver/resources/com.quexten.goldwarden.policy" "$pkgdir/usr/share/polkit-1/actions/com.quexten.goldwarden.policy"
+  chown root:root "$pkgdir/usr/share/polkit-1/actions/com.quexten.goldwarden.policy"
 }

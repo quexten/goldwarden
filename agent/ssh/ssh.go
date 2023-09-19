@@ -8,9 +8,9 @@ import (
 	"net"
 	"os"
 
+	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
-	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
@@ -22,6 +22,7 @@ var log = logging.GetLogger("Goldwarden", "SSH")
 
 type vaultAgent struct {
 	vault               *vault.Vault
+	config              *config.Config
 	unlockRequestAction func() bool
 	context             sockets.CallingContext
 }
@@ -77,7 +78,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 			return nil, errors.New("vault is locked")
 		}
 
-		systemauth.CreateSession(vaultAgent.context)
+		systemauth.CreatePinSession(vaultAgent.context)
 	}
 
 	var signer ssh.Signer
@@ -103,7 +104,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		return nil, errors.New("Approval not given")
 	}
 
-	if !systemauth.CheckBiometrics(&vaultAgent.context, biometrics.SSHKey) {
+	if permission, err := systemauth.GetPermission(systemauth.SSHKey, vaultAgent.context, vaultAgent.config); err != nil || !permission {
 		log.Info("Sign Request for key: %s denied", key.Marshal())
 		return nil, errors.New("Biometrics not checked")
 	}
@@ -124,6 +125,7 @@ func (vaultAgent) Unlock(passphrase []byte) error {
 
 type SSHAgentServer struct {
 	vault               *vault.Vault
+	config              *config.Config
 	unlockRequestAction func() bool
 }
 
@@ -131,9 +133,10 @@ func (v *SSHAgentServer) SetUnlockRequestAction(action func() bool) {
 	v.unlockRequestAction = action
 }
 
-func NewVaultAgent(vault *vault.Vault) SSHAgentServer {
+func NewVaultAgent(vault *vault.Vault, config *config.Config) SSHAgentServer {
 	return SSHAgentServer{
-		vault: vault,
+		vault:  vault,
+		config: config,
 		unlockRequestAction: func() bool {
 			log.Info("Unlock Request, but no action defined")
 			return false
@@ -175,6 +178,7 @@ func (v SSHAgentServer) Serve() {
 
 		go agent.ServeAgent(vaultAgent{
 			vault:               v.vault,
+			config:              v.config,
 			unlockRequestAction: v.unlockRequestAction,
 			context:             callingContext,
 		}, conn)

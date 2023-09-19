@@ -19,10 +19,8 @@ func init() {
 type Approval string
 
 const (
-	AccessCredential  Approval = "com.quexten.goldwarden.accesscredential"
-	ChangePin         Approval = "com.quexten.goldwarden.changepin"
+	AccessVault       Approval = "com.quexten.goldwarden.accessvault"
 	SSHKey            Approval = "com.quexten.goldwarden.usesshkey"
-	ModifyVault       Approval = "com.quexten.goldwarden.modifyvault"
 	BrowserBiometrics Approval = "com.quexten.goldwarden.browserbiometrics"
 )
 

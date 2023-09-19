@@ -6,7 +6,6 @@ import (
 
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics"
-	"github.com/quexten/goldwarden/client/setup"
 	"github.com/quexten/goldwarden/cmd"
 )
 
@@ -39,7 +38,6 @@ func main() {
 		User:                  os.Getenv("GOLDWARDEN_AUTH_USER"),
 		Password:              os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
 		Pin:                   os.Getenv("GOLDWARDEN_PIN"),
-		SessionToken:          os.Getenv("GOLDWARDEN_SESSION_TOKEN"),
 
 		ConfigDirectory: configPath,
 	}
@@ -55,10 +53,6 @@ func main() {
 
 	if runtimeConfig.DisableAuth {
 		os.Setenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED", "true")
-	}
-
-	if !setup.VerifySetup(runtimeConfig) {
-		return
 	}
 
 	cmd.Execute(runtimeConfig)
