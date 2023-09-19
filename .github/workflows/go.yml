@@ -46,22 +46,45 @@ jobs:
         flags: ''
         namcap: true
         updpkgsums: true
-    - name: Makepkg Build and Check
-      id: makepkg
-      uses: edlanglois/pkgbuild-action@v1
-      with:
-        aurDeps: true
-    - name: Convert to deb
-      uses: bpicode/github-action-fpm@master
-      with:
-        fpm_args: './build'
-        fpm_opts: '--debug -n goldwarden -t deb -s pacman'
-    - name: Convert to rpm
-      uses: bpicode/github-action-fpm@master
-      with:
-        fpm_args: './build'
-        fpm_opts: '--debug -n goldwarden -t rpm -s pacman'
 
+    - name: Build 
+      run: go build -v .
+
+    - name: Move binaries to directories
+      run:
+        mkdir -p .debpkg/usr/bin
+        mkdir -p .rpmpkg/usr/bin
+        cp -p goldwarden .debpkg/usr/bin/
+        cp -p goldwarden .rpmpkg/usr/bin/
+
+    - uses: jiro4989/build-deb-action@v3
+      with:
+        package: goldwarden
+        package_root: .debpkg
+        maintainer: quexten
+        version: ${{ github.ref }}
+        arch: 'amd64'
+        desc: 'Goldwarden'
+    - uses: actions/upload-artifact@v3
+      with:
+        name: goldwarden.deb
+        path: ./*.deb
+
+    - uses: jiro4989/build-rpm-action@v2
+      with:
+        summary: 'Goldwarden'
+        package: goldwarden
+        package_root: .rpmpkg
+        maintainer: quexten
+        version: ${{ github.ref }}
+        arch: 'x86_64'
+        desc: 'Goldwarden'
+    - uses: actions/upload-artifact@v3
+      with:
+        name: goldwarden.rpm
+        path: |
+          ./*.rpm
+          !./*-debuginfo-*.rpm
   macos:
     runs-on: macos-latest
     steps:
