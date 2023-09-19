@@ -36,6 +36,8 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 		if !vaultAgent.unlockRequestAction() {
 			return nil, errors.New("vault is locked")
 		}
+
+		systemauth.CreatePinSession(vaultAgent.context)
 	}
 
 	vaultSSHKeys := (*vaultAgent.vault).GetSSHKeys()
