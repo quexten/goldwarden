@@ -25,9 +25,14 @@ func GetCallingContext(connection net.Conn) CallingContext {
 	}
 	pid, _ := creds.PID()
 	process, err := gops.FindProcess(pid)
-	if process.Executable() == "ssh-keygen" {
-		process, err = gops.FindProcess(process.PPid())
-		pid = process.Pid()
+
+	// git is epheremal and spawns ssh-keygen and ssh so we need to anchor to git
+	if process.Executable() == "ssh-keygen" || process.Executable() == "ssh" {
+		p, e := gops.FindProcess(process.PPid())
+		if p.Executable() == "git" && e == nil {
+			process, err = p, e
+			pid = process.Pid()
+		}
 	}
 
 	uid, _ := creds.UserID()
