@@ -94,8 +94,6 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 }
 
 type AgentState struct {
-	vault  *vault.Vault
-	config *config.ConfigFile
 }
 
 func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
@@ -106,6 +104,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	var vault = vault.NewVault(&keyring)
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
+		log.Warn("Could not read config: %s", err.Error())
 		cfg = config.DefaultConfig()
 		cfg.ConfigFile.RuntimeConfig = runtimeConfig
 		cfg.WriteConfig()
