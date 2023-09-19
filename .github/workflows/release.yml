@@ -49,5 +49,34 @@ jobs:
         commit_message: Update AUR package from GitHub Actions automation
         ssh_keyscan_types: ed25519
 
+  build_macos_x86_64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - name: Build 
+        run: go build -tags "nofido2 noautofill" -v .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: goldwarden-macos_x86_64
+          path: ./goldwarden
 
-  
+  build_windows_x86_64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - name: Build 
+        run: go build -tags "nofido2 noautofill" -v .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: goldwarden-windows_x86_64.exe
+          path: ./goldwarden.exe
