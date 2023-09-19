@@ -46,8 +46,11 @@ jobs:
         flags: ''
         namcap: true
         updpkgsums: true
-    - name: Build archlinux package
-      uses: mijailr/arch-makepkg-action@v1
+    - name: Makepkg Build and Check
+      id: makepkg
+      uses: edlanglois/pkgbuild-action@v1
+      with:
+        aurDeps: true
     - name: Convert to deb
       uses: bpicode/github-action-fpm@master
       with:
