@@ -25,20 +25,28 @@ func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactor
 
 			result, err := Fido2TwoFactor(chall, creds, cfg)
 			if err != nil {
-				return WebAuthn, nil, err
+				twofactorLog.Error("Error during FIDO2 two-factor authentication: %s", err)
+				//return WebAuthn, nil, err
+			} else {
+				return WebAuthn, []byte(result), err
 			}
-			return WebAuthn, []byte(result), err
 		} else {
 			twofactorLog.Warn("WebAuthn is enabled for the account but goldwarden is not compiled with FIDO2 support")
 		}
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Authenticator]; isInMap {
 		token, err := pinentry.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
-		return Authenticator, []byte(token), err
+		if err != nil {
+			twofactorLog.Error("Error during authenticator two-factor authentication: %s", err)
+		} else {
+			return Authenticator, []byte(token), err
+		}
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Email]; isInMap {
 		token, err := pinentry.GetPassword("Email Second Factor", "Enter your two-factor auth code")
-		return Email, []byte(token), err
+		if err == nil {
+			return Email, []byte(token), err
+		}
 	}
 
 	return Authenticator, []byte{}, errors.New("no second factor available")
