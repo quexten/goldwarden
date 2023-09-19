@@ -40,12 +40,6 @@ jobs:
       run: sudo apt-get install -y libfido2-dev
     - name: Install gio dependencies
       run: sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
-    - name: Validate ArchLinux PKGBUILD
-      uses: hapakaien/archlinux-package-action@v2
-      with:
-        flags: ''
-        namcap: true
-        updpkgsums: true
 
     - name: Build 
       run: go build -v .
