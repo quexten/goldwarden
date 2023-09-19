@@ -64,7 +64,7 @@ jobs:
         version: ${{ github.ref }}
         arch: 'amd64'
         desc: 'Goldwarden'
-    - uses: AButler/upload-release-assets@v2.0
+    - uses: AButler/upload-release-assets@v3.0
       with:
         files: './*.deb'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +78,9 @@ jobs:
         version: ${{ github.ref }}
         arch: 'x86_64'
         desc: 'Goldwarden'
+    - name: Move binaries to directories
+      run:
+        "rm ./goldwarden-debuginfo*"
     - uses: AButler/upload-release-assets@v2.0
       with:
         files: './*.rpm'
@@ -93,10 +96,10 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build 
-        run: go build -tags "nofido2 noautofill" -o "goldwarden-macos_x86_64" -v .
+        run: go build -tags "nofido2 noautofill" -o "goldwarden_macos_x86_64" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
-          files: './goldwarden-macos_x86_64'
+          files: './goldwarden_macos_x86_64'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   build_windows_x86_64:
