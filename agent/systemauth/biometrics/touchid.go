@@ -20,3 +20,7 @@ func CheckBiometrics(approvalType Approval) bool {
 		return false
 	}
 }
+
+func BiometricsWorking() bool {
+	return false
+}
