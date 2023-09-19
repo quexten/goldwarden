@@ -45,8 +45,8 @@ jobs:
       run: go build -v .
 
     - name: Move binaries to directories
-      run:
-        mkdir -p .debpkg/usr/bin
+      run: |
+        mkdir -p .debpkg/usr/bin &&
         mkdir -p .rpmpkg/usr/bin
         cp -p goldwarden .debpkg/usr/bin/
         cp -p goldwarden .rpmpkg/usr/bin/
