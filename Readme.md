@@ -30,11 +30,16 @@ yay -S goldwarden
 ```
 should be enough to install goldwarden on your system.
 
-Otherwise:
-Download the latest release binary and put it into a location you want to have it in, f.e `/usr/bin`.
+For deb/rpm, download the deb/rpm from the latest release on GitHub and install it using your package manager.
+
+On other distributions, Mac and Windows, you can download it from the latest release on GitHub and put it into a location you want to have it in, f.e `/usr/bin`.
 Then run `goldwarden setup polkit`.
 Optionally run: `goldwarden setup systemd` and `goldwarden setup browserbiometrics`.
 
+Alternatively, you can build it yourself.
+```
+go install github.com/quexten/goldwarden@latest
+```
 ### Usage
 
 Start the daemon (this is done by systemd automatically, when set up with `goldwarden setup systemd`):
