@@ -24,8 +24,13 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		panic(err)
 	}
 	pid, _ := creds.PID()
-	uid, _ := creds.UserID()
 	process, err := gops.FindProcess(pid)
+	if process.Executable() == "ssh-keygen" {
+		process, err = gops.FindProcess(process.PPid())
+		pid = process.Pid()
+	}
+
+	uid, _ := creds.UserID()
 	ppid := process.PPid()
 	if err != nil {
 		panic(err)
