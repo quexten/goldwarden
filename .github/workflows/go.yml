@@ -56,7 +56,7 @@ jobs:
         package: goldwarden
         package_root: .debpkg
         maintainer: quexten
-        version: ${{ github.ref }}
+        version: 1
         arch: 'amd64'
         desc: 'Goldwarden'
     - uses: actions/upload-artifact@v3
@@ -70,7 +70,7 @@ jobs:
         package: goldwarden
         package_root: .rpmpkg
         maintainer: quexten
-        version: ${{ github.ref }}
+        version: 1
         arch: 'x86_64'
         desc: 'Goldwarden'
     - uses: actions/upload-artifact@v3
