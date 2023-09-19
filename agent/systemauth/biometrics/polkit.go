@@ -9,36 +9,37 @@ import (
 const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE policyconfig PUBLIC
  "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
- "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
-
+ "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
 <policyconfig>
-    <action id="com.quexten.goldwarden.accessvault">
-      <description>Allow access to the vault</description>
-      <message>Allows access to the vault entries</message>
-      <defaults>
-        <allow_any>auth_self</allow_any>
-        <allow_inactive>auth_self</allow_inactive>
-        <allow_active>auth_self</allow_active>
-      </defaults>
-    </action>
-    <action id="com.quexten.goldwarden.usesshkey">
-      <description>Use SSH Key</description>
-      <message>Authenticate to use an SSH Key from your vault</message>
-      <defaults>
-        <allow_any>auth_self</allow_any>
-        <allow_inactive>auth_self</allow_inactive>
-        <allow_active>auth_self</allow_active>
-      </defaults>
-    </action>
-    <action id="com.quexten.goldwarden.browserbiometrics">
-      <description>Browser Biometrics</description>
-      <message>Authenticate to allow Goldwarden to unlock your browser.</message>
-      <defaults>
-        <allow_any>auth_self</allow_any>
-        <allow_inactive>auth_self</allow_inactive>
-        <allow_active>auth_self</allow_active>
-      </defaults>
-    </action>
+
+  <action id="com.quexten.goldwarden.accessvault">
+    <description>Allow access to the vault</description>
+    <message>Allows access to the vault</message>
+    <defaults>
+      <allow_any>auth_self</allow_any>
+      <allow_inactive>auth_self</allow_inactive>
+      <allow_active>auth_self</allow_active>
+    </defaults>
+  </action>
+  <action id="com.quexten.goldwarden.usesshkey">
+    <description>Use SSH Key</description>
+    <message>Authenticate to use an SSH Key from your vault</message>
+    <defaults>
+      <allow_any>auth_self</allow_any>
+      <allow_inactive>auth_self</allow_inactive>
+      <allow_active>auth_self</allow_active>
+    </defaults>
+  </action>
+  <action id="com.quexten.goldwarden.browserbiometrics">
+    <description>Browser Biometrics</description>
+    <message>Authenticate to allow Goldwarden to unlock your browser</message>
+    <defaults>
+      <allow_any>auth_self</allow_any>
+      <allow_inactive>auth_self</allow_inactive>
+      <allow_active>auth_self</allow_active>
+    </defaults>
+  </action>
+
 </policyconfig>`
 
 func CheckBiometrics(approvalType Approval) bool {
