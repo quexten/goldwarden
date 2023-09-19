@@ -31,54 +31,6 @@ jobs:
         name: goldwarden-linux
         path: ./goldwarden
 
-  linux-packaging:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Install libfido2-dev
-      run: sudo apt-get install -y libfido2-dev
-    - name: Install gio dependencies
-      run: sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
-
-    - name: Build 
-      run: go build -v .
-
-    - name: Move binaries to directories
-      run: |
-        mkdir -p .debpkg/usr/bin &&
-        mkdir -p .rpmpkg/usr/bin
-        cp -p goldwarden .debpkg/usr/bin/
-        cp -p goldwarden .rpmpkg/usr/bin/
-
-    - uses: jiro4989/build-deb-action@v3
-      with:
-        package: goldwarden
-        package_root: .debpkg
-        maintainer: quexten
-        version: 1
-        arch: 'amd64'
-        desc: 'Goldwarden'
-    - uses: actions/upload-artifact@v3
-      with:
-        name: goldwarden.deb
-        path: ./*.deb
-
-    - uses: jiro4989/build-rpm-action@v2
-      with:
-        summary: 'Goldwarden'
-        package: goldwarden
-        package_root: .rpmpkg
-        maintainer: quexten
-        version: 1
-        arch: 'x86_64'
-        desc: 'Goldwarden'
-    - uses: actions/upload-artifact@v3
-      with:
-        name: goldwarden.rpm
-        path: |
-          ./*.rpm
-          !./*-debuginfo-*.rpm
   macos:
     runs-on: macos-latest
     steps:

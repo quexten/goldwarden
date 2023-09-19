@@ -24,12 +24,12 @@ jobs:
       run: sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
   
     - name: Build with All features
-      run: go build -o goldwarden -v .
+      run: go build -o goldwarden_linux_x86_64 -v .
     - name: Build minimal featureset
-      run: go build -tags nofido2 -tags noautofill -o goldwarden-minimal -v .
+      run: go build -tags nofido2 -tags noautofill -o goldwarden_linux_minimal_x86_64 -v .
     - uses: AButler/upload-release-assets@v2.0
       with:
-        files: './goldwarden;./goldwarden-minimal'
+        files: './goldwarden_linux_x86_64;./goldwarden_linux_x86_64_minimal'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Validate ArchLinux PKGBUILD
       uses: hapakaien/archlinux-package-action@v2
@@ -49,6 +49,40 @@ jobs:
         commit_message: Update AUR package from GitHub Actions automation
         ssh_keyscan_types: ed25519
 
+    - name: Move binaries to directories
+      run: |
+        mkdir -p .debpkg/usr/bin &&
+        mkdir -p .rpmpkg/usr/bin
+        cp -p goldwarden_linux_x86_64 .debpkg/usr/bin/goldwarden
+        cp -p goldwarden_linux_x86_64 .rpmpkg/usr/bin/goldwarden
+
+    - uses: jiro4989/build-deb-action@v3
+      with:
+        package: goldwarden
+        package_root: .debpkg
+        maintainer: quexten
+        version: ${{ github.ref }}
+        arch: 'amd64'
+        desc: 'Goldwarden'
+    - uses: AButler/upload-release-assets@v2.0
+      with:
+        files: './*.deb'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: jiro4989/build-rpm-action@v2
+      with:
+        summary: 'Goldwarden'
+        package: goldwarden
+        package_root: .rpmpkg
+        maintainer: quexten
+        version: ${{ github.ref }}
+        arch: 'x86_64'
+        desc: 'Goldwarden'
+    - uses: AButler/upload-release-assets@v2.0
+      with:
+        files: './*.rpm'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+
   build_macos_x86_64:
     runs-on: macos-latest
     steps:
@@ -59,11 +93,11 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build 
-        run: go build -tags "nofido2 noautofill" -v .
-      - uses: actions/upload-artifact@v3
+        run: go build -tags "nofido2 noautofill" -o "goldwarden-macos_x86_64" -v .
+      - uses: AButler/upload-release-assets@v2.0
         with:
-          name: goldwarden-macos_x86_64
-          path: ./goldwarden
+          files: './goldwarden-macos_x86_64'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
   build_windows_x86_64:
     runs-on: windows-latest
@@ -75,8 +109,8 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build 
-        run: go build -tags "nofido2 noautofill" -v .
-      - uses: actions/upload-artifact@v3
+        run: go build -tags "nofido2 noautofill" -o "goldwarden_windows_x86_64.exe" -v .
+      - uses: AButler/upload-release-assets@v2.0
         with:
-          name: goldwarden-windows_x86_64.exe
-          path: ./goldwarden.exe
+          files: './goldwarden_windows_x86_64.exe'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
