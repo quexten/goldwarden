@@ -222,13 +222,17 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}
 	log.Info("Agent listening on %s...", path)
 
-	for {
-		fd, err := l.Accept()
-		if err != nil {
-			println("accept error", err.Error())
-			return err
-		}
+	go func() {
+		for {
+			fd, err := l.Accept()
+			if err != nil {
+				println("accept error", err.Error())
+			}
 
-		go serveAgentSession(fd, ctx, vault, &cfg)
-	}
+			go serveAgentSession(fd, ctx, vault, &cfg)
+		}
+	}()
+
+	mainloop()
+	return nil
 }
