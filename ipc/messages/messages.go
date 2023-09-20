@@ -39,7 +39,7 @@ func registerPayloadParser(payloadParser parsePayload, emptyPayload interface{})
 
 func ParsePayload(message IPCMessage) interface{} {
 	if _, ok := messageTypes[message.Type]; !ok {
-		log.Error("Unregistered message type %s", string(message.Type))
+		log.Error("Unregistered message type %d", int(message.Type))
 		return nil
 	}
 	if payload, err := messages[messageTypes[message.Type]](message.Payload); err != nil {
