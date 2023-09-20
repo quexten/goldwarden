@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +15,7 @@ var setApiUrlCmd = &cobra.Command{
 		}
 
 		url := args[0]
-		request := ipc.SetApiURLRequest{}
+		request := messages.SetApiURLRequest{}
 		request.Value = url
 
 		result, err := commandClient.SendToAgent(request)
@@ -25,11 +25,11 @@ var setApiUrlCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Done")
 			} else {
-				println("Setting api url failed: " + result.(ipc.ActionResponse).Message)
+				println("Setting api url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong IPC response type")
@@ -48,7 +48,7 @@ var setIdentityURLCmd = &cobra.Command{
 		}
 
 		url := args[0]
-		request := ipc.SetIdentityURLRequest{}
+		request := messages.SetIdentityURLRequest{}
 		request.Value = url
 
 		result, err := commandClient.SendToAgent(request)
@@ -58,11 +58,11 @@ var setIdentityURLCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Done")
 			} else {
-				println("Setting identity url failed: " + result.(ipc.ActionResponse).Message)
+				println("Setting identity url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong IPC response type")
@@ -81,7 +81,7 @@ var setNotificationsURLCmd = &cobra.Command{
 		}
 
 		url := args[0]
-		request := ipc.SetNotificationsURLRequest{}
+		request := messages.SetNotificationsURLRequest{}
 		request.Value = url
 
 		result, err := commandClient.SendToAgent(request)
@@ -91,11 +91,11 @@ var setNotificationsURLCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Done")
 			} else {
-				println("Setting notifications url failed: " + result.(ipc.ActionResponse).Message)
+				println("Setting notifications url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong IPC response type")

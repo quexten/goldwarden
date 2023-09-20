@@ -1,7 +1,9 @@
 package client
 
 import (
-	"github.com/quexten/goldwarden/ipc"
+	"encoding/json"
+
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 func NewVirtualClient(recv chan []byte, send chan []byte) VirtualClient {
@@ -18,7 +20,8 @@ type VirtualClient struct {
 
 func virtualReader(recv chan []byte) interface{} {
 	for {
-		message, err := ipc.UnmarshalJSON(<-recv)
+		var message messages.IPCMessage
+		err := json.Unmarshal(<-recv, &message)
 		if err != nil {
 			panic(err)
 		}
@@ -27,16 +30,16 @@ func virtualReader(recv chan []byte) interface{} {
 }
 
 func (client VirtualClient) SendToAgent(request interface{}) (interface{}, error) {
-	message, err := ipc.IPCMessageFromPayload(request)
+	message, err := messages.IPCMessageFromPayload(request)
 	if err != nil {
 		panic(err)
 	}
-	messageJson, err := message.MarshallToJson()
+	messageJson, err := json.Marshal(message)
 	if err != nil {
 		panic(err)
 	}
 
 	client.send <- messageJson
 	result := virtualReader(client.recv)
-	return result.(ipc.IPCMessage).ParsedPayload(), nil
+	return messages.ParsePayload(result.(messages.IPCMessage)), nil
 }

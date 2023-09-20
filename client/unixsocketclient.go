@@ -1,12 +1,13 @@
 package client
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"net"
 	"os"
 
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 const READ_BUFFER = 1 * 1024 * 1024 // 1MB
@@ -25,7 +26,9 @@ func reader(r io.Reader) interface{} {
 		if err != nil {
 			return nil
 		}
-		message, err := ipc.UnmarshalJSON(buf[0:n])
+
+		var message messages.IPCMessage
+		err = json.Unmarshal(buf[0:n], &message)
 		if err != nil {
 			panic(err)
 		}
@@ -45,11 +48,11 @@ func (client UnixSocketClient) SendToAgent(request interface{}) (interface{}, er
 	}
 	defer c.Close()
 
-	message, err := ipc.IPCMessageFromPayload(request)
+	message, err := messages.IPCMessageFromPayload(request)
 	if err != nil {
 		panic(err)
 	}
-	messageJson, err := message.MarshallToJson()
+	messageJson, err := json.Marshal(message)
 	if err != nil {
 		panic(err)
 	}
@@ -59,5 +62,5 @@ func (client UnixSocketClient) SendToAgent(request interface{}) (interface{}, er
 		log.Fatal("write error:", err)
 	}
 	result := reader(c)
-	return result.(ipc.IPCMessage).ParsedPayload(), nil
+	return messages.ParsePayload(result.(messages.IPCMessage)), nil
 }

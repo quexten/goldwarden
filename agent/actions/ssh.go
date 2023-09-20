@@ -10,17 +10,17 @@ import (
 	"github.com/quexten/goldwarden/agent/ssh"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/quexten/goldwarden/logging"
 )
 
 var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 
-func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	req := msg.ParsedPayload().(ipc.CreateSSHKeyRequest)
+func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	req := messages.ParsePayload(msg).(messages.CreateSSHKeyRequest)
 
 	cipher, publicKey := ssh.NewSSHKeyCipher(req.Name, vault.Keyring)
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
@@ -36,27 +36,27 @@ func handleAddSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ca
 		actionsLog.Warn("Error posting ssh key cipher: " + err.Error())
 	}
 
-	response, err = ipc.IPCMessageFromPayload(ipc.CreateSSHKeyResponse{
+	response, err = messages.IPCMessageFromPayload(messages.CreateSSHKeyResponse{
 		Digest: strings.ReplaceAll(publicKey, "\n", "") + " " + req.Name,
 	})
 
 	return
 }
 
-func handleListSSH(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleListSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	keys := vault.GetSSHKeys()
 	keyStrings := make([]string, 0)
 	for _, key := range keys {
 		keyStrings = append(keyStrings, strings.ReplaceAll(key.PublicKey+" "+key.Name, "\n", ""))
 	}
 
-	response, err = ipc.IPCMessageFromPayload(ipc.GetSSHKeysResponse{
+	response, err = messages.IPCMessageFromPayload(messages.GetSSHKeysResponse{
 		Keys: keyStrings,
 	})
 	return
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeCreateSSHKeyRequest, ensureEverything(systemauth.SSHKey, handleAddSSH))
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetSSHKeysRequest, ensureIsNotLocked(ensureIsLoggedIn(handleListSSH)))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.CreateSSHKeyRequest{}), ensureEverything(systemauth.SSHKey, handleAddSSH))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetSSHKeysRequest{}), ensureIsNotLocked(ensureIsLoggedIn(handleListSSH)))
 }

@@ -8,44 +8,44 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/quexten/goldwarden/autofill/autotype"
 	"github.com/quexten/goldwarden/client"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func GetLoginByUUID(uuid string, client client.Client) (ipc.DecryptedLoginCipher, error) {
-	resp, err := client.SendToAgent(ipc.GetLoginRequest{
+func GetLoginByUUID(uuid string, client client.Client) (messages.DecryptedLoginCipher, error) {
+	resp, err := client.SendToAgent(messages.GetLoginRequest{
 		UUID: uuid,
 	})
 	if err != nil {
-		return ipc.DecryptedLoginCipher{}, err
+		return messages.DecryptedLoginCipher{}, err
 	}
 
 	switch resp.(type) {
-	case ipc.GetLoginResponse:
-		castedResponse := (resp.(ipc.GetLoginResponse))
+	case messages.GetLoginResponse:
+		castedResponse := (resp.(messages.GetLoginResponse))
 		return castedResponse.Result, nil
-	case ipc.ActionResponse:
-		castedResponse := (resp.(ipc.ActionResponse))
-		return ipc.DecryptedLoginCipher{}, errors.New("Error: " + castedResponse.Message)
+	case messages.ActionResponse:
+		castedResponse := (resp.(messages.ActionResponse))
+		return messages.DecryptedLoginCipher{}, errors.New("Error: " + castedResponse.Message)
 	default:
-		return ipc.DecryptedLoginCipher{}, errors.New("Wrong response type")
+		return messages.DecryptedLoginCipher{}, errors.New("Wrong response type")
 	}
 }
 
-func ListLogins(client client.Client) ([]ipc.DecryptedLoginCipher, error) {
-	resp, err := client.SendToAgent(ipc.ListLoginsRequest{})
+func ListLogins(client client.Client) ([]messages.DecryptedLoginCipher, error) {
+	resp, err := client.SendToAgent(messages.ListLoginsRequest{})
 	if err != nil {
-		return []ipc.DecryptedLoginCipher{}, err
+		return []messages.DecryptedLoginCipher{}, err
 	}
 
 	switch resp.(type) {
-	case ipc.GetLoginsResponse:
-		castedResponse := (resp.(ipc.GetLoginsResponse))
+	case messages.GetLoginsResponse:
+		castedResponse := (resp.(messages.GetLoginsResponse))
 		return castedResponse.Result, nil
-	case ipc.ActionResponse:
-		castedResponse := (resp.(ipc.ActionResponse))
-		return []ipc.DecryptedLoginCipher{}, errors.New("Error: " + castedResponse.Message)
+	case messages.ActionResponse:
+		castedResponse := (resp.(messages.ActionResponse))
+		return []messages.DecryptedLoginCipher{}, errors.New("Error: " + castedResponse.Message)
 	default:
-		return []ipc.DecryptedLoginCipher{}, errors.New("Wrong response type")
+		return []messages.DecryptedLoginCipher{}, errors.New("Wrong response type")
 	}
 }
 

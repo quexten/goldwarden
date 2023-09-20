@@ -16,7 +16,7 @@ import (
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/quexten/goldwarden/logging"
 )
 
@@ -28,7 +28,7 @@ const (
 var log = logging.GetLogger("Goldwarden", "Agent")
 
 func writeError(c net.Conn, errMsg error) error {
-	payload := ipc.ActionResponse{
+	payload := messages.ActionResponse{
 		Success: false,
 		Message: errMsg.Error(),
 	}
@@ -53,7 +53,7 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 
 		data := buf[0:nr]
 
-		var msg ipc.IPCMessage
+		var msg messages.IPCMessage
 		err = json.Unmarshal(data, &msg)
 		if err != nil {
 			writeError(c, err)
@@ -74,7 +74,7 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 				continue
 			}
 		} else {
-			payload := ipc.ActionResponse{
+			payload := messages.ActionResponse{
 				Success: false,
 				Message: "Action not found",
 			}

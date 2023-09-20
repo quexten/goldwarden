@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ var runCmd = &cobra.Command{
 
 		env := []string{}
 
-		result, err := commandClient.SendToAgent(ipc.GetCLICredentialsRequest{
+		result, err := commandClient.SendToAgent(messages.GetCLICredentialsRequest{
 			ApplicationName: executable,
 		})
 		if err != nil {
@@ -37,13 +37,13 @@ var runCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.GetCLICredentialsResponse:
-			response := result.(ipc.GetCLICredentialsResponse)
+		case messages.GetCLICredentialsResponse:
+			response := result.(messages.GetCLICredentialsResponse)
 			for key, value := range response.Env {
 				env = append(env, key+"="+value)
 			}
-		case ipc.ActionResponse:
-			println("Error: " + result.(ipc.ActionResponse).Message)
+		case messages.ActionResponse:
+			println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +16,7 @@ var unlockCmd = &cobra.Command{
 	Short: "Unlocks the vault",
 	Long:  `Unlocks the vault. You will be prompted for your pin. The pin is empty by default.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		request := ipc.UnlockVaultRequest{}
+		request := messages.UnlockVaultRequest{}
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
@@ -25,11 +25,11 @@ var unlockCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Unlocked")
 			} else {
-				println("Not unlocked: " + result.(ipc.ActionResponse).Message)
+				println("Not unlocked: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong response type")
@@ -42,7 +42,7 @@ var lockCmd = &cobra.Command{
 	Short: "Locks the vault",
 	Long:  `Locks the vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		request := ipc.LockVaultRequest{}
+		request := messages.LockVaultRequest{}
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
@@ -51,11 +51,11 @@ var lockCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Locked")
 			} else {
-				println("Not locked: " + result.(ipc.ActionResponse).Message)
+				println("Not locked: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong response type")
@@ -68,7 +68,7 @@ var purgeCmd = &cobra.Command{
 	Short: "Wipes the vault",
 	Long:  `Wipes the vault and encryption keys from ram and config. Does not delete any entries on the server side.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		request := ipc.WipeVaultRequest{}
+		request := messages.WipeVaultRequest{}
 
 		result, err := commandClient.SendToAgent(request)
 		if err != nil {
@@ -77,11 +77,11 @@ var purgeCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Purged")
 			} else {
-				println("Not purged: " + result.(ipc.ActionResponse).Message)
+				println("Not purged: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong response type")

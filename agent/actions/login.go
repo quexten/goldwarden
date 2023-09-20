@@ -9,23 +9,23 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	if !cfg.HasPin() && !cfg.ConfigFile.RuntimeConfig.DisablePinRequirement {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "No pin set. Set a pin first!",
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 
 		return
 	}
 
-	req := msg.ParsedPayload().(ipc.DoLoginRequest)
+	req := messages.ParsePayload(msg).(messages.DoLoginRequest)
 
 	ctx := context.Background()
 	var token bitwarden.LoginResponseToken
@@ -38,13 +38,13 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithMasterpassword(ctx, req.Email, cfg, vault)
 	}
 	if err != nil {
-		var payload = ipc.ActionResponse{
+		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not login: %s", err.Error()),
 		}
-		response, err = ipc.IPCMessageFromPayload(payload)
+		response, err = messages.IPCMessageFromPayload(payload)
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return
 	}
@@ -59,13 +59,13 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 
 	profile, err := bitwarden.Sync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), cfg)
 	if err != nil {
-		var payload = ipc.ActionResponse{
+		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not sync vault: %s", err.Error()),
 		}
-		response, err = ipc.IPCMessageFromPayload(payload)
+		response, err = messages.IPCMessageFromPayload(payload)
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return
 	}
@@ -78,13 +78,13 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 
 	err = crypto.InitKeyringFromMasterKey(vault.Keyring, profile.Profile.Key, profile.Profile.PrivateKey, orgKeys, masterKey)
 	if err != nil {
-		var payload = ipc.ActionResponse{
+		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not sync vault: %s", err.Error()),
 		}
-		response, err = ipc.IPCMessageFromPayload(payload)
+		response, err = messages.IPCMessageFromPayload(payload)
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return
 	}
@@ -94,19 +94,19 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 	cfg.SetMasterKey([]byte(masterKey.GetBytes()))
 	protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(vault.Keyring.AccountKey.Bytes())
 	if err != nil {
-		var payload = ipc.ActionResponse{
+		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not sync vault: %s", err.Error()),
 		}
-		response, err = ipc.IPCMessageFromPayload(payload)
+		response, err = messages.IPCMessageFromPayload(payload)
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return
 	}
 	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey, false)
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
@@ -117,5 +117,5 @@ func handleLogin(msg ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, cal
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeDoLoginRequest, ensureIsNotLocked(handleLogin))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.DoLoginRequest{}), ensureIsNotLocked(handleLogin))
 }

@@ -9,35 +9,35 @@ import (
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 var AgentActionsRegistry = newActionsRegistry()
 
-type Action func(ipc.IPCMessage, *config.Config, *vault.Vault, *sockets.CallingContext) (ipc.IPCMessage, error)
+type Action func(messages.IPCMessage, *config.Config, *vault.Vault, *sockets.CallingContext) (messages.IPCMessage, error)
 type ActionsRegistry struct {
-	actions map[ipc.IPCMessageType]Action
+	actions map[messages.IPCMessageType]Action
 }
 
 func newActionsRegistry() *ActionsRegistry {
 	return &ActionsRegistry{
-		actions: make(map[ipc.IPCMessageType]Action),
+		actions: make(map[messages.IPCMessageType]Action),
 	}
 }
 
-func (registry *ActionsRegistry) Register(messageType ipc.IPCMessageType, action Action) {
+func (registry *ActionsRegistry) Register(messageType messages.IPCMessageType, action Action) {
 	registry.actions[messageType] = action
 }
 
-func (registry *ActionsRegistry) Get(messageType ipc.IPCMessageType) (Action, bool) {
+func (registry *ActionsRegistry) Get(messageType messages.IPCMessageType) (Action, bool) {
 	action, ok := registry.actions[messageType]
 	return action, ok
 }
 
 func ensureIsLoggedIn(action Action) Action {
-	return func(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (ipc.IPCMessage, error) {
+	return func(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (messages.IPCMessage, error) {
 		if hash, err := cfg.GetMasterPasswordHash(); err != nil || len(hash) == 0 {
-			return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+			return messages.IPCMessageFromPayload(messages.ActionResponse{
 				Success: false,
 				Message: "Not logged in",
 			})
@@ -68,13 +68,13 @@ func sync(ctx context.Context, vault *vault.Vault, cfg *config.Config) bool {
 }
 
 func ensureIsNotLocked(action Action) Action {
-	return func(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (ipc.IPCMessage, error) {
+	return func(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (messages.IPCMessage, error) {
 		if cfg.IsLocked() {
 			err := cfg.TryUnlock(vault)
 			ctx1 := context.Background()
 			success := sync(ctx1, vault, cfg)
 			if err != nil || !success {
-				return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+				return messages.IPCMessageFromPayload(messages.ActionResponse{
 					Success: false,
 					Message: err.Error(),
 				})
@@ -88,9 +88,9 @@ func ensureIsNotLocked(action Action) Action {
 }
 
 func ensureBiometricsAuthorized(approvalType systemauth.SessionType, action Action) Action {
-	return func(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (ipc.IPCMessage, error) {
+	return func(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (messages.IPCMessage, error) {
 		if permission, err := systemauth.GetPermission(approvalType, *ctx, cfg); err != nil || !permission {
-			return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+			return messages.IPCMessageFromPayload(messages.ActionResponse{
 				Success: false,
 				Message: "Polkit authorization failed required",
 			})

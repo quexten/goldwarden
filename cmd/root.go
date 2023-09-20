@@ -6,7 +6,7 @@ import (
 	"github.com/quexten/goldwarden/agent"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/client"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -46,12 +46,12 @@ func loginIfRequired() error {
 	var err error
 
 	if runtimeConfig.AuthMethod == "password" {
-		_, err = commandClient.SendToAgent(ipc.DoLoginRequest{
+		_, err = commandClient.SendToAgent(messages.DoLoginRequest{
 			Email:    runtimeConfig.User,
 			Password: runtimeConfig.Password,
 		})
 	} else if runtimeConfig.AuthMethod == "passwordless" {
-		_, err = commandClient.SendToAgent(ipc.DoLoginRequest{
+		_, err = commandClient.SendToAgent(messages.DoLoginRequest{
 			Email:        runtimeConfig.User,
 			Passwordless: true,
 		})

@@ -8,36 +8,36 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	req := request.ParsedPayload().(ipc.GetCLICredentialsRequest)
+func handleGetCliCredentials(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	req := messages.ParsePayload(request).(messages.GetCLICredentialsRequest)
 
 	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, req.ApplicationName)); err != nil || !approved {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
 	env, found := vault.GetEnvCredentialForExecutable(req.ApplicationName)
 	if !found {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "no credentials found for " + req.ApplicationName,
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
-	response, err = ipc.IPCMessageFromPayload(ipc.GetCLICredentialsResponse{
+	response, err = messages.IPCMessageFromPayload(messages.GetCLICredentialsResponse{
 		Env: env,
 	})
 
@@ -45,5 +45,5 @@ func handleGetCliCredentials(request ipc.IPCMessage, cfg *config.Config, vault *
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetCLICredentialsRequest, ensureEverything(systemauth.AccessVault, handleGetCliCredentials))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetCLICredentialsRequest{}), ensureEverything(systemauth.AccessVault, handleGetCliCredentials))
 }

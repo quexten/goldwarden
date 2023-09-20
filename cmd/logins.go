@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +28,7 @@ var getLoginCmd = &cobra.Command{
 		username, _ := cmd.Flags().GetString("username")
 		fullOutput, _ := cmd.Flags().GetBool("full")
 
-		resp, err := commandClient.SendToAgent(ipc.GetLoginRequest{
+		resp, err := commandClient.SendToAgent(messages.GetLoginRequest{
 			Name:     name,
 			Username: username,
 			UUID:     uuid,
@@ -39,16 +39,16 @@ var getLoginCmd = &cobra.Command{
 		}
 
 		switch resp.(type) {
-		case ipc.GetLoginResponse:
-			response := resp.(ipc.GetLoginResponse)
+		case messages.GetLoginResponse:
+			response := resp.(messages.GetLoginResponse)
 			if fullOutput {
 				fmt.Println(response.Result)
 			} else {
 				fmt.Println(response.Result.Password)
 			}
 			break
-		case ipc.ActionResponse:
-			println("Error: " + resp.(ipc.ActionResponse).Message)
+		case messages.ActionResponse:
+			println("Error: " + resp.(messages.ActionResponse).Message)
 			return
 		}
 	},

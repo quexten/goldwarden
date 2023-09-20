@@ -4,7 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ var loginCmd = &cobra.Command{
 	Long: `Starts the login process for Bitwarden. 
 	You will be prompted to enter your password, and confirm your second factor if you have one.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		request := ipc.DoLoginRequest{}
+		request := messages.DoLoginRequest{}
 		email, _ := cmd.Flags().GetString("email")
 		if email == "" {
 			println("Error: No email specified")
@@ -32,11 +32,11 @@ var loginCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.ActionResponse:
-			if result.(ipc.ActionResponse).Success {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
 				println("Logged in")
 			} else {
-				println("Login failed: " + result.(ipc.ActionResponse).Message)
+				println("Login failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
 			println("Wrong IPC response type for login")

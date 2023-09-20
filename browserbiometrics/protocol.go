@@ -8,7 +8,7 @@ import (
 
 	"github.com/quexten/goldwarden/browserbiometrics/logging"
 	"github.com/quexten/goldwarden/client"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 func readLoop() {
@@ -99,18 +99,18 @@ func handlePayloadMessage(msg PayloadMessage, appID string) {
 	case "biometricUnlock":
 		logging.Debugf("Biometric unlock requested")
 		// logging.Debugf("Biometrics authorized: %t", isAuthorized)
-		result, err := client.NewUnixSocketClient().SendToAgent(ipc.GetBiometricsKeyRequest{})
+		result, err := client.NewUnixSocketClient().SendToAgent(messages.GetBiometricsKeyRequest{})
 		if err != nil {
 			logging.Errorf("Unable to send message to agent: %s", err.Error())
 			return
 		}
 		switch result.(type) {
-		case ipc.GetBiometricsKeyResponse:
+		case messages.GetBiometricsKeyResponse:
 			if err != nil {
 				logging.Panicf(err.Error())
 			}
 
-			var key = result.(ipc.GetBiometricsKeyResponse).Key
+			var key = result.(messages.GetBiometricsKeyResponse).Key
 			var payloadMsg ReceiveMessage = ReceiveMessage{
 				Command:   "biometricUnlock",
 				Response:  "unlocked",

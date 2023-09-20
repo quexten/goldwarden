@@ -13,14 +13,14 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	req := request.ParsedPayload().(ipc.GetLoginRequest)
+func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	req := messages.ParsePayload(request).(messages.GetLoginRequest)
 	login, err := vault.GetLoginByFilter(req.UUID, req.OrgId, req.Name, req.Username)
 	if err != nil {
-		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "login not found",
 		})
@@ -28,13 +28,13 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 
 	cipherKey, err := login.GetKeyForCipher(*vault.Keyring)
 	if err != nil {
-		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "could not get cipher key",
 		})
 	}
 
-	decryptedLogin := ipc.DecryptedLoginCipher{
+	decryptedLogin := messages.DecryptedLoginCipher{
 		Name: "NO NAME FOUND",
 	}
 	decryptedLogin.UUID = login.ID.String()
@@ -84,36 +84,36 @@ func handleGetLoginCipher(request ipc.IPCMessage, cfg *config.Config, vault *vau
 	}
 
 	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for user %s on entry %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, decryptedLogin.Username, decryptedLogin.Name)); err != nil || !approved {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
-	return ipc.IPCMessageFromPayload(ipc.GetLoginResponse{
+	return messages.IPCMessageFromPayload(messages.GetLoginResponse{
 		Found:  true,
 		Result: decryptedLogin,
 	})
 }
 
-func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying to list credentials (name & username)", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
 	logins := vault.GetLogins()
-	decryptedLoginCiphers := make([]ipc.DecryptedLoginCipher, 0)
+	decryptedLoginCiphers := make([]messages.DecryptedLoginCipher, 0)
 	for _, login := range logins {
 		key, err := login.GetKeyForCipher(*vault.Keyring)
 		if err != nil {
@@ -140,7 +140,7 @@ func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *
 			}
 		}
 
-		decryptedLoginCiphers = append(decryptedLoginCiphers, ipc.DecryptedLoginCipher{
+		decryptedLoginCiphers = append(decryptedLoginCiphers, messages.DecryptedLoginCipher{
 			Name:     string(decryptedName),
 			Username: string(decryptedUsername),
 			UUID:     login.ID.String(),
@@ -150,13 +150,13 @@ func handleListLoginsRequest(request ipc.IPCMessage, cfg *config.Config, vault *
 		debug.FreeOSMemory()
 	}
 
-	return ipc.IPCMessageFromPayload(ipc.GetLoginsResponse{
+	return messages.IPCMessageFromPayload(messages.GetLoginsResponse{
 		Found:  len(decryptedLoginCiphers) > 0,
 		Result: decryptedLoginCiphers,
 	})
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageGetLoginRequest, ensureEverything(systemauth.AccessVault, handleGetLoginCipher))
-	AgentActionsRegistry.Register(ipc.IPCMessageListLoginsRequest, ensureEverything(systemauth.AccessVault, handleListLoginsRequest))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetLoginRequest{}), ensureEverything(systemauth.AccessVault, handleGetLoginCipher))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.ListLoginsRequest{}), ensureEverything(systemauth.AccessVault, handleListLoginsRequest))
 }

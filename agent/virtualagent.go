@@ -14,7 +14,7 @@ import (
 	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 func writeErrorToLog(err error) {
@@ -25,7 +25,7 @@ func serveVirtualAgent(recv chan []byte, send chan []byte, ctx context.Context, 
 	for {
 		data := <-recv
 
-		var msg ipc.IPCMessage
+		var msg messages.IPCMessage
 		err := json.Unmarshal(data, &msg)
 		if err != nil {
 			writeErrorToLog(err)
@@ -55,7 +55,7 @@ func serveVirtualAgent(recv chan []byte, send chan []byte, ctx context.Context, 
 				continue
 			}
 		} else {
-			payload := ipc.ActionResponse{
+			payload := messages.ActionResponse{
 				Success: false,
 				Message: "Action not found",
 			}

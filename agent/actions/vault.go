@@ -11,12 +11,13 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	if !cfg.HasPin() {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "No pin set",
 		})
@@ -28,7 +29,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	}
 
 	if !cfg.IsLocked() {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: true,
 			Message: "Unlocked",
 		})
@@ -41,7 +42,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 
 	err = cfg.TryUnlock(vault)
 	if err != nil {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "wrong pin: " + err.Error(),
 		})
@@ -75,7 +76,7 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 		}
 	}
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
@@ -85,9 +86,9 @@ func handleUnlockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.
 	return
 }
 
-func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleLockVault(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	if !cfg.HasPin() {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "No pin set",
 		})
@@ -99,7 +100,7 @@ func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	}
 
 	if cfg.IsLocked() {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: true,
 			Message: "Locked",
 		})
@@ -114,7 +115,7 @@ func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	vault.Clear()
 	vault.Keyring.Lock()
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
@@ -124,12 +125,12 @@ func handleLockVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	return
 }
 
-func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleWipeVault(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	cfg.Purge()
 	cfg.WriteConfig()
 	vault.Clear()
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
@@ -139,29 +140,29 @@ func handleWipeVault(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 	return
 }
 
-func handleUpdateVaultPin(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handleUpdateVaultPin(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	pin, err := pinentry.GetPassword("Pin Change", "Enter your desired pin")
 	if err != nil {
-		response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: err.Error(),
 		})
 		if err != nil {
-			return ipc.IPCMessage{}, err
+			return messages.IPCMessage{}, err
 		} else {
 			return response, nil
 		}
 	}
 	cfg.UpdatePin(pin, true)
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 
 	return
 }
 
-func handlePinStatus(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response ipc.IPCMessage, err error) {
+func handlePinStatus(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	var pinStatus string
 	if cfg.HasPin() {
 		pinStatus = "enabled"
@@ -169,7 +170,7 @@ func handlePinStatus(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 		pinStatus = "disabled"
 	}
 
-	response, err = ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 		Message: pinStatus,
 	})
@@ -178,9 +179,9 @@ func handlePinStatus(request ipc.IPCMessage, cfg *config.Config, vault *vault.Va
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeUnlockVaultRequest, handleUnlockVault)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeLockVaultRequest, handleLockVault)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeWipeVaultRequest, handleWipeVault)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeUpdateVaultPINRequest, ensureBiometricsAuthorized(systemauth.AccessVault, handleUpdateVaultPin))
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeGetVaultPINStatusRequest, handlePinStatus)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UnlockVaultRequest{}), handleUnlockVault)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.LockVaultRequest{}), handleLockVault)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.WipeVaultRequest{}), handleWipeVault)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UpdateVaultPINRequest{}), ensureBiometricsAuthorized(systemauth.AccessVault, handleUpdateVaultPin))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetVaultPINRequest{}), handlePinStatus)
 }

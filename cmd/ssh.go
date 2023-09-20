@@ -1,13 +1,10 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
 	"fmt"
 
 	"github.com/atotto/clipboard"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +29,7 @@ var sshAddCmd = &cobra.Command{
 		name, _ := cmd.Flags().GetString("name")
 		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
 
-		result, err := commandClient.SendToAgent(ipc.CreateSSHKeyRequest{
+		result, err := commandClient.SendToAgent(messages.CreateSSHKeyRequest{
 			Name: name,
 		})
 		if err != nil {
@@ -41,16 +38,16 @@ var sshAddCmd = &cobra.Command{
 		}
 
 		switch result.(type) {
-		case ipc.CreateSSHKeyResponse:
-			response := result.(ipc.CreateSSHKeyResponse)
+		case messages.CreateSSHKeyResponse:
+			response := result.(messages.CreateSSHKeyResponse)
 			fmt.Println(response.Digest)
 
 			if copyToClipboard {
 				clipboard.WriteAll(string(response.Digest))
 			}
 			break
-		case ipc.ActionResponse:
-			println("Error: " + result.(ipc.ActionResponse).Message)
+		case messages.ActionResponse:
+			println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 	},
@@ -63,21 +60,21 @@ var listSSHCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		loginIfRequired()
 
-		result, err := commandClient.SendToAgent(ipc.GetSSHKeysRequest{})
+		result, err := commandClient.SendToAgent(messages.GetSSHKeysRequest{})
 		if err != nil {
 			handleSendToAgentError(err)
 			return
 		}
 
 		switch result.(type) {
-		case ipc.GetSSHKeysResponse:
-			response := result.(ipc.GetSSHKeysResponse)
+		case messages.GetSSHKeysResponse:
+			response := result.(messages.GetSSHKeysResponse)
 			for _, key := range response.Keys {
 				fmt.Println(key)
 			}
 			break
-		case ipc.ActionResponse:
-			println("Error: " + result.(ipc.ActionResponse).Message)
+		case messages.ActionResponse:
+			println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 	},

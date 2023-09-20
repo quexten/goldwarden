@@ -4,59 +4,59 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/vault"
-	"github.com/quexten/goldwarden/ipc"
+	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func handleSetApiURL(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	apiURL := request.ParsedPayload().(ipc.SetApiURLRequest).Value
+func handleSetApiURL(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	apiURL := messages.ParsePayload(request).(messages.SetApiURLRequest).Value
 	cfg.ConfigFile.ApiUrl = apiURL
 	err = cfg.WriteConfig()
 	if err != nil {
-		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: err.Error(),
 		})
 	}
 
-	return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 }
 
-func handleSetIdentity(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	identity := request.ParsedPayload().(ipc.SetIdentityURLRequest).Value
+func handleSetIdentity(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	identity := messages.ParsePayload(request).(messages.SetIdentityURLRequest).Value
 	cfg.ConfigFile.IdentityUrl = identity
 	err = cfg.WriteConfig()
 	if err != nil {
-		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: err.Error(),
 		})
 	}
 
-	return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 }
 
-func handleSetNotifications(request ipc.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response ipc.IPCMessage, err error) {
-	notifications := request.ParsedPayload().(ipc.SetNotificationsURLRequest).Value
+func handleSetNotifications(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	notifications := messages.ParsePayload(request).(messages.SetNotificationsURLRequest).Value
 	cfg.ConfigFile.NotificationsUrl = notifications
 	err = cfg.WriteConfig()
 	if err != nil {
-		return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: err.Error(),
 		})
 	}
 
-	return ipc.IPCMessageFromPayload(ipc.ActionResponse{
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 }
 
 func init() {
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetIdentityURLRequest, handleSetIdentity)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetAPIUrlRequest, handleSetApiURL)
-	AgentActionsRegistry.Register(ipc.IPCMessageTypeSetNotificationsURLRequest, handleSetNotifications)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetIdentityURLRequest{}), handleSetIdentity)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetApiURLRequest{}), handleSetApiURL)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetNotificationsURLRequest{}), handleSetNotifications)
 }
