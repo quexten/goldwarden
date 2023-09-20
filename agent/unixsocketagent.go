@@ -128,16 +128,25 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		token, err := cfg.GetToken()
 		if err == nil {
 			if token.AccessToken != "" {
-				bitwarden.RefreshToken(ctx, &cfg)
-				userSymmetricKey, err := cfg.GetUserSymmetricKey()
-				if err != nil {
-					fmt.Println(err)
-				}
-				protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				// attempt to sync every minute until successful
+				for {
+					bitwarden.RefreshToken(ctx, &cfg)
+					userSymmetricKey, err := cfg.GetUserSymmetricKey()
+					if err != nil {
+						fmt.Println(err)
+						time.Sleep(60 * time.Second)
+						continue
+					}
+					protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
 
-				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
-				if err != nil {
-					fmt.Println(err)
+					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
+					if err != nil {
+						fmt.Println(err)
+						time.Sleep(60 * time.Second)
+						continue
+					} else {
+						break
+					}
 				}
 			}
 		}
