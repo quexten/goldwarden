@@ -51,10 +51,14 @@ jobs:
 
     - name: Move binaries to directories
       run: |
-        mkdir -p .debpkg/usr/bin &&
+        mkdir -p .debpkg/usr/bin
         mkdir -p .rpmpkg/usr/bin
         cp -p goldwarden_linux_x86_64 .debpkg/usr/bin/goldwarden
         cp -p goldwarden_linux_x86_64 .rpmpkg/usr/bin/goldwarden
+        mkdir -p .debpkg/usr/share/polkit-1/actions/
+        mkdir -p .rpmpkg/usr/share/polkit-1/actions/
+        cp -p resources/com.quexten.goldwarden.policy .debpkg/usr/share/polkit-1/actions/
+        cp -p resources/com.quexten.goldwarden.policy .rpmpkg/usr/share/polkit-1/actions/
 
     - uses: jiro4989/build-deb-action@v3
       with:
