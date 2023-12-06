@@ -172,15 +172,23 @@ And then just run the command as usual:
 restic backup
 ```
 
-### Autofill
+### Autotype based Autofill
 [goldwarden_autofill.webm](https://github.com/quexten/goldwarden/assets/11866552/6ac7cdc2-0cd7-42fd-9fd0-cfff26e2ceee)
 
-The autofill feature is a bit experimental. It autotypes the password via uinput. This needs a keyboardlayout to map the letters to 
+You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
+
+#### XDG-RemoteDesktop-Portal
+
+By default, the remote desktop portal is used. As long as your desktop environment handle this (KDE and Gnome do, wlroots does not yet)
+this enables autotyping without having to modify permissions.
+`goldwarden autofill`
+
+#### (Legacy) Uinput
+If your desktop environment does not implement the remotedesktop portal, your only other option is uinput based autotype. This requires your user
+to have access to the input group to use uinput to autotype. This needs a keyboardlayout to map the letters to 
 keycodes. Currently supported are qwerty and dvorak.
 `goldwarden autofill --layout qwerty`
 `goldwarden autofill --layout dvorak`
-
-You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
 
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
