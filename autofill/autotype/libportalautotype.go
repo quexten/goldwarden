@@ -48,6 +48,7 @@ func TypeString(textToType string, layout string) {
 				state = 2
 			} else if state == 2 {
 				state = 3
+				time.Sleep(200 * time.Millisecond)
 				for _, char := range textToType {
 					if char == '\t' {
 						obj.Call("org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeycode", 0, sessionHandle, map[string]dbus.Variant{}, 15, uint32(1))
@@ -63,9 +64,6 @@ func TypeString(textToType string, layout string) {
 				}
 				bus.Close()
 				return
-			} else {
-				fmt.Println("state", state)
-				fmt.Println("Message:", message)
 			}
 		}
 	}
