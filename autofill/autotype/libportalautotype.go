@@ -68,8 +68,3 @@ func TypeString(textToType string, layout string) {
 		}
 	}
 }
-
-func Paste(layout string) error {
-	fmt.Println("Not implemented")
-	return nil
-}
