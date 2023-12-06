@@ -77,9 +77,7 @@ func Run(layout string, useCopyPaste bool, client client.Client) {
 			clipboard.WriteAll(login.Password)
 			autotype.Paste(layout)
 		} else {
-			autotype.TypeString(string(login.Username), layout)
-			autotype.TypeString("\t", layout)
-			autotype.TypeString(string(login.Password), layout)
+			autotype.TypeString(string(login.Username)+"\t"+string(login.Password), layout)
 		}
 
 		clipboard.WriteAll(login.TwoFactorCode)
