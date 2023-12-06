@@ -49,7 +49,7 @@ func ListLogins(client client.Client) ([]messages.DecryptedLoginCipher, error) {
 	}
 }
 
-func Run(layout string, useCopyPaste bool, client client.Client) {
+func Run(layout string, client client.Client) {
 	logins, err := ListLogins(client)
 	if err != nil {
 		panic(err)
@@ -70,17 +70,7 @@ func Run(layout string, useCopyPaste bool, client client.Client) {
 			panic(err)
 		}
 
-		if useCopyPaste {
-			clipboard.WriteAll(string(login.Username))
-			autotype.Paste(layout)
-			autotype.TypeString("\t", layout)
-			clipboard.WriteAll(login.Password)
-			autotype.Paste(layout)
-		} else {
-			autotype.TypeString(string(login.Username), layout)
-			autotype.TypeString("\t", layout)
-			autotype.TypeString(string(login.Password), layout)
-		}
+		autotype.TypeString(string(login.Username)+"\t"+string(login.Password), layout)
 
 		clipboard.WriteAll(login.TwoFactorCode)
 		c <- true

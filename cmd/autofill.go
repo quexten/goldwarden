@@ -13,8 +13,7 @@ var autofillCmd = &cobra.Command{
 	Long:  `Autofill credentials`,
 	Run: func(cmd *cobra.Command, args []string) {
 		layout := cmd.Flag("layout").Value.String()
-		useCopyPaste, _ := cmd.Flags().GetBool("use-copy-paste")
-		autofill.Run(layout, useCopyPaste, commandClient)
+		autofill.Run(layout, commandClient)
 	},
 }
 
