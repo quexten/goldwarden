@@ -81,9 +81,20 @@ func setupSystemd() {
 	file.Close()
 
 	userDirectory := os.Getenv("HOME")
+	//ensure user systemd dir exists
+	command0 := exec.Command("mkdir", "-p", userDirectory+"/.config/systemd/user/")
+	err = command0.Run()
+	if err != nil {
+		fmt.Println("failed creating systemd user dir")
+		fmt.Println(err.Error())
+		panic(err)
+	}
+
 	command := exec.Command("mv", "/tmp/goldwarden.service", userDirectory+"/.config/systemd/user/goldwarden.service")
 	err = command.Run()
 	if err != nil {
+		fmt.Println("failed moving goldwarden service file to systemd dir")
+		fmt.Println(err.Error())
 		panic(err)
 	}
 
@@ -92,6 +103,7 @@ func setupSystemd() {
 	command2.Stderr = os.Stderr
 	err = command2.Run()
 	if err != nil {
+		fmt.Println("failed enabling systemd service")
 		panic(err)
 	}
 
