@@ -39,6 +39,16 @@ func setupPolkit() {
 		panic(err)
 	}
 
+	command3 := exec.Command("sudo", "chcon", "system_u:object_r:usr_t:s0", "/usr/share/polkit-1/actions/com.quexten.goldwarden.policy")
+	err = command3.Run()
+	if err != nil {
+		fmt.Println("failed setting selinux context")
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("Set selinux context successfully")
+		fmt.Println("Might require a reboot to take effect!")
+	}
+
 	fmt.Println("Polkit setup successfully")
 }
 
