@@ -52,10 +52,10 @@ const (
 )
 
 func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Config) {
+	time.Sleep(5 * time.Second)
 	for {
-		time.Sleep(WEBSOCKET_SLEEP_DURATION_SECONDS * time.Second)
-
 		if cfg.IsLocked() {
+			time.Sleep(5 * time.Second)
 			continue
 		}
 
@@ -65,6 +65,8 @@ func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Con
 				websocketLog.Error("Websocket error %s", err)
 			}
 		}
+
+		time.Sleep(WEBSOCKET_SLEEP_DURATION_SECONDS * time.Second)
 	}
 }
 
