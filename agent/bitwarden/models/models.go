@@ -150,5 +150,5 @@ func (cipher Cipher) GetKeyForCipher(keyring crypto.Keyring) (crypto.SymmetricEn
 	if cipher.OrganizationID != nil {
 		return keyring.GetSymmetricKeyForOrganization(cipher.OrganizationID.String())
 	}
-	return *keyring.AccountKey, nil
+	return keyring.AccountKey, nil
 }

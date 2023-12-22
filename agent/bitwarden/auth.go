@@ -127,7 +127,7 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 	for i := 0; i < 25; i++ {
 		accessCode += string(alphabet[rand.Intn(len(alphabet))])
 	}
-	publicKey, err := crypto.GenerateAsymmetric()
+	publicKey, err := crypto.GenerateAsymmetric(vault.Keyring.IsMemguard)
 	if err != nil {
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}

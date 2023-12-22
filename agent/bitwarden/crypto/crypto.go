@@ -18,24 +18,51 @@ import (
 
 var b64enc = base64.StdEncoding.Strict()
 
-type SymmetricEncryptionKey struct {
+type SymmetricEncryptionKey interface {
+	Bytes() []byte
+	EncryptionKeyBytes() ([]byte, error)
+	MacKeyBytes() ([]byte, error)
+}
+
+type MemorySymmetricEncryptionKey struct {
+	encKey []byte
+	macKey []byte
+}
+
+type MemguardSymmetricEncryptionKey struct {
 	encKey *memguard.Enclave
 	macKey *memguard.Enclave
 }
 
-type AsymmetricEncryptionKey struct {
+type AsymmetricEncryptionKey interface {
+	PublicBytes() []byte
+	PrivateBytes() ([]byte, error)
+}
+
+type MemoryAsymmetricEncryptionKey struct {
+	encKey []byte
+}
+
+type MemguardAsymmetricEncryptionKey struct {
 	encKey *memguard.Enclave
 }
 
-func SymmetricEncryptionKeyFromBytes(key []byte) (SymmetricEncryptionKey, error) {
+func MemguardSymmetricEncryptionKeyFromBytes(key []byte) (MemguardSymmetricEncryptionKey, error) {
 	if len(key) != 64 {
 		memguard.WipeBytes(key)
-		return SymmetricEncryptionKey{}, fmt.Errorf("invalid key length: %d", len(key))
+		return MemguardSymmetricEncryptionKey{}, fmt.Errorf("invalid key length: %d", len(key))
 	}
-	return SymmetricEncryptionKey{memguard.NewEnclave(key[0:32]), memguard.NewEnclave(key[32:64])}, nil
+	return MemguardSymmetricEncryptionKey{memguard.NewEnclave(key[0:32]), memguard.NewEnclave(key[32:64])}, nil
 }
 
-func (key SymmetricEncryptionKey) Bytes() []byte {
+func MemorySymmetricEncryptionKeyFromBytes(key []byte) (MemorySymmetricEncryptionKey, error) {
+	if len(key) != 64 {
+		return MemorySymmetricEncryptionKey{}, fmt.Errorf("invalid key length: %d", len(key))
+	}
+	return MemorySymmetricEncryptionKey{encKey: key[0:32], macKey: key[32:64]}, nil
+}
+
+func (key MemguardSymmetricEncryptionKey) Bytes() []byte {
 	k1, err := key.encKey.Open()
 	if err != nil {
 		panic(err)
@@ -50,12 +77,61 @@ func (key SymmetricEncryptionKey) Bytes() []byte {
 	return keyBytes
 }
 
-func AssymmetricEncryptionKeyFromBytes(key []byte) (AsymmetricEncryptionKey, error) {
-	k := memguard.NewEnclave(key)
-	return AsymmetricEncryptionKey{k}, nil
+func (key MemorySymmetricEncryptionKey) Bytes() []byte {
+	keyBytes := make([]byte, 64)
+	copy(keyBytes[0:32], key.encKey)
+	copy(keyBytes[32:64], key.macKey)
+	return keyBytes
 }
 
-func (key AsymmetricEncryptionKey) PublicBytes() []byte {
+func (key MemorySymmetricEncryptionKey) EncryptionKeyBytes() ([]byte, error) {
+	return key.encKey, nil
+}
+
+func (key MemguardSymmetricEncryptionKey) EncryptionKeyBytes() ([]byte, error) {
+	k, err := key.encKey.Open()
+	if err != nil {
+		return nil, err
+	}
+	keyBytes := make([]byte, 32)
+	copy(keyBytes, k.Bytes())
+	return keyBytes, nil
+}
+
+func (key MemorySymmetricEncryptionKey) MacKeyBytes() ([]byte, error) {
+	return key.macKey, nil
+}
+
+func (key MemguardSymmetricEncryptionKey) MacKeyBytes() ([]byte, error) {
+	k, err := key.macKey.Open()
+	if err != nil {
+		return nil, err
+	}
+	keyBytes := make([]byte, 32)
+	copy(keyBytes, k.Bytes())
+	return keyBytes, nil
+}
+
+func MemoryAssymmetricEncryptionKeyFromBytes(key []byte) (MemoryAsymmetricEncryptionKey, error) {
+	return MemoryAsymmetricEncryptionKey{key}, nil
+}
+
+func MemguardAssymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEncryptionKey, error) {
+	k := memguard.NewEnclave(key)
+	return MemguardAsymmetricEncryptionKey{k}, nil
+}
+
+func (key MemoryAsymmetricEncryptionKey) PublicBytes() []byte {
+	privateKey, err := x509.ParsePKCS8PrivateKey(key.encKey)
+	pub := (privateKey.(*rsa.PrivateKey)).Public()
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
+	if err != nil {
+		panic(err)
+	}
+	return publicKeyBytes
+}
+
+func (key MemguardAsymmetricEncryptionKey) PublicBytes() []byte {
 	buffer, err := key.encKey.Open()
 	if err != nil {
 		panic(err)
@@ -67,6 +143,18 @@ func (key AsymmetricEncryptionKey) PublicBytes() []byte {
 		panic(err)
 	}
 	return publicKeyBytes
+}
+
+func (key MemoryAsymmetricEncryptionKey) PrivateBytes() ([]byte, error) {
+	return key.encKey, nil
+}
+
+func (key MemguardAsymmetricEncryptionKey) PrivateBytes() ([]byte, error) {
+	buffer, err := key.encKey.Open()
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
 }
 
 func isMacValid(message, messageMAC, key []byte) bool {

@@ -5,12 +5,19 @@ import (
 )
 
 type Keyring struct {
-	AccountKey               *SymmetricEncryptionKey
+	AccountKey               SymmetricEncryptionKey
 	AsymmetricEncyryptionKey AsymmetricEncryptionKey
+	IsMemguard               bool
 	OrganizationKeys         map[string]string
 }
 
-func NewKeyring(accountKey *SymmetricEncryptionKey) Keyring {
+func NewMemoryKeyring(accountKey *MemorySymmetricEncryptionKey) Keyring {
+	return Keyring{
+		AccountKey: accountKey,
+	}
+}
+
+func NewMemguardKeyring(accountKey *MemguardSymmetricEncryptionKey) Keyring {
 	return Keyring{
 		AccountKey: accountKey,
 	}
@@ -22,7 +29,7 @@ func (keyring Keyring) IsLocked() bool {
 
 func (keyring *Keyring) Lock() {
 	keyring.AccountKey = nil
-	keyring.AsymmetricEncyryptionKey = AsymmetricEncryptionKey{}
+	keyring.AsymmetricEncyryptionKey = MemoryAsymmetricEncryptionKey{}
 	keyring.OrganizationKeys = nil
 }
 
@@ -30,10 +37,10 @@ func (keyring *Keyring) GetSymmetricKeyForOrganization(uuid string) (SymmetricEn
 	if key, ok := keyring.OrganizationKeys[uuid]; ok {
 		decryptedOrgKey, err := DecryptWithAsymmetric([]byte(key), keyring.AsymmetricEncyryptionKey)
 		if err != nil {
-			return SymmetricEncryptionKey{}, err
+			return MemorySymmetricEncryptionKey{}, err
 		}
 
-		return SymmetricEncryptionKeyFromBytes(decryptedOrgKey)
+		return MemorySymmetricEncryptionKeyFromBytes(decryptedOrgKey)
 	}
-	return SymmetricEncryptionKey{}, errors.New("no key found for organization")
+	return MemorySymmetricEncryptionKey{}, errors.New("no key found for organization")
 }

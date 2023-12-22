@@ -99,8 +99,13 @@ type AgentState struct {
 func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	ctx := context.Background()
 
-	// check if exists
-	keyring := crypto.NewKeyring(nil)
+	var keyring crypto.Keyring
+	if runtimeConfig.UseMemguard {
+		keyring = crypto.NewMemguardKeyring(nil)
+	} else {
+		keyring = crypto.NewMemoryKeyring(nil)
+	}
+
 	var vault = vault.NewVault(&keyring)
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
@@ -137,7 +142,12 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						time.Sleep(60 * time.Second)
 						continue
 					}
-					protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
+					var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+					if vault.Keyring.IsMemguard {
+						protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+					} else {
+						protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+					}
 
 					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 					if err != nil {
@@ -170,7 +180,12 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						if err != nil {
 							fmt.Println(err)
 						}
-						protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
+						var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+						if vault.Keyring.IsMemguard {
+							protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+						} else {
+							protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+						}
 
 						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 						if err != nil {

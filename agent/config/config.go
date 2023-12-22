@@ -43,6 +43,7 @@ type RuntimeConfig struct {
 	User                  string
 	Password              string
 	Pin                   string
+	UseMemguard           bool
 }
 
 type ConfigFile struct {
@@ -419,11 +420,17 @@ func (cfg *Config) TryUnlock(vault *vault.Vault) error {
 	if cfg.IsLoggedIn() {
 		userKey, err := cfg.GetUserSymmetricKey()
 		if err == nil {
-			key, err := crypto.SymmetricEncryptionKeyFromBytes(userKey)
+			var key crypto.SymmetricEncryptionKey
+			var err error
+			if vault.Keyring.IsMemguard {
+				key, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userKey)
+			} else {
+				key, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userKey)
+			}
 			if err != nil {
 				return err
 			}
-			vault.Keyring.AccountKey = &key
+			vault.Keyring.AccountKey = key
 		} else {
 			cfg.Lock()
 			return err

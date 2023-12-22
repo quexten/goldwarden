@@ -64,10 +64,17 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 				if err != nil {
 					fmt.Println(err)
 				}
-				safeUserSymmkey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmkey)
+
+				var safeUserSymmkey crypto.SymmetricEncryptionKey
+				if vault.Keyring.IsMemguard {
+					safeUserSymmkey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmkey)
+				} else {
+					safeUserSymmkey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmkey)
+				}
 				if err != nil {
 					fmt.Println(err)
 				}
+
 				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &safeUserSymmkey, true)
 				if err != nil {
 					fmt.Println(err)

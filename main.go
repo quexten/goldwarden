@@ -38,6 +38,7 @@ func main() {
 		User:                  os.Getenv("GOLDWARDEN_AUTH_USER"),
 		Password:              os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
 		Pin:                   os.Getenv("GOLDWARDEN_PIN"),
+		UseMemguard:           os.Getenv("GOLDWARDEN_NO_MEMGUARD") != "true",
 
 		ConfigDirectory: configPath,
 	}
