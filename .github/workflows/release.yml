@@ -25,11 +25,15 @@ jobs:
   
     - name: Build with All features
       run: go build -o goldwarden_linux_x86_64 -v .
-    - name: Build minimal featureset
+    - name: Build minimal x86_64 featureset
       run: go build -tags nofido2 -tags noautofill -o goldwarden_linux_minimal_x86_64 -v .
+    - name: Build minimal x86 featureset
+      run: GOARCH=386 go build -tags nofido2 -tags noautofill -o goldwarden_linux_x86 -v .
+    - name: Build minimal arm64 featureset
+      run: GOARCH=arm64 go build -tags nofido2 -tags noautofill -o goldwarden_linux_arm64 -v .
     - uses: AButler/upload-release-assets@v2.0
       with:
-        files: './goldwarden_linux_x86_64;./goldwarden_linux_x86_64_minimal'
+        files: './goldwarden_linux_x86_64;./goldwarden_linux_x86_64_minimal;./goldwarden_linux_x86;./goldwarden_linux_arm64'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Validate ArchLinux PKGBUILD
       uses: hapakaien/archlinux-package-action@v2
