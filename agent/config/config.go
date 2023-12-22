@@ -441,7 +441,7 @@ func (cfg *Config) TryUnlock(vault *vault.Vault) error {
 			if err != nil {
 				return err
 			}
-			vault.Keyring.AccountKey = key
+			vault.Keyring.UnlockWithAccountKey(key)
 		} else {
 			cfg.Lock()
 			return err

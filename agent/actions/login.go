@@ -89,14 +89,14 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		return
 	}
 
-	cfg.SetUserSymmetricKey(vault.Keyring.AccountKey.Bytes())
+	cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
 	cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
 	cfg.SetMasterKey([]byte(masterKey.GetBytes()))
 	var protectedUserSymetricKey crypto.SymmetricEncryptionKey
 	if vault.Keyring.IsMemguard {
-		protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.AccountKey.Bytes())
+		protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	} else {
-		protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.AccountKey.Bytes())
+		protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	}
 	if err != nil {
 		var payload = messages.ActionResponse{

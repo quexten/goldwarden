@@ -47,7 +47,7 @@ func InitKeyringFromMasterKey(keyring *Keyring, accountKey EncString, accountPri
 		return err
 	}
 
-	keyring.AccountKey = accountSymmetricKey
+	keyring.UnlockWithAccountKey(accountSymmetricKey)
 
 	pkcs8PrivateKey, err := DecryptWith(accountPrivateKey, accountSymmetricKey)
 	if err != nil {
@@ -64,7 +64,7 @@ func InitKeyringFromMasterKey(keyring *Keyring, accountKey EncString, accountPri
 }
 
 func InitKeyringFromUserSymmetricKey(keyring *Keyring, accountSymmetricKey SymmetricEncryptionKey, accountPrivateKey EncString, orgKeys map[string]string) error {
-	keyring.AccountKey = accountSymmetricKey
+	keyring.UnlockWithAccountKey(accountSymmetricKey)
 	pkcs8PrivateKey, err := DecryptWith(accountPrivateKey, accountSymmetricKey)
 	if err != nil {
 		return err

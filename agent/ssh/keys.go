@@ -30,13 +30,13 @@ func NewSSHKeyCipher(name string, keyring *crypto.Keyring) (models.Cipher, strin
 	privatePEM := pem.EncodeToMemory(&privBlock)
 	publicKey, err := ssh.NewPublicKey(pub)
 
-	encryptedName, _ := crypto.EncryptWith([]byte(name), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedPublicKeyKey, _ := crypto.EncryptWith([]byte("public-key"), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedPublicKeyValue, _ := crypto.EncryptWith([]byte(string(ssh.MarshalAuthorizedKey(publicKey))), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedCustomTypeKey, _ := crypto.EncryptWith([]byte("custom-type"), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedCustomTypeValue, _ := crypto.EncryptWith([]byte("ssh-key"), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedPrivateKeyKey, _ := crypto.EncryptWith([]byte("private-key"), crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
-	encryptedPrivateKeyValue, _ := crypto.EncryptWith(privatePEM, crypto.AesCbc256_HmacSha256_B64, keyring.AccountKey)
+	encryptedName, _ := crypto.EncryptWith([]byte(name), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedPublicKeyKey, _ := crypto.EncryptWith([]byte("public-key"), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedPublicKeyValue, _ := crypto.EncryptWith([]byte(string(ssh.MarshalAuthorizedKey(publicKey))), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedCustomTypeKey, _ := crypto.EncryptWith([]byte("custom-type"), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedCustomTypeValue, _ := crypto.EncryptWith([]byte("ssh-key"), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedPrivateKeyKey, _ := crypto.EncryptWith([]byte("private-key"), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
+	encryptedPrivateKeyValue, _ := crypto.EncryptWith(privatePEM, crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
 
 	cipher := models.Cipher{
 		Type:           models.CipherNote,
