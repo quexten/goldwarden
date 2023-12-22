@@ -3,7 +3,6 @@ package bitwarden
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
@@ -49,7 +48,7 @@ const (
 )
 
 const (
-	WEBSOCKET_SLEEP_DURATION_SECONDS = 5
+	WEBSOCKET_SLEEP_DURATION_SECONDS = 60
 )
 
 func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Config) {
@@ -95,11 +94,14 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	go func() {
 		defer close(done)
 		for {
-			mt, message, err := c.ReadMessage()
-			fmt.Println(mt)
+			_, message, err := c.ReadMessage()
 			if err != nil {
 				websocketLog.Error("Error reading websocket message %s", err)
 				return
+			}
+			if len(message) < 3 {
+				//ignore empty messages
+				continue
 			}
 
 			if messageType, cipherid, success := websocketMessageType(message); success {

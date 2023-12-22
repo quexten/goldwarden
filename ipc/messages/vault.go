@@ -17,6 +17,17 @@ type WipeVaultRequest struct {
 type GetVaultPINRequest struct {
 }
 
+type VaultStatusRequest struct {
+}
+
+type VaultStatusResponse struct {
+	Locked         bool
+	NumberOfLogins int
+	NumberOfNotes  int
+	// todo websocket status
+	// todo last synced
+}
+
 func init() {
 	registerPayloadParser(func(payload []byte) (interface{}, error) {
 		var req LockVaultRequest
@@ -62,4 +73,22 @@ func init() {
 		}
 		return req, nil
 	}, GetVaultPINRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req VaultStatusRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, VaultStatusRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req VaultStatusResponse
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, VaultStatusResponse{})
 }

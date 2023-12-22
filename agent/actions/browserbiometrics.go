@@ -15,28 +15,33 @@ import (
 )
 
 func handleGetBiometricsKey(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	actionsLog.Info("Browser Biometrics: Key requested, verifying biometrics...")
 	if !(systemauth.VerifyPinSession(*ctx) || biometrics.CheckBiometrics(biometrics.BrowserBiometrics)) {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
+		actionsLog.Info("Browser Biometrics: Biometrics not approved %v", err)
 		if err != nil {
 			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
+	actionsLog.Info("Browser Biometrics: Biometrics verified, asking for approval...")
 	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access your vault encryption key for browser biometric unlock.", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
 		})
+		actionsLog.Info("Browser Biometrics: Biometrics not approved %v", err)
 		if err != nil {
 			return messages.IPCMessage{}, err
 		}
 		return response, nil
 	}
 
+	actionsLog.Info("Browser Biometrics: Approved, getting key...")
 	masterKey, err := cfg.GetMasterKey()
 	if err != nil {
 		return messages.IPCMessage{}, err
@@ -45,6 +50,7 @@ func handleGetBiometricsKey(request messages.IPCMessage, cfg *config.Config, vau
 	response, err = messages.IPCMessageFromPayload(messages.GetBiometricsKeyResponse{
 		Key: masterKeyB64,
 	})
+	actionsLog.Info("Browser Biometrics: Sending key...")
 	return response, err
 }
 
