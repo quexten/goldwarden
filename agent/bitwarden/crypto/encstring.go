@@ -123,7 +123,10 @@ func b64encode(src []byte) []byte {
 }
 
 func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
-	encKeyData, err := key.MacKeyBytes()
+	encKeyData, err := key.EncryptionKeyBytes()
+	if err != nil {
+		return nil, err
+	}
 	macKeyData, err := key.MacKeyBytes()
 	if err != nil {
 		return nil, err
