@@ -171,7 +171,11 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					break
 				case LogOut:
 					websocketLog.Info("LogOut received. Wiping vault and exiting...")
-					memguard.SafeExit(0)
+					if vault.Keyring.IsMemguard {
+						memguard.SafeExit(0)
+					} else {
+						os.Exit(0)
+					}
 				case AuthRequest:
 					websocketLog.Info("AuthRequest received" + string(cipherid))
 					authRequest, err := GetAuthRequest(context.WithValue(ctx, AuthToken{}, token.AccessToken), cipherid, cfg)

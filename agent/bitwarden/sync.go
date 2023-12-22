@@ -36,6 +36,9 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 		if allowCache {
 			home, _ := os.UserHomeDir()
 			sync, err = ReadVault(home + path)
+			if err != nil {
+				return err
+			}
 		} else {
 			return err
 		}
@@ -44,7 +47,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 	}
 
 	var orgKeys map[string]string = make(map[string]string)
-	log.Info("Initializing  %d org keys...", len(sync.Profile.Organizations))
+	log.Info("Reading  %d org keys...", len(sync.Profile.Organizations))
 	for _, org := range sync.Profile.Organizations {
 		orgId := org.Id.String()
 		orgKeys[orgId] = org.Key

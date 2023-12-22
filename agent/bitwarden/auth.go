@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/awnumar/memguard"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/twofactor"
 	"github.com/quexten/goldwarden/agent/config"
@@ -81,7 +80,7 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
-	masterKey, err = crypto.DeriveMasterKey(*memguard.NewBufferFromBytes([]byte(strings.Clone(password))), email, crypto.KDFConfig{Type: crypto.KDFType(preLogin.KDF), Iterations: uint32(preLogin.KDFIterations), Memory: uint32(preLogin.KDFMemory), Parallelism: uint32(preLogin.KDFParallelism)})
+	masterKey, err = crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(preLogin.KDF), Iterations: uint32(preLogin.KDFIterations), Memory: uint32(preLogin.KDFMemory), Parallelism: uint32(preLogin.KDFParallelism)})
 	if err != nil {
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}

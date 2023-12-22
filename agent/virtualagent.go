@@ -84,7 +84,7 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 	var vault = vault.NewVault(&keyring)
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
-		var cfg = config.DefaultConfig()
+		var cfg = config.DefaultConfig(runtimeConfig.UseMemguard)
 		cfg.WriteConfig()
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig

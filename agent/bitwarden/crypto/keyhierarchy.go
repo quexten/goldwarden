@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/hkdf"
 )
 
-func InitKeyringFromMasterPassword(keyring *Keyring, accountKey EncString, accountPrivateKey EncString, orgKeys map[string]string, password memguard.LockedBuffer, email string, kdfConfig KDFConfig) error {
+func InitKeyringFromMasterPassword(keyring *Keyring, accountKey EncString, accountPrivateKey EncString, orgKeys map[string]string, password []byte, email string, kdfConfig KDFConfig) error {
 	masterKey, err := DeriveMasterKey(password, email, kdfConfig)
 	if err != nil {
 		return err

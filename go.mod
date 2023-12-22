@@ -7,22 +7,21 @@ require (
 	github.com/LlamaNite/llamalog v0.2.1
 	github.com/amenzhinsky/go-polkit v0.0.0-20210519083301-ee6a51849123
 	github.com/atotto/clipboard v0.1.4
-	github.com/awnumar/memguard v0.22.3
-	github.com/bendahl/uinput v1.6.2
-	github.com/google/uuid v1.3.0
-	github.com/gorilla/websocket v1.5.0
+	github.com/awnumar/memguard v0.22.4
+	github.com/bendahl/uinput v1.7.0
+	github.com/google/uuid v1.5.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/pquerna/otp v1.4.0
-	github.com/shirou/gopsutil/v3 v3.23.6
-	github.com/spf13/cobra v1.7.0
-	github.com/tink-crypto/tink-go/v2 v2.0.0
-	github.com/twpayne/go-pinentry v0.2.0
-	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/crypto v0.13.0
-	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
-	golang.org/x/sys v0.12.0
+	github.com/shirou/gopsutil/v3 v3.23.11
+	github.com/spf13/cobra v1.8.0
+	github.com/tink-crypto/tink-go/v2 v2.1.0
+	github.com/twpayne/go-pinentry v0.3.0
+	github.com/vmihailenco/msgpack/v5 v5.4.1
+	golang.org/x/crypto v0.17.0
+	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
 )
 
 require (
@@ -34,25 +33,26 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/tklauser/go-sysconf v0.3.11 // indirect
-	github.com/tklauser/numcpus v0.6.0 // indirect
+	github.com/tklauser/go-sysconf v0.3.13 // indirect
+	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
-	golang.org/x/exp/shiny v0.0.0-20220827204233-334a2380cb91 // indirect
-	golang.org/x/image v0.5.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/exp/shiny v0.0.0-20231219180239-dc181d75b848 // indirect
+	golang.org/x/image v0.14.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
 
 require (
-	github.com/awnumar/memcall v0.1.2 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
+	github.com/awnumar/memcall v0.2.0 // indirect
+	github.com/godbus/dbus/v5 v5.1.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/keys-pub/go-libfido2 v1.5.3
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rs/zerolog v1.29.1
+	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
 	inet.af/peercred v0.0.0-20210906144145-0893ea02156a
 )

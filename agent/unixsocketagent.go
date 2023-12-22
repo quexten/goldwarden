@@ -110,7 +110,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
 		log.Warn("Could not read config: %s", err.Error())
-		cfg = config.DefaultConfig()
+		cfg = config.DefaultConfig(runtimeConfig.UseMemguard)
 		cfg.ConfigFile.RuntimeConfig = runtimeConfig
 		cfg.WriteConfig()
 	}
