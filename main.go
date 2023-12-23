@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) > 1 && strings.Contains(os.Args[1], "com.8bit.bitwarden.json") {
+	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
 		browserbiometrics.Main()
 		return
 	}
