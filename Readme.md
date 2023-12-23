@@ -24,6 +24,11 @@ On Linux, you need at least a working Polkit installation and a pinentry agent. 
 
 ### Installation
 
+#### Flatpak (WIP)
+There is a flatpak that includes a small UI, autotype functionality and autostarting of the daemon.
+**Not yet on flathub**
+
+#### CLI
 On Arch linux, or other distributions with access to the AUR, simply:
 ```
 yay -S goldwarden
@@ -85,7 +90,7 @@ Run a command with injected environment variables
 goldwarden run -- <command>
 ```
 
-Autofill (Flatpak only?)
+Autofill (Flatpak Only)
 ```
 dbus-send --type=method_call --dest=com.quexten.goldwarden /com/quexten/goldwarden com.quexten.goldwarden.Autofill.autofill
 ```
@@ -176,19 +181,15 @@ restic backup
 [goldwarden_autofill.webm](https://github.com/quexten/goldwarden/assets/11866552/6ac7cdc2-0cd7-42fd-9fd0-cfff26e2ceee)
 
 You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
+```
+dbus-send --type=method_call --dest=com.quexten.goldwarden /com/quexten/goldwarden com.quexten.goldwarden.Autofill.autofill
+```
 
 #### XDG-RemoteDesktop-Portal
 
 By default, the remote desktop portal is used. As long as your desktop environment handle this (KDE and Gnome do, wlroots does not yet)
 this enables autotyping without having to modify permissions.
 `goldwarden autofill`
-
-#### (Legacy) Uinput
-If your desktop environment does not implement the remotedesktop portal, your only other option is uinput based autotype. This requires your user
-to have access to the input group to use uinput to autotype. This needs a keyboardlayout to map the letters to 
-keycodes. Currently supported are qwerty and dvorak.
-`goldwarden autofill --layout qwerty`
-`goldwarden autofill --layout dvorak`
 
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
