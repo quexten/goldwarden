@@ -45,12 +45,12 @@ def login_passwordless(email):
         raise Exception("Failed to initialize repository, err", result.stderr)
     
 def is_pin_enabled():
-    restic_cmd = f"{BINARY_PATH} vault pin"
+    restic_cmd = f"{BINARY_PATH} vault pin status"
     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
     # check if contains enabled
-    return "enabled" in result.stdout
+    return "enabled" in result.stderr
 
 def enable_pin():
     restic_cmd = f"{BINARY_PATH} vault pin set"
@@ -58,6 +58,24 @@ def enable_pin():
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
     
+def unlock():
+    restic_cmd = f"{BINARY_PATH} vault unlock"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Failed to initialize repository, err", result.stderr)
+    
+def lock():
+    restic_cmd = f"{BINARY_PATH} vault lock"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Failed to initialize repository, err", result.stderr)
+    
+def purge():
+    restic_cmd = f"{BINARY_PATH} vault purge"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Failed to initialize repository, err", result.stderr)
+
 def get_vault_status():
     restic_cmd = f"{BINARY_PATH} vault status"
     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)

@@ -137,7 +137,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
 
         self.autofill_row = Adw.ActionRow()
         self.autofill_row.set_title("Autofill Shortcut")
-        self.autofill_row.set_subtitle("Unavailable")
+        self.autofill_row.set_subtitle("Unavailable, please set up a shortcut in your desktop environment (README)")
         self.preferences_group.add(self.autofill_row)
 
         self.status_row = Adw.ActionRow()
@@ -163,6 +163,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.login_button = Gtk.Button()
         self.login_button.set_label("Login")
         self.login_button.connect("clicked", lambda button: show_login())
+        self.login_button.set_sensitive(False)
         self.login_button.set_margin_top(10)
         self.preferences_group.add(self.login_button)
     
@@ -173,18 +174,38 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             set_pin_thread.start()
         self.set_pin_button.connect("clicked", lambda button: set_pin())
         self.set_pin_button.set_margin_top(10)
+        self.set_pin_button.set_sensitive(False)
         self.preferences_group.add(self.set_pin_button)
 
         self.unlock_button = Gtk.Button()
         self.unlock_button.set_label("Unlock")
         self.unlock_button.set_margin_top(10)
+        def unlock_button_clicked():
+            action = goldwarden.unlock if self.unlock_button.get_label() == "Unlock" else goldwarden.lock
+            unlock_thread = Thread(target=action)
+            unlock_thread.start()
+        self.unlock_button.connect("clicked", lambda button: unlock_button_clicked())
+        # set disabled
+        self.unlock_button.set_sensitive(False)
         self.preferences_group.add(self.unlock_button)
+
+        self.logout_button = Gtk.Button()
+        self.logout_button.set_label("Logout")
+        self.logout_button.set_margin_top(10)
+        self.logout_button.connect("clicked", lambda button: goldwarden.purge())
+        self.preferences_group.add(self.logout_button)
         
         def update_labels():
+            pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
-            self.status_row.set_subtitle(str("Unlocked" if status["locked"] == False else "Locked"))
+            locked = status["locked"]
+            self.login_button.set_sensitive(pin_set and not locked)
+            self.set_pin_button.set_sensitive(not pin_set or not locked)
+            self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
             self.login_row.set_subtitle(str(status["loginEntries"]))
             self.notes_row.set_subtitle(str(status["noteEntries"]))
+            self.unlock_button.set_sensitive(True)
+            self.unlock_button.set_label("Unlock" if locked else "Lock")
             GLib.timeout_add(1000, update_labels)
 
         GLib.timeout_add(1000, update_labels)

@@ -1,0 +1,28 @@
+id: com.quexten.Goldwarden
+runtime: org.gnome.Platform
+runtime-version: '45'
+sdk: org.gnome.Sdk
+command: main.py
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --filesystem=home
+modules:
+  - name: goldwarden
+    buildsystem: simple
+    build-options:
+      build-args:
+        - "--share=network"
+    build-commands:
+      - pip3 install --prefix=/app timeago secretstorage pycryptodome chacha20
+      - install -D main.py /app/bin/main.py
+      - install -D com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
+      - install -D goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - cp -R ui/ /app/bin/gui/
+      - cp -R backend/ /app/bin/backend/
+      - cp -R event_monitors/ /app/bin/event_monitors/
+    sources:
+      - type: dir
+        path: ui
