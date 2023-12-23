@@ -1,8 +1,13 @@
 package cmd
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/icza/gox/stringsx"
+	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
@@ -54,6 +59,61 @@ var getLoginCmd = &cobra.Command{
 	},
 }
 
+var listLoginsCmd = &cobra.Command{
+	Use:   "list",
+	Short: "Lists all logins in your vault",
+	Long:  `Lists all logins in your vault.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		loginIfRequired()
+
+		logins, err := ListLogins(commandClient)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		fmt.Println("[")
+		for index, login := range logins {
+			data := map[string]string{
+				"name":     stringsx.Clean(login.Name),
+				"uuid":     stringsx.Clean(login.UUID),
+				"username": stringsx.Clean(login.Username),
+				"password": stringsx.Clean(strings.ReplaceAll(login.Password, "\"", "\\\"")),
+			}
+			jsonString, err := json.Marshal(data)
+			if err != nil {
+				handleSendToAgentError(err)
+				return
+			}
+			fmt.Print(string(jsonString))
+			if index != len(logins)-1 {
+				fmt.Println(",")
+			} else {
+				fmt.Println()
+			}
+		}
+		fmt.Println("]")
+	},
+}
+
+func ListLogins(client client.Client) ([]messages.DecryptedLoginCipher, error) {
+	resp, err := client.SendToAgent(messages.ListLoginsRequest{})
+	if err != nil {
+		return []messages.DecryptedLoginCipher{}, err
+	}
+
+	switch resp.(type) {
+	case messages.GetLoginsResponse:
+		castedResponse := (resp.(messages.GetLoginsResponse))
+		return castedResponse.Result, nil
+	case messages.ActionResponse:
+		castedResponse := (resp.(messages.ActionResponse))
+		return []messages.DecryptedLoginCipher{}, errors.New("Error: " + castedResponse.Message)
+	default:
+		return []messages.DecryptedLoginCipher{}, errors.New("Wrong response type")
+	}
+}
+
 func init() {
 	rootCmd.AddCommand(baseLoginCmd)
 	baseLoginCmd.AddCommand(getLoginCmd)
@@ -61,4 +121,5 @@ func init() {
 	getLoginCmd.PersistentFlags().String("username", "", "")
 	getLoginCmd.PersistentFlags().String("uuid", "", "")
 	getLoginCmd.PersistentFlags().Bool("full", false, "")
+	baseLoginCmd.AddCommand(listLoginsCmd)
 }

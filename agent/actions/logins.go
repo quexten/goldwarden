@@ -101,7 +101,7 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 }
 
 func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
-	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying to list credentials (name & username)", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying access all credentials", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",
@@ -123,6 +123,7 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 
 		var decryptedName []byte = []byte{}
 		var decryptedUsername []byte = []byte{}
+		var decryptedPassword []byte = []byte{}
 
 		if !login.Name.IsNull() {
 			decryptedName, err = crypto.DecryptWith(login.Name, key)
@@ -140,10 +141,19 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 			}
 		}
 
+		if !login.Login.Password.IsNull() {
+			decryptedPassword, err = crypto.DecryptWith(login.Login.Password, key)
+			if err != nil {
+				actionsLog.Warn("Could not decrypt login:" + err.Error())
+				continue
+			}
+		}
+
 		decryptedLoginCiphers = append(decryptedLoginCiphers, messages.DecryptedLoginCipher{
 			Name:     string(decryptedName),
 			Username: string(decryptedUsername),
 			UUID:     login.ID.String(),
+			Password: string(decryptedPassword),
 		})
 
 		// prevent deadlock from enclaves

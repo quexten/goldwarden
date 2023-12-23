@@ -107,9 +107,11 @@ var statusCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.VaultStatusResponse:
 			status := result.(messages.VaultStatusResponse)
-			fmt.Println("Locked: ", status.Locked)
-			fmt.Println("Number of logins: ", status.NumberOfLogins)
-			fmt.Println("Number of notes: ", status.NumberOfNotes)
+			fmt.Println("{")
+			fmt.Println("  \"locked\":", status.Locked, ",")
+			fmt.Println("  \"loginEntries\":", status.NumberOfLogins, ",")
+			fmt.Println("  \"noteEntries\":", status.NumberOfNotes)
+			fmt.Println("}")
 		default:
 			println("Wrong response type")
 		}

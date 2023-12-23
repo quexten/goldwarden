@@ -85,9 +85,9 @@ Run a command with injected environment variables
 goldwarden run -- <command>
 ```
 
-Autofill
+Autofill (Flatpak only?)
 ```
-goldwarden autofill --layout <keyboard-layout>
+dbus-send --type=method_call --dest=com.quexten.goldwarden /com/quexten/goldwarden com.quexten.goldwarden.Autofill.autofill
 ```
 (Create a hotkey for this depending on your desktop environment)
 

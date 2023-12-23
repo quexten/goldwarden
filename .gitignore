@@ -1,2 +1,3 @@
 .vscode
-goldwarden*
+goldwarden
+__pycache__

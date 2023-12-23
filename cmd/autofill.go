@@ -1,24 +1,25 @@
-//go:build !noautofill
+//go:build linux
 
 package cmd
 
 import (
-	"github.com/quexten/goldwarden/autofill"
+	"github.com/quexten/goldwarden/autotype"
 	"github.com/spf13/cobra"
 )
 
 var autofillCmd = &cobra.Command{
-	Use:   "autofill",
-	Short: "Autofill credentials",
-	Long:  `Autofill credentials`,
+	Use:   "autotype",
+	Short: "Autotype credentials",
+	Long:  `Autotype credentials`,
 	Run: func(cmd *cobra.Command, args []string) {
-		layout := cmd.Flag("layout").Value.String()
-		autofill.Run(layout, commandClient)
+		username, _ := cmd.Flags().GetString("username")
+		password, _ := cmd.Flags().GetString("password")
+		autotype.TypeString(username + "\t" + password)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(autofillCmd)
-	autofillCmd.PersistentFlags().String("layout", "qwerty", "")
-	autofillCmd.PersistentFlags().Bool("use-copy-paste", false, "")
+	autofillCmd.PersistentFlags().String("username", "", "")
+	autofillCmd.PersistentFlags().String("password", "", "")
 }
