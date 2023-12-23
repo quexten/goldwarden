@@ -5,6 +5,6 @@ Keywords=backup;recovery;
 Exec=main.py
 Terminal=false
 Type=Application
-Icon=com.quexten.goldwarden.svg
+Icon=com.quexten.Goldwarden.svg
 StartupNotify=true
 Categories=GNOME;GTK;Password Manager;

@@ -1,3 +1,4 @@
 .vscode
 goldwarden
 __pycache__
+.flatpak-builder

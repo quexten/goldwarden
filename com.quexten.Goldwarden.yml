@@ -9,6 +9,8 @@ finish-args:
   - --socket=wayland
   - --socket=fallback-x11
   - --filesystem=home
+  # todo remove this
+  - --socket=session-bus
 modules:
   - name: goldwarden
     buildsystem: simple
@@ -16,13 +18,11 @@ modules:
       build-args:
         - "--share=network"
     build-commands:
-      - pip3 install --prefix=/app timeago secretstorage pycryptodome chacha20
+      - pip3 install --prefix=/app tendo
       - install -D main.py /app/bin/main.py
       - install -D com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
       - install -D goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
-      - cp -R ui/ /app/bin/gui/
-      - cp -R backend/ /app/bin/backend/
-      - cp -R event_monitors/ /app/bin/event_monitors/
+      - cp -R ./ /app/bin/
     sources:
       - type: dir
         path: ui

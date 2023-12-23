@@ -1,5 +1,6 @@
 import subprocess
 import json
+import os
 
 BINARY_PATH = "/home/quexten/go/src/github.com/quexten/goldwarden/goldwarden"
 
@@ -99,7 +100,10 @@ def get_vault_logins():
         return None
     
 def autotype(username, password):
-    restic_cmd = f"{BINARY_PATH} autotype --username {username} --password {password}"
-    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    # environment
+    env = os.environ.copy()
+    env["PASSWORD"] = password
+    restic_cmd = f"{BINARY_PATH} autotype --username {username}"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True, env=env)
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
