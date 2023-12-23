@@ -69,7 +69,7 @@ func CreateAuthResponse(ctx context.Context, authRequest AuthRequestData, keyrin
 	//}
 
 	publicKey, err := base64.StdEncoding.DecodeString(authRequest.PublicKey)
-	requesterKey, err := crypto.AssymmetricEncryptionKeyFromBytes(publicKey)
+	requesterKey, err := crypto.MemoryAssymmetricEncryptionKeyFromBytes(publicKey)
 
 	encryptedUserSymmetricKey, err := crypto.EncryptWithAsymmetric(userSymmetricKey, requesterKey)
 	if err != nil {

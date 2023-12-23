@@ -7,9 +7,11 @@ import (
 
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
-	"github.com/rs/zerolog/log"
+	"github.com/quexten/goldwarden/logging"
 	"golang.org/x/exp/slices"
 )
+
+var vaultLog = logging.GetLogger("Goldwarden", "Vault")
 
 type Vault struct {
 	Keyring        *crypto.Keyring
@@ -94,7 +96,7 @@ func (vault *Vault) isEnv(cipher models.Cipher) (string, bool) {
 
 	key, err := cipher.GetKeyForCipher(*vault.Keyring)
 	if err != nil {
-		log.Warn().Err(err).Msg("Failed to get key for cipher " + cipher.ID.String())
+		vaultLog.Error("Failed to get key for cipher "+cipher.ID.String(), err.Error())
 		return "", false
 	}
 
@@ -132,7 +134,7 @@ func (vault *Vault) isSSHKey(cipher models.Cipher) bool {
 
 	key, err := cipher.GetKeyForCipher(*vault.Keyring)
 	if err != nil {
-		log.Warn().Err(err).Msg("Failed to get key for cipher " + cipher.ID.String())
+		vaultLog.Error("Failed to get key for cipher "+cipher.ID.String(), err.Error())
 		return false
 	}
 
@@ -140,8 +142,12 @@ func (vault *Vault) isSSHKey(cipher models.Cipher) bool {
 		fieldName, err := crypto.DecryptWith(field.Name, key)
 		if err != nil {
 			cipherID := cipher.ID.String()
-			orgID := cipher.OrganizationID.String()
-			log.Warn().Err(err).Msg("Failed to decrypt field name with on cipher " + cipherID + " in organization " + orgID)
+			if cipher.OrganizationID != nil {
+				orgID := cipher.OrganizationID.String()
+				vaultLog.Error("Failed to decrypt field name with on cipher "+cipherID+" in organization "+orgID, err.Error())
+			} else {
+				vaultLog.Error("Failed to decrypt field name with on cipher "+cipherID, err.Error())
+			}
 			continue
 		}
 		fieldValue, err := crypto.DecryptWith(field.Value, key)
@@ -229,7 +235,7 @@ func (vault *Vault) GetEnvCredentialForExecutable(executableName string) (map[st
 	if id, ok := vault.envCredentials[executableName]; ok {
 		key, err := vault.secureNotes[id].GetKeyForCipher(*vault.Keyring)
 		if err != nil {
-			log.Warn().Err(err).Msg("Failed to get key for cipher " + id)
+			vaultLog.Error("Failed to get key for cipher " + id)
 			return make(map[string]string), false
 		}
 
@@ -302,7 +308,7 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 
 		key, err := cipher.GetKeyForCipher(*vault.Keyring)
 		if err != nil {
-			log.Warn().Err(err).Msg("Failed to get key for cipher " + cipher.ID.String())
+			vaultLog.Error("Failed to get key for cipher " + cipher.ID.String())
 			continue
 		}
 		if name != "" {
@@ -312,7 +318,7 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 
 			decryptedName, err := crypto.DecryptWith(cipher.Name, key)
 			if err != nil {
-				log.Warn().Err(err).Msg("Failed to decrypt name for cipher " + cipher.ID.String())
+				vaultLog.Error("Failed to decrypt name for cipher " + cipher.ID.String())
 				continue
 			}
 			if name != "" && string(decryptedName) != name {
@@ -327,7 +333,7 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 
 			decryptedUsername, err := crypto.DecryptWith(cipher.Login.Username, key)
 			if err != nil {
-				log.Warn().Err(err).Msg("Failed to decrypt username for cipher " + cipher.ID.String())
+				vaultLog.Error("Failed to decrypt username for cipher " + cipher.ID.String())
 				continue
 			}
 			if username != "" && string(decryptedUsername) != username {
@@ -338,7 +344,7 @@ func (vault *Vault) GetLoginByFilter(uuid string, orgId string, name string, use
 		return cipher, nil
 	}
 
-	return models.Cipher{}, errors.New("Cipher not found")
+	return models.Cipher{}, errors.New("cipher not found")
 }
 
 func (vault *Vault) GetNoteByFilter(uuid string, orgId string, name string) (models.Cipher, error) {
@@ -355,12 +361,12 @@ func (vault *Vault) GetNoteByFilter(uuid string, orgId string, name string) (mod
 
 		key, err := cipher.GetKeyForCipher(*vault.Keyring)
 		if err != nil {
-			log.Warn().Err(err).Msg("Failed to get key for cipher " + cipher.ID.String())
+			vaultLog.Error("Failed to get key for cipher "+cipher.ID.String(), err.Error())
 			continue
 		}
 		decryptedName, err := crypto.DecryptWith(cipher.Name, key)
 		if err != nil {
-			log.Warn().Err(err).Msg("Failed to decrypt name for cipher " + cipher.ID.String())
+			vaultLog.Error("Failed to decrypt name for cipher "+cipher.ID.String(), err.Error())
 			continue
 		}
 		if name != "" && string(decryptedName) != name {

@@ -1,3 +1,4 @@
 .vscode
-*debug*
-goldwarden*
+goldwarden
+__pycache__
+.flatpak-builder

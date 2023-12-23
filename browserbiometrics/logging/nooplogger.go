@@ -1,4 +1,4 @@
-//go:build !logging
+//go:build nooplogging
 
 package logging
 

@@ -18,11 +18,13 @@ func readLoop() {
 	lengthBytes := make([]byte, 4)
 	lengthNum := int(0)
 
+	logging.Debugf("Sending connected message")
 	send(SendMessage{
 		Command: "connected",
 		AppID:   appID,
 	})
 
+	logging.Debugf("Starting read loop")
 	for b, err := s.Read(lengthBytes); b > 0 && err == nil; b, err = s.Read(lengthBytes) {
 		lengthNum = readMessageLength(lengthBytes)
 

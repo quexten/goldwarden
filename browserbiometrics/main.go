@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/quexten/goldwarden/browserbiometrics/logging"
 )
 
 const appID = "com.quexten.bw-bio-handler"
@@ -25,7 +27,9 @@ func Main() {
 		return
 	}
 
+	logging.Debugf("Starting browserbiometrics")
 	transportKey = generateTransportKey()
+	logging.Debugf("Generated transport key")
 
 	setupCommunication()
 	readLoop()

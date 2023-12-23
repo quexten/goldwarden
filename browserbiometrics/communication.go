@@ -52,7 +52,7 @@ func readMessageLength(msg []byte) int {
 
 func send(msg SendMessage) {
 	byteMsg := dataToBytes(msg)
-	logging.Debugf("Sending message: " + string(byteMsg))
+	logging.Debugf("[SENSITIVE] Sending message: " + string(byteMsg))
 	writeMessageLength(byteMsg)
 
 	var msgBuf bytes.Buffer

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	cryptoSubtle "crypto/subtle"
 	"encoding/base64"
 	"encoding/hex"
@@ -10,7 +11,6 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/awnumar/memguard"
 	"github.com/google/uuid"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
@@ -43,6 +43,7 @@ type RuntimeConfig struct {
 	User                  string
 	Password              string
 	Pin                   string
+	UseMemguard           bool
 }
 
 type ConfigFile struct {
@@ -67,15 +68,18 @@ type LoginToken struct {
 }
 
 type Config struct {
-	key        *memguard.LockedBuffer
-	ConfigFile ConfigFile
-	mu         sync.Mutex
+	useMemguard bool
+	key         *LockedBuffer
+	ConfigFile  ConfigFile
+	mu          sync.Mutex
 }
 
-func DefaultConfig() Config {
+func DefaultConfig(useMemguard bool) Config {
 	deviceUUID, _ := uuid.NewUUID()
+	keyBuffer := NewBuffer(32, useMemguard)
 	return Config{
-		memguard.NewBuffer(32),
+		useMemguard,
+		&keyBuffer,
 		ConfigFile{
 			IdentityUrl:                 "https://vault.bitwarden.com/identity",
 			ApiUrl:                      "https://vault.bitwarden.com/api",
@@ -93,7 +97,8 @@ func DefaultConfig() Config {
 }
 
 func (c *Config) IsLocked() bool {
-	return c.key.EqualTo(make([]byte, 32)) && c.HasPin()
+	key := (*c.key).Bytes()
+	return bytes.Equal(key, make([]byte, 32)) && c.HasPin()
 }
 
 func (c *Config) IsLoggedIn() bool {
@@ -116,7 +121,8 @@ func (c *Config) Unlock(password string) bool {
 		return false
 	}
 
-	c.key = memguard.NewBufferFromBytes(key)
+	keyBuffer := NewBufferFromBytes(key, c.useMemguard)
+	c.key = &keyBuffer
 	return true
 }
 
@@ -139,7 +145,7 @@ func (c *Config) Lock() {
 	if c.IsLocked() {
 		return
 	}
-	c.key.Wipe()
+	(*c.key).Wipe()
 }
 
 func (c *Config) Purge() {
@@ -151,7 +157,8 @@ func (c *Config) Purge() {
 	c.ConfigFile.EncryptedUserSymmetricKey = ""
 	c.ConfigFile.ConfigKeyHash = ""
 	c.ConfigFile.EncryptedMasterKey = ""
-	c.key = memguard.NewBuffer(32)
+	key := NewBuffer(32, c.useMemguard)
+	c.key = &key
 }
 
 func (c *Config) HasPin() bool {
@@ -173,7 +180,8 @@ func (c *Config) UpdatePin(password string, write bool) {
 	plaintextEncryptedMasterPasswordHash, err4 := c.decryptString(c.ConfigFile.EncryptedMasterPasswordHash)
 	plaintextMasterKey, err5 := c.decryptString(c.ConfigFile.EncryptedMasterKey)
 
-	c.key = memguard.NewBufferFromBytes(newKey)
+	key := NewBufferFromBytes(newKey, c.useMemguard)
+	c.key = &key
 
 	if err1 == nil {
 		c.ConfigFile.EncryptedToken, err1 = c.encryptString(plaintextToken)
@@ -314,7 +322,7 @@ func (c *Config) encryptString(data string) (string, error) {
 	if c.IsLocked() {
 		return "", errors.New("config is locked")
 	}
-	ca, err := subtle.NewChaCha20Poly1305(c.key.Bytes())
+	ca, err := subtle.NewChaCha20Poly1305((*c.key).Bytes())
 	if err != nil {
 		return "", err
 	}
@@ -336,7 +344,7 @@ func (c *Config) decryptString(data string) (string, error) {
 		return "", err
 	}
 
-	ca, err := subtle.NewChaCha20Poly1305(c.key.Bytes())
+	ca, err := subtle.NewChaCha20Poly1305((*c.key).Bytes())
 	if err != nil {
 		return "", err
 	}
@@ -378,8 +386,9 @@ func (config *Config) WriteConfig() error {
 func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
 	file, err := os.Open(rtCfg.ConfigDirectory)
 	if err != nil {
+		key := NewBuffer(32, rtCfg.UseMemguard)
 		return Config{
-			key:        memguard.NewBuffer(32),
+			key:        &key,
 			ConfigFile: ConfigFile{},
 		}, err
 	}
@@ -389,19 +398,22 @@ func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
 	config := ConfigFile{}
 	err = decoder.Decode(&config)
 	if err != nil {
+		key := NewBuffer(32, rtCfg.UseMemguard)
 		return Config{
-			key:        memguard.NewBuffer(32),
+			key:        &key,
 			ConfigFile: ConfigFile{},
 		}, err
 	}
 	if config.ConfigKeyHash == "" {
+		key := NewBuffer(32, rtCfg.UseMemguard)
 		return Config{
-			key:        memguard.NewBuffer(32),
+			key:        &key,
 			ConfigFile: config,
 		}, nil
 	}
+	key := NewBuffer(32, rtCfg.UseMemguard)
 	return Config{
-		key:        memguard.NewBuffer(32),
+		key:        &key,
 		ConfigFile: config,
 	}, nil
 }
@@ -419,11 +431,17 @@ func (cfg *Config) TryUnlock(vault *vault.Vault) error {
 	if cfg.IsLoggedIn() {
 		userKey, err := cfg.GetUserSymmetricKey()
 		if err == nil {
-			key, err := crypto.SymmetricEncryptionKeyFromBytes(userKey)
+			var key crypto.SymmetricEncryptionKey
+			var err error
+			if vault.Keyring.IsMemguard {
+				key, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userKey)
+			} else {
+				key, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userKey)
+			}
 			if err != nil {
 				return err
 			}
-			vault.Keyring.AccountKey = &key
+			vault.Keyring.UnlockWithAccountKey(key)
 		} else {
 			cfg.Lock()
 			return err

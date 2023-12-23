@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Goldwarden
+Comment=A Bitwarden compatible desktop password manager
+Keywords=backup;recovery;
+Exec=main.py
+Terminal=false
+Type=Application
+Icon=com.quexten.Goldwarden.svg
+StartupNotify=true
+Categories=GNOME;GTK;Password Manager;

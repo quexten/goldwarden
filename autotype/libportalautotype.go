@@ -1,4 +1,4 @@
-//go:build linux && !uinput
+//go:build linux
 
 package autotype
 
@@ -13,7 +13,7 @@ var globalID = 0
 
 const autoTypeDelay = 1 * time.Millisecond
 
-func TypeString(textToType string, layout string) {
+func TypeString(textToType string) {
 	bus, err := dbus.SessionBus()
 	if err != nil {
 		panic(err)

@@ -30,35 +30,42 @@ func Sync(ctx context.Context, config *config.Config) (models.SyncData, error) {
 
 func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, userSymmetricKey *crypto.SymmetricEncryptionKey, allowCache bool) error {
 	log.Info("Performing full sync...")
-
 	sync, err := Sync(ctx, config)
 	if err != nil {
+		log.Error("Could not sync: %v", err)
 		if allowCache {
 			home, _ := os.UserHomeDir()
 			sync, err = ReadVault(home + path)
+			if err != nil {
+				return err
+			}
 		} else {
 			return err
 		}
+	} else {
+		log.Info("Sync successful, initializing keyring and vault...")
 	}
 
 	var orgKeys map[string]string = make(map[string]string)
+	log.Info("Reading  %d org keys...", len(sync.Profile.Organizations))
 	for _, org := range sync.Profile.Organizations {
 		orgId := org.Id.String()
 		orgKeys[orgId] = org.Key
 	}
 	if userSymmetricKey != nil {
+		log.Info("Initializing keyring from user symmetric key...")
 		crypto.InitKeyringFromUserSymmetricKey(vault.Keyring, *userSymmetricKey, sync.Profile.PrivateKey, orgKeys)
 	}
 
+	log.Info("Clearing vault...")
 	vault.Clear()
+	log.Info("Adding %d ciphers to vault...", len(sync.Ciphers))
 	for _, cipher := range sync.Ciphers {
 		switch cipher.Type {
 		case models.CipherLogin:
 			vault.AddOrUpdateLogin(cipher)
-			break
 		case models.CipherNote:
 			vault.AddOrUpdateSecureNote(cipher)
-			break
 		}
 	}
 

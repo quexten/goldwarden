@@ -15,6 +15,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/awnumar/memguard"
 )
 
 type EncString struct {
@@ -121,16 +123,16 @@ func b64encode(src []byte) []byte {
 }
 
 func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
-	encKeyData, err := key.encKey.Open()
+	encKeyData, err := key.EncryptionKeyBytes()
 	if err != nil {
 		return nil, err
 	}
-	macKeyData, err := key.macKey.Open()
+	macKeyData, err := key.MacKeyBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	block, err := aes.NewCipher(encKeyData.Data())
+	block, err := aes.NewCipher(encKeyData)
 	if err != nil {
 		return nil, err
 	}
@@ -143,13 +145,13 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 	}
 
 	if s.Type == AesCbc256_HmacSha256_B64 {
-		if len(s.MAC) == 0 || len(macKeyData.Data()) == 0 {
+		if len(s.MAC) == 0 || len(macKeyData) == 0 {
 			return nil, fmt.Errorf("decrypt: cipher string type expects a MAC")
 		}
 		var msg []byte
 		msg = append(msg, s.IV...)
 		msg = append(msg, s.CT...)
-		if !isMacValid(msg, s.MAC, macKeyData.Data()) {
+		if !isMacValid(msg, s.MAC, macKeyData) {
 			return nil, fmt.Errorf("decrypt: MAC mismatch")
 		}
 	}
@@ -165,14 +167,8 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 }
 
 func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (EncString, error) {
-	encKeyData, err := key.encKey.Open()
-	if err != nil {
-		return EncString{}, err
-	}
-	macKeyData, err := key.macKey.Open()
-	if err != nil {
-		return EncString{}, err
-	}
+	encKeyData, err := key.EncryptionKeyBytes()
+	macKeyData, err := key.MacKeyBytes()
 
 	s := EncString{}
 	switch typ {
@@ -183,7 +179,7 @@ func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (En
 	s.Type = typ
 	data = padPKCS7(data, aes.BlockSize)
 
-	block, err := aes.NewCipher(encKeyData.Bytes())
+	block, err := aes.NewCipher(encKeyData)
 	if err != nil {
 		return s, err
 	}
@@ -196,13 +192,13 @@ func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (En
 	mode.CryptBlocks(s.CT, data)
 
 	if typ == AesCbc256_HmacSha256_B64 {
-		if len(macKeyData.Bytes()) == 0 {
+		if len(macKeyData) == 0 {
 			return s, fmt.Errorf("encrypt: cipher string type expects a MAC")
 		}
 		var macMessage []byte
 		macMessage = append(macMessage, s.IV...)
 		macMessage = append(macMessage, s.CT...)
-		mac := hmac.New(sha256.New, macKeyData.Bytes())
+		mac := hmac.New(sha256.New, macKeyData)
 		mac.Write(macMessage)
 		s.MAC = mac.Sum(nil)
 	}
@@ -210,27 +206,31 @@ func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (En
 	return s, nil
 }
 
-func GenerateAsymmetric() (AsymmetricEncryptionKey, error) {
+func GenerateAsymmetric(useMemguard bool) (AsymmetricEncryptionKey, error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return AsymmetricEncryptionKey{}, err
+		return MemoryAsymmetricEncryptionKey{}, err
 	}
 
 	encKey, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
-		return AsymmetricEncryptionKey{}, err
+		return MemoryAsymmetricEncryptionKey{}, err
 	}
 
-	return AssymmetricEncryptionKeyFromBytes(encKey)
+	if useMemguard {
+		return MemguardAsymmetricEncryptionKey{memguard.NewEnclave(encKey)}, nil
+	} else {
+		return MemoryAsymmetricEncryptionKey{encKey}, nil
+	}
 }
 
 func DecryptWithAsymmetric(s []byte, asymmetrickey AsymmetricEncryptionKey) ([]byte, error) {
-	key, err := asymmetrickey.encKey.Open()
+	key, err := asymmetrickey.PrivateBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	parsedKey, err := x509.ParsePKCS8PrivateKey(key.Bytes())
+	parsedKey, err := x509.ParsePKCS8PrivateKey(key)
 	if err != nil {
 		return nil, err
 	}
@@ -248,12 +248,12 @@ func DecryptWithAsymmetric(s []byte, asymmetrickey AsymmetricEncryptionKey) ([]b
 }
 
 func EncryptWithAsymmetric(s []byte, asymmbetrickey AsymmetricEncryptionKey) ([]byte, error) {
-	key, err := asymmbetrickey.encKey.Open()
+	key, err := asymmbetrickey.PrivateBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	parsedKey, err := x509.ParsePKIXPublicKey(key.Bytes())
+	parsedKey, err := x509.ParsePKIXPublicKey(key)
 	if err != nil {
 		return nil, err
 	}

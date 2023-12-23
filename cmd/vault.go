@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
@@ -89,9 +91,37 @@ var purgeCmd = &cobra.Command{
 	},
 }
 
+var statusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Shows the vault status",
+	Long:  `Shows the vault status.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		request := messages.VaultStatusRequest{}
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.VaultStatusResponse:
+			status := result.(messages.VaultStatusResponse)
+			fmt.Println("{")
+			fmt.Println("  \"locked\":", status.Locked, ",")
+			fmt.Println("  \"loginEntries\":", status.NumberOfLogins, ",")
+			fmt.Println("  \"noteEntries\":", status.NumberOfNotes)
+			fmt.Println("}")
+		default:
+			println("Wrong response type")
+		}
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(vaultCmd)
 	vaultCmd.AddCommand(unlockCmd)
 	vaultCmd.AddCommand(lockCmd)
 	vaultCmd.AddCommand(purgeCmd)
+	vaultCmd.AddCommand(statusCmd)
 }

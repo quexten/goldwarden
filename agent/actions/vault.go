@@ -64,10 +64,17 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 				if err != nil {
 					fmt.Println(err)
 				}
-				safeUserSymmkey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmkey)
+
+				var safeUserSymmkey crypto.SymmetricEncryptionKey
+				if vault.Keyring.IsMemguard {
+					safeUserSymmkey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmkey)
+				} else {
+					safeUserSymmkey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmkey)
+				}
 				if err != nil {
 					fmt.Println(err)
 				}
+
 				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &safeUserSymmkey, true)
 				if err != nil {
 					fmt.Println(err)
@@ -178,10 +185,20 @@ func handlePinStatus(request messages.IPCMessage, cfg *config.Config, vault *vau
 	return
 }
 
+func handleVaultStatus(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	var vaultStatus messages.VaultStatusResponse = messages.VaultStatusResponse{}
+	vaultStatus.Locked = cfg.IsLocked()
+	vaultStatus.NumberOfLogins = len(vault.GetLogins())
+	vaultStatus.NumberOfNotes = len(vault.GetNotes())
+	response, err = messages.IPCMessageFromPayload(vaultStatus)
+	return
+}
+
 func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UnlockVaultRequest{}), handleUnlockVault)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.LockVaultRequest{}), handleLockVault)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.WipeVaultRequest{}), handleWipeVault)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UpdateVaultPINRequest{}), ensureBiometricsAuthorized(systemauth.AccessVault, handleUpdateVaultPin))
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetVaultPINRequest{}), handlePinStatus)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.VaultStatusRequest{}), handleVaultStatus)
 }

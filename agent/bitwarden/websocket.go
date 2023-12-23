@@ -3,7 +3,6 @@ package bitwarden
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
@@ -49,14 +48,14 @@ const (
 )
 
 const (
-	WEBSOCKET_SLEEP_DURATION_SECONDS = 5
+	WEBSOCKET_SLEEP_DURATION_SECONDS = 60
 )
 
 func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Config) {
+	time.Sleep(5 * time.Second)
 	for {
-		time.Sleep(WEBSOCKET_SLEEP_DURATION_SECONDS * time.Second)
-
 		if cfg.IsLocked() {
+			time.Sleep(5 * time.Second)
 			continue
 		}
 
@@ -66,6 +65,8 @@ func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Con
 				websocketLog.Error("Websocket error %s", err)
 			}
 		}
+
+		time.Sleep(WEBSOCKET_SLEEP_DURATION_SECONDS * time.Second)
 	}
 }
 
@@ -95,11 +96,14 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	go func() {
 		defer close(done)
 		for {
-			mt, message, err := c.ReadMessage()
-			fmt.Println(mt)
+			_, message, err := c.ReadMessage()
 			if err != nil {
 				websocketLog.Error("Error reading websocket message %s", err)
 				return
+			}
+			if len(message) < 3 {
+				//ignore empty messages
+				continue
 			}
 
 			if messageType, cipherid, success := websocketMessageType(message); success {
@@ -169,7 +173,11 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					break
 				case LogOut:
 					websocketLog.Info("LogOut received. Wiping vault and exiting...")
-					memguard.SafeExit(0)
+					if vault.Keyring.IsMemguard {
+						memguard.SafeExit(0)
+					} else {
+						os.Exit(0)
+					}
 				case AuthRequest:
 					websocketLog.Info("AuthRequest received" + string(cipherid))
 					authRequest, err := GetAuthRequest(context.WithValue(ctx, AuthToken{}, token.AccessToken), cipherid, cfg)

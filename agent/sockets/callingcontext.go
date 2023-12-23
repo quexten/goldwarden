@@ -20,11 +20,26 @@ type CallingContext struct {
 
 func GetCallingContext(connection net.Conn) CallingContext {
 	creds, err := peercred.Get(connection)
+	errorContext := CallingContext{
+		UserName:               "unknown",
+		ProcessName:            "unknown",
+		ParentProcessName:      "unknown",
+		GrandParentProcessName: "unknown",
+		ProcessPid:             0,
+		ParentProcessPid:       0,
+		GrandParentProcessPid:  0,
+	}
 	if err != nil {
-		panic(err)
+		return errorContext
 	}
 	pid, _ := creds.PID()
 	process, err := gops.FindProcess(pid)
+	if err != nil {
+		return errorContext
+	}
+	if process == nil {
+		return errorContext
+	}
 
 	// git is epheremal and spawns ssh-keygen and ssh so we need to anchor to git
 	if process.Executable() == "ssh-keygen" || process.Executable() == "ssh" {
@@ -38,22 +53,22 @@ func GetCallingContext(connection net.Conn) CallingContext {
 	uid, _ := creds.UserID()
 	ppid := process.PPid()
 	if err != nil {
-		panic(err)
+		return errorContext
 	}
 
 	parentProcess, err := gops.FindProcess(ppid)
 	if err != nil {
-		panic(err)
+		return errorContext
 	}
 
 	parentParentProcess, err := gops.FindProcess(parentProcess.PPid())
 	if err != nil {
-		panic(err)
+		return errorContext
 	}
 
 	username, err := user.LookupId(uid)
 	if err != nil {
-		panic(err)
+		return errorContext
 	}
 
 	return CallingContext{

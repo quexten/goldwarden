@@ -74,12 +74,17 @@ func serveVirtualAgent(recv chan []byte, send chan []byte, ctx context.Context, 
 func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []byte) {
 	ctx := context.Background()
 
-	// check if exists
-	keyring := crypto.NewKeyring(nil)
+	var keyring crypto.Keyring
+	if runtimeConfig.UseMemguard {
+		keyring = crypto.NewMemguardKeyring(nil)
+	} else {
+		keyring = crypto.NewMemoryKeyring(nil)
+	}
+
 	var vault = vault.NewVault(&keyring)
 	cfg, err := config.ReadConfig(runtimeConfig)
 	if err != nil {
-		var cfg = config.DefaultConfig()
+		var cfg = config.DefaultConfig(runtimeConfig.UseMemguard)
 		cfg.WriteConfig()
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig
@@ -106,7 +111,12 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 				if err != nil {
 					fmt.Println(err)
 				}
-				protectedUserSymetricKey, err := crypto.SymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+				if keyring.IsMemguard {
+					protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				} else {
+					protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				}
 
 				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 				if err != nil {

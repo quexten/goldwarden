@@ -87,6 +87,7 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 				return false, nil
 			}
 		} else {
+			log.Warn("Biometrics is not available, asking for pin")
 			pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
 			if err != nil {
 				return false, err
@@ -96,10 +97,10 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 			}
 		}
 
-		approval, err := pinentry.GetApproval("Goldwarden authorization", message)
-		if err != nil || !approval {
-			return false, err
-		}
+		// approval, err := pinentry.GetApproval("Goldwarden authorization", message)
+		// if err != nil || !approval {
+		// 	return false, err
+		// }
 
 		log.Info("Permission granted, creating session")
 		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType)
