@@ -12,7 +12,9 @@ try:
 except:
     pass
 
-if "--hidden" not in sys.argv:
+is_hidden = "--hidden" in sys.argv
+
+if not is_hidden:
     try:
         subprocess.Popen(["python3", "/app/bin/settings.py"], start_new_session=True)
     except:
@@ -25,7 +27,8 @@ except:
 
 def run_daemon():
     # todo: do a proper check
-    time.sleep(20)
+    if is_hidden:
+        time.sleep(20)
     if not goldwarden.is_daemon_running():
         goldwarden.run_daemon()
 
