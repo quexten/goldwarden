@@ -5,11 +5,13 @@ import gc
 from gi.repository import Gtk, Adw, GLib, Gio
 from random import randint
 import time
-
+import os
+from threading import Timer
 
 def receive_autostart(self, *args):
     print("autostart enabled..!?")
     print(args)
+    os._exit(0)
 
 def request_autostart():
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
@@ -53,6 +55,9 @@ def request_autostart():
         print(e)
 
 request_autostart()
+
+thread = Timer(10, os._exit, [0])
+thread.start()
 
 loop = GLib.MainLoop()
 loop.run()
