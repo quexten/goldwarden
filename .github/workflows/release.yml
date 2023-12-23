@@ -7,7 +7,7 @@ permissions:
     packages: write
 
 jobs:
-  build_linux_x86_64:
+  build_linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -19,21 +19,15 @@ jobs:
 
     - name: Install libfido2-dev
       run: sudo apt-get install -y libfido2-dev
-
-    - name: Install gio dependencies
-      run: sudo apt-get install -y gcc pkg-config libwayland-dev libx11-dev libx11-xcb-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev
-  
     - name: Build with All features
       run: go build -o goldwarden_linux_x86_64 -v .
-    - name: Build minimal x86_64 featureset
-      run: go build -tags nofido2 -tags noautofill -o goldwarden_linux_minimal_x86_64 -v .
     - name: Build minimal x86 featureset
-      run: GOARCH=386 go build -tags nofido2 -tags noautofill -o goldwarden_linux_x86 -v .
+      run: GOARCH=386 go build -tags nofido2 -o goldwarden_linux_x86 -v .
     - name: Build minimal arm64 featureset
-      run: GOARCH=arm64 go build -tags nofido2 -tags noautofill -o goldwarden_linux_arm64 -v .
+      run: GOARCH=arm64 go build -tags nofido2 -o goldwarden_linux_arm64 -v .
     - uses: AButler/upload-release-assets@v2.0
       with:
-        files: './goldwarden_linux_x86_64;./goldwarden_linux_x86_64_minimal;./goldwarden_linux_x86;./goldwarden_linux_arm64'
+        files: './goldwarden_linux_x86_64;./goldwarden_linux_x86;./goldwarden_linux_arm64'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Validate ArchLinux PKGBUILD
       uses: hapakaien/archlinux-package-action@v2
@@ -104,7 +98,7 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build 
-        run: go build -tags "nofido2 noautofill" -o "goldwarden_macos_x86_64" -v .
+        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: './goldwarden_macos_x86_64'
@@ -120,7 +114,7 @@ jobs:
         with:
           go-version: '1.20'
       - name: Build 
-        run: go build -tags "nofido2 noautofill" -o "goldwarden_windows_x86_64.exe" -v .
+        run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: './goldwarden_windows_x86_64.exe'
