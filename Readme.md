@@ -1,10 +1,11 @@
 ## Goldwarden
 
-Goldwarden is a Bitwarden compatible CLI tool written in Go. It focuses on features for Desktop integration, and enhanced security measures that other tools do not provide, such as:
+Goldwarden is a Bitwarden compatible desktop integration written in Go. It focuses on providing useful desktop features that the official tools 
+do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
 - Support for injecting environment variables into the environment of a cli command
-- System wide autofill
+- System wide autotype
 - Biometric authentication (via Polkit) for each credential access
 - Vault content is held encrypted in memory and only briefly decrypted when needed
 - Kernel level memory protection for keys (via the memguard library)
@@ -177,19 +178,17 @@ And then just run the command as usual:
 restic backup
 ```
 
-### Autotype based Autofill
+### Autotype based Autofill (Flatpak Only)
 [goldwarden_autofill.webm](https://github.com/quexten/goldwarden/assets/11866552/6ac7cdc2-0cd7-42fd-9fd0-cfff26e2ceee)
 
 You can bind this to a hotkey in your desktop environment (i.e i3/sway config file, Gnome custom shortcuts, etc).
 ```
 dbus-send --type=method_call --dest=com.quexten.goldwarden /com/quexten/goldwarden com.quexten.goldwarden.Autofill.autofill
 ```
-
 #### XDG-RemoteDesktop-Portal
 
 By default, the remote desktop portal is used. As long as your desktop environment handle this (KDE and Gnome do, wlroots does not yet)
 this enables autotyping without having to modify permissions.
-`goldwarden autofill`
 
 ### Login with device
 Approving other devices works out of the box and is enabled by default. If the agent is unlocked, you will be prompted
@@ -216,8 +215,6 @@ GOLDWARDEN_SYSTEM_AUTH_DISABLED=true # disable system auth (biometrics / approva
 
 To build, you will need libfido2-dev. And a go toolchain. 
 
-Additionally, if you want the autofill feature you will need some dependencies. Everything from https://gioui.org/doc/install linux and wl-clipboard (or xclipboard) should be installed.
-
 Run:
 ```
 go install github.com/quexten/goldwarden@latest
@@ -227,7 +224,6 @@ go install -tags autofill github.com/quexten/goldwarden@latest
 or:
 ```
 go build
-go build -tags autofill
 ```
 
 ### Design
@@ -246,7 +242,7 @@ By default, credential entry is cached for 10 minutes. During this time, a paren
 ### Future Plans
 Some things that I consider adding (depending on time and personal need):
 - Regular cli managment (add, delete, update, of logins / secure notes)
-- Insatllers
+- Installers
 - (MacOS & Windows support tracked in https://github.com/quexten/goldwarden/issues/4)
 
 If you have other interesting ideas, feel free to open an issue. I can't
