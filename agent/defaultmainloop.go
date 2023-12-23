@@ -1,5 +1,3 @@
-//go:build (!windows && !darwin && !linux) || noautofill
-
 package agent
 
 import (
