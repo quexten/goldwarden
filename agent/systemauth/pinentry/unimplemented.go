@@ -1,4 +1,4 @@
-//go:build !linux && !freebsd && !darwin && !windows
+//go:build !linux
 
 package pinentry
 
