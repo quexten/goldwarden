@@ -4,6 +4,8 @@ import subprocess
 from tendo import singleton
 import monitors.dbus_autofill_monitor
 import sys
+import goldwarden
+from threading import Thread
 
 try:
     subprocess.Popen(["python3", "/app/bin/background.py"], start_new_session=True)
@@ -20,6 +22,19 @@ try:
     me = singleton.SingleInstance()
 except:
     exit()
+
+def run_daemon():
+    # todo: do a proper check
+    time.sleep(20)
+    if not goldwarden.is_daemon_running():
+        goldwarden.run_daemon()
+
+if not goldwarden.is_daemon_running():
+    print("daemon not running.. autostarting")
+    daemonThread = Thread(target=run_daemon)
+    daemonThread.start()
+
+print("starting autofill monitor")
 
 def on_autofill():
     subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True)

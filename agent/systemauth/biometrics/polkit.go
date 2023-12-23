@@ -78,15 +78,18 @@ func BiometricsWorking() bool {
 
 	authority, err := polkit.NewAuthority()
 	if err != nil {
+		log.Warn("Failed to create polkit authority: %s", err.Error())
 		return false
 	}
 
 	result, err := authority.EnumerateActions("en")
 	if err != nil {
+		log.Warn("Failed to enumerate polkit actions: %s", err.Error())
 		return false
 	}
 
 	if len(result) == 0 {
+		log.Warn("No polkit actions found")
 		return false
 	}
 

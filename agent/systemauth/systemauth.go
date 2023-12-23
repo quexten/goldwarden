@@ -87,6 +87,7 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 				return false, nil
 			}
 		} else {
+			log.Warn("Biometrics is not available, asking for pin")
 			pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
 			if err != nil {
 				return false, err

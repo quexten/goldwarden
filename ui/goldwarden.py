@@ -107,3 +107,23 @@ def autotype(username, password):
     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True, env=env)
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
+
+def is_daemon_running():
+    restic_cmd = f"{BINARY_PATH} vault status"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        return False
+    daemon_not_running = ("daemon running?" in result.stderr or "daemon running" in result.stderr)
+    return not daemon_not_running
+
+def run_daemon():
+    restic_cmd = f"{BINARY_PATH} daemonize"
+    # print while running
+    result = subprocess.Popen(restic_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode != 0:
+        print("Failed err", result.stderr)
+    for line in result.stdout:
+        print(line.decode("utf-8"))
+    result.wait()
+    print("quitting goldwarden daemon")
+    return result.returncode

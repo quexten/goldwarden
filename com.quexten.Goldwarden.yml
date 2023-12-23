@@ -8,9 +8,12 @@ finish-args:
   - --share=network
   - --socket=wayland
   - --socket=fallback-x11
-  - --filesystem=home
-  # todo remove this
+  - --device=dri
+  # - --filesystem=home
+  - --filesystem=host
+  # polkit & locking.. should filter this later on
   - --socket=session-bus
+  - --socket=system-bus
 modules:
   - name: goldwarden
     buildsystem: simple

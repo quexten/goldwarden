@@ -123,14 +123,19 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         def update_labels():
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
-            locked = status["locked"]
-            self.login_button.set_sensitive(pin_set and not locked)
-            self.set_pin_button.set_sensitive(not pin_set or not locked)
-            self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
-            self.login_row.set_subtitle(str(status["loginEntries"]))
-            self.notes_row.set_subtitle(str(status["noteEntries"]))
-            self.unlock_button.set_sensitive(True)
-            self.unlock_button.set_label("Unlock" if locked else "Lock")
+            if status != None:
+                locked = status["locked"]
+                self.login_button.set_sensitive(pin_set and not locked)
+                self.set_pin_button.set_sensitive(not pin_set or not locked)
+                self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
+                self.login_row.set_subtitle(str(status["loginEntries"]))
+                self.notes_row.set_subtitle(str(status["noteEntries"]))
+                self.unlock_button.set_sensitive(True)
+                self.unlock_button.set_label("Unlock" if locked else "Lock")
+            else:
+                is_daemon_running = goldwarden.is_daemon_running()
+                if not is_daemon_running:
+                    self.status_row.set_subtitle("Daemon not running")
             GLib.timeout_add(1000, update_labels)
 
         GLib.timeout_add(1000, update_labels)
