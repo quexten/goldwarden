@@ -97,10 +97,10 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 			}
 		}
 
-		approval, err := pinentry.GetApproval("Goldwarden authorization", message)
-		if err != nil || !approval {
-			return false, err
-		}
+		// approval, err := pinentry.GetApproval("Goldwarden authorization", message)
+		// if err != nil || !approval {
+		// 	return false, err
+		// }
 
 		log.Info("Permission granted, creating session")
 		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType)

@@ -3,7 +3,6 @@ package sockets
 import (
 	"net"
 	"os/user"
-	"time"
 
 	gops "github.com/mitchellh/go-ps"
 	"inet.af/peercred"
@@ -22,13 +21,13 @@ type CallingContext struct {
 func GetCallingContext(connection net.Conn) CallingContext {
 	creds, err := peercred.Get(connection)
 	errorContext := CallingContext{
-		UserName:               "unknown user",
-		ProcessName:            "unknown process",
-		ParentProcessName:      "unknown parent",
-		GrandParentProcessName: "unknown grandparent",
-		ProcessPid:             time.Now().UTC().Nanosecond(),
-		ParentProcessPid:       time.Now().UTC().Nanosecond(),
-		GrandParentProcessPid:  time.Now().UTC().Nanosecond(),
+		UserName:               "unknown",
+		ProcessName:            "unknown",
+		ParentProcessName:      "unknown",
+		GrandParentProcessName: "unknown",
+		ProcessPid:             0,
+		ParentProcessPid:       0,
+		GrandParentProcessPid:  0,
 	}
 	if err != nil {
 		return errorContext
