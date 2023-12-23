@@ -163,6 +163,15 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}
 
 	processsecurity.DisableDumpable()
+	err = processsecurity.MonitorLocks(func() {
+		cfg.Lock()
+		vault.Clear()
+		vault.Keyring.Lock()
+	})
+	if err != nil {
+		log.Warn("Could not monitor screensaver: %s", err.Error())
+	}
+
 	if !runtimeConfig.WebsocketDisabled {
 		go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
 	}

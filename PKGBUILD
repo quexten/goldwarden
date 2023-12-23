@@ -1,6 +1,6 @@
 pkgname=goldwarden
-pkgver=0.1.9
-pkgrel=2
+pkgver=0.1.10
+pkgrel=1
 pkgdesc='A feature-packed Bitwarden compatible desktop integration'
 arch=('x86_64')
 url="https://github.com/quexten/$pkgname"

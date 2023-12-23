@@ -126,6 +126,15 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 		}
 	}
 	processsecurity.DisableDumpable()
+	err = processsecurity.MonitorLocks(func() {
+		cfg.Lock()
+		vault.Clear()
+		vault.Keyring.Lock()
+	})
+	if err != nil {
+		log.Warn("Could not monitor screensaver: %s", err.Error())
+	}
+
 	go func() {
 		for {
 			time.Sleep(TokenRefreshInterval)
