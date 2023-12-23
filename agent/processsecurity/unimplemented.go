@@ -7,6 +7,6 @@ func DisableDumpable() error {
 	return nil
 }
 
-func MonitorLocks(onlock func) error {
+func MonitorLocks(onlock func()) error {
 	return nil
 }
