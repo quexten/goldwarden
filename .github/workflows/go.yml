@@ -13,70 +13,70 @@ env:
   GO_VERSION: '1.20'
     
 jobs:
-  build_linux_x86_64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-    - name: Install libfido2-dev
-      run: sudo apt-get install -y libfido2-dev
-    - name: Build
-      run: go build -o goldwarden_linux_x86_64 -v .
-    - uses: actions/upload-artifact@v3
-      with:
-        name: goldwarden_linux_x86_64
-        path: ./goldwarden_linux_x86_64
+  # build_linux_x86_64:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
+  #     with:
+  #       go-version: ${{ env.GO_VERSION }}
+  #   - name: Install libfido2-dev
+  #     run: sudo apt-get install -y libfido2-dev
+  #   - name: Build
+  #     run: go build -o goldwarden_linux_x86_64 -v .
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: goldwarden_linux_x86_64
+  #       path: ./goldwarden_linux_x86_64
 
-  build_linux_arm64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-    - name: Install libfido2-dev
-      run: sudo apt-get install -y libfido2-dev
-    - name: Build minimal arm64 featureset
-      run: GOARCH=arm64 go build -tags nofido2 -o goldwarden_linux_arm64 -v .
-    - uses: actions/upload-artifact@v3
-      with:
-        name: goldwarden_linux_arm64
-        path: ./goldwarden_linux_arm64
+  # build_linux_arm64:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
+  #     with:
+  #       go-version: ${{ env.GO_VERSION }}
+  #   - name: Install libfido2-dev
+  #     run: sudo apt-get install -y libfido2-dev
+  #   - name: Build minimal arm64 featureset
+  #     run: GOARCH=arm64 go build -tags nofido2 -o goldwarden_linux_arm64 -v .
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: goldwarden_linux_arm64
+  #       path: ./goldwarden_linux_arm64
 
-  build_linux_x86:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GO_VERSION }}
-    - name: Build minimal x86 featureset
-      run: GOARCH=386 go build -tags nofido2 -o goldwarden_linux_x86 -v .
-    - uses: actions/upload-artifact@v3
-      with:
-        name: goldwarden_linux_x86
-        path: ./goldwarden_linux_x86
+  # build_linux_x86:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Go
+  #     uses: actions/setup-go@v4
+  #     with:
+  #       go-version: ${{ env.GO_VERSION }}
+  #   - name: Build minimal x86 featureset
+  #     run: GOARCH=386 go build -tags nofido2 -o goldwarden_linux_x86 -v .
+  #   - uses: actions/upload-artifact@v3
+  #     with:
+  #       name: goldwarden_linux_x86
+  #       path: ./goldwarden_linux_x86
 
-  build_macos_x86_64:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
-      - uses: actions/upload-artifact@v3
-        with:
-          name: goldwarden-macos_x86_64
-          path: ./goldwarden_macos_x86_64
+  # build_macos_x86_64:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+  #     - name: Build 
+  #       run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: goldwarden-macos_x86_64
+  #         path: ./goldwarden_macos_x86_64
     
   build_macos_arm64:
     runs-on: macos-latest
@@ -87,26 +87,27 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Install zig
+        run: brew install zig
       - name: Build 
-        run: GOARCH=arm64 go build -tags "nofido2" -o "goldwarden_macos_arm64" -v .
+        run: GOARCH=arm64 go build CC="zcc" CXX="zxx"-tags "nofido2" -o "goldwarden_macos_arm64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_arm64
           path: ./goldwarden_macos_arm64
 
-  build_windows_x86_64:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
-      - uses: actions/upload-artifact@v3
-        with:
-          name: goldwarden-windows_x86_64.exe
-          path: ./goldwarden_windows_x86_64.exe
-  
+  # build_windows_x86_64:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v4
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
+  #     - name: Build 
+  #       run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: goldwarden-windows_x86_64.exe
+  #         path: ./goldwarden_windows_x86_64.exe
