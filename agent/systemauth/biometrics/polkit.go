@@ -63,7 +63,19 @@ func CheckBiometrics(approvalType Approval) bool {
 
 	if err != nil {
 		log.Error("Failed to create polkit authority: %s", err.Error())
-		return false
+		log.Info("Falling back to pkexec permissions")
+		result, err = authority.CheckAuthorization(
+			"org.freedesktop.policykit.exec",
+			nil,
+			uint32(polkit.AuthenticationRequiredRetained), "",
+		)
+		if err != nil {
+			log.Error("Failed to create polkit authority: %s", err.Error())
+			return false
+		}
+
+		log.Info("Biometrics result: %t", result.IsAuthorized)
+		return result.IsAuthorized
 	}
 
 	log.Info("Biometrics result: %t", result.IsAuthorized)
@@ -96,6 +108,14 @@ func BiometricsWorking() bool {
 	testFor := AccessVault
 	for _, action := range result {
 		if Approval(action.ActionID) == testFor {
+			return true
+		}
+	}
+
+	testFor = "org.freedesktop.policykit.exec"
+	for _, action := range result {
+		if Approval(action.ActionID) == testFor {
+			log.Warn("Only pkexec permissions found, consider installing polkit policies")
 			return true
 		}
 	}

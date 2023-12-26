@@ -4,16 +4,25 @@ runtime-version: '45'
 sdk: org.gnome.Sdk
 command: main.py
 finish-args:
-  - --share=ipc
+  # Allow network access for sync
   - --share=network
+
+  # GUI
+  - --share=ipc
   - --socket=wayland
   - --socket=fallback-x11
   - --device=dri
-  # - --filesystem=home
-  - --filesystem=host
-  # polkit & locking.. should filter this later on
-  - --socket=session-bus
-  - --socket=system-bus
+
+  # Lock on screensave
+  - --talk-name=org.gnome.ScreenSaver
+  - --talk-name=org.freedesktop.ScreenSaver
+
+  # Home directory access to setup browser ipc
+  - --filesystem=home
+  # pinentry & approval
+  - --talk-name=org.gnome.keyring.SystemPrompter
+  # biometric / user password auth
+  - --system-talk-name=org.freedesktop.PolicyKit1
 modules:
   - name: goldwarden
     buildsystem: simple

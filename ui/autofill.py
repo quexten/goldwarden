@@ -104,5 +104,5 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_default_size(700, 700)
         self.set_title("Goldwarden")
 
-app = MyApp(application_id="com.quexten.Goldwarden.autofill")
+app = MyApp(application_id="com.quexten.Goldwarden.autofill-menu")
 app.run(sys.argv)

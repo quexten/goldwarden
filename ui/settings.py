@@ -9,10 +9,13 @@ from gi.repository import Gtk, Adw, GLib
 import goldwarden
 from threading import Thread
 
+hidden = False
+
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        print("init settings window")
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.set_child(self.stack)
@@ -156,7 +159,6 @@ class MyApp(Adw.Application):
         self.settings_win = SettingsWinvdow(application=app)
         self.settings_win.present()
 
-app = MyApp(application_id="com.quexten.Goldwarden")
 
 def show_login():
     dialog = Gtk.Dialog(title="Goldwarden")
@@ -218,4 +220,5 @@ def show_login():
     dialog.set_modal(True)
     dialog.present()
 
+app = MyApp(application_id="com.quexten.Goldwarden.settings")
 app.run(sys.argv)
