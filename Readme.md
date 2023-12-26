@@ -28,6 +28,8 @@ On Linux, you need at least a working Polkit installation and a pinentry agent. 
 #### Flatpak (WIP)
 There is a flatpak that includes a small UI, autotype functionality and autostarting of the daemon.
 **Not yet on flathub**
+![image](https://github.com/quexten/goldwarden/assets/11866552/7a0bbd62-89ad-4762-8e0b-85bf69cdc864)
+
 
 #### CLI
 On Arch linux, or other distributions with access to the AUR, simply:
