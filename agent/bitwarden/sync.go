@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
@@ -43,6 +44,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 			return err
 		}
 	} else {
+		vault.SetLastSynced(time.Now().Unix())
 		log.Info("Sync successful, initializing keyring and vault...")
 	}
 

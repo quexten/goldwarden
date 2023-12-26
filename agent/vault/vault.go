@@ -14,21 +14,25 @@ import (
 var vaultLog = logging.GetLogger("Goldwarden", "Vault")
 
 type Vault struct {
-	Keyring        *crypto.Keyring
-	logins         map[string]models.Cipher
-	secureNotes    map[string]models.Cipher
-	sshKeyNoteIDs  []string
-	envCredentials map[string]string
-	mu             sync.Mutex
+	Keyring            *crypto.Keyring
+	logins             map[string]models.Cipher
+	secureNotes        map[string]models.Cipher
+	sshKeyNoteIDs      []string
+	envCredentials     map[string]string
+	lastSynced         int64
+	websockedConnected bool
+	mu                 sync.Mutex
 }
 
 func NewVault(keyring *crypto.Keyring) *Vault {
 	return &Vault{
-		Keyring:        keyring,
-		logins:         make(map[string]models.Cipher),
-		secureNotes:    make(map[string]models.Cipher),
-		sshKeyNoteIDs:  make([]string, 0),
-		envCredentials: make(map[string]string),
+		Keyring:            keyring,
+		logins:             make(map[string]models.Cipher),
+		secureNotes:        make(map[string]models.Cipher),
+		sshKeyNoteIDs:      make([]string, 0),
+		envCredentials:     make(map[string]string),
+		lastSynced:         0,
+		websockedConnected: false,
 	}
 }
 
@@ -402,4 +406,30 @@ func (vault *Vault) GetSecureNote(uuid string) (models.Cipher, error) {
 	}
 
 	return models.Cipher{}, errors.New("cipher not found")
+}
+
+func (vault *Vault) SetLastSynced(lastSynced int64) {
+	vault.lockMutex()
+	vault.lastSynced = lastSynced
+	vault.unlockMutex()
+}
+
+func (vault *Vault) GetLastSynced() int64 {
+	vault.lockMutex()
+	defer vault.unlockMutex()
+
+	return vault.lastSynced
+}
+
+func (vault *Vault) SetWebsocketConnected(connected bool) {
+	vault.lockMutex()
+	vault.websockedConnected = connected
+	vault.unlockMutex()
+}
+
+func (vault *Vault) IsWebsocketConnected() bool {
+	vault.lockMutex()
+	defer vault.unlockMutex()
+
+	return vault.websockedConnected
 }

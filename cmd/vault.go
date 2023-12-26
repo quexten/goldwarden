@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
@@ -110,7 +111,9 @@ var statusCmd = &cobra.Command{
 			fmt.Println("{")
 			fmt.Println("  \"locked\":", status.Locked, ",")
 			fmt.Println("  \"loginEntries\":", status.NumberOfLogins, ",")
-			fmt.Println("  \"noteEntries\":", status.NumberOfNotes)
+			fmt.Println("  \"noteEntries\":", status.NumberOfNotes, ",")
+			fmt.Println("  \"lastSynced\":	\"" + time.Unix(status.LastSynced, 0).String() + "\",")
+			fmt.Println("  \"websocketConnected\":", status.WebsockedConnected)
 			fmt.Println("}")
 		default:
 			println("Wrong response type")
