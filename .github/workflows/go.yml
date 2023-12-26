@@ -90,7 +90,7 @@ jobs:
       - name: Install zig
         run: brew install zig
       - name: Build 
-        run: GOARCH=arm64 go build CC="zcc" CXX="zxx"-tags "nofido2" -o "goldwarden_macos_arm64" -v .
+        run: CC="zcc" CXX="zxx" GOARCH=arm64 go build -tags "nofido2" -o "goldwarden_macos_arm64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_arm64
