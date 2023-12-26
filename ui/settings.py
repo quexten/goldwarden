@@ -69,6 +69,16 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.status_row.set_subtitle("Locked")
         self.vault_status_preferences_group.add(self.status_row)
 
+        self.last_sync_row = Adw.ActionRow()
+        self.last_sync_row.set_title("Last Sync")
+        self.last_sync_row.set_subtitle("Never")
+        self.vault_status_preferences_group.add(self.last_sync_row)
+
+        self.websocket_connected_row = Adw.ActionRow()
+        self.websocket_connected_row.set_title("Websocket Connected")
+        self.websocket_connected_row.set_subtitle("False")
+        self.vault_status_preferences_group.add(self.websocket_connected_row)
+
         self.login_row = Adw.ActionRow()
         self.login_row.set_title("Vault Login Entries")
         self.login_row.set_subtitle("0")
@@ -139,6 +149,8 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
                 self.login_row.set_subtitle(str(status["loginEntries"]))
                 self.notes_row.set_subtitle(str(status["noteEntries"]))
+                self.websocket_connected_row.set_subtitle("Connected" if status["websocketConnected"] else "Disconnected")
+                self.last_sync_row.set_subtitle(str(status["lastSynced"]))
                 self.unlock_button.set_sensitive(True)
                 self.unlock_button.set_label("Unlock" if locked else "Lock")
             else:
