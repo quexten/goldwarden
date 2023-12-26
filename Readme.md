@@ -91,11 +91,21 @@ Run a command with injected environment variables
 goldwarden run -- <command>
 ```
 
-Autofill (Flatpak Only)
+#### Autofill (Flatpak Only)
+
+To set up a shortcut (CTRL+u) on Gnome:
 ```
-dbus-send --type=method_call --dest=com.quexten.goldwarden /com/quexten/goldwarden com.quexten.goldwarden.Autofill.autofill
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gwautofill/']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gwautofill/ name 'Goldwarden Autofill'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gwautofill/ command 'dbus-send --type=method_call --dest=com.quexten.Goldwarden.autofill /com/quexten/Goldwarden com.quexten.Goldwarden.Autofill.autofill'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/gwautofill/ binding '<Ctrl>u'
 ```
-(Create a hotkey for this depending on your desktop environment)
+
+On other Desktop environments this will work differently, just makes sure that:
+`dbus-send --type=method_call --dest=com.quexten.Goldwarden.autofill /com/quexten/Goldwarden com.quexten.Goldwarden.Autofill.autofill`
+gets called.
+
+This will be changed once desktop environments implement the global hotkey portal.
 
 #### SSH Agent
 [goldwarden_ssh.webm](https://github.com/quexten/goldwarden/assets/11866552/9058f734-60e0-4dd3-b9f8-1d77f7cf4c65)

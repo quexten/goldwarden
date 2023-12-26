@@ -8,14 +8,12 @@ import gc
 from gi.repository import Gtk, Adw, GLib
 import goldwarden
 from threading import Thread
-
-hidden = False
+import subprocess
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        print("init settings window")
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
         self.set_child(self.stack)
@@ -85,6 +83,13 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.action_preferences_group.set_title("Actions")
         self.preferences_page.add(self.action_preferences_group)
         
+        self.autotype_button = Gtk.Button()
+        self.autotype_button.set_label("Autotype")
+        self.autotype_button.set_margin_top(10)
+        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+        self.autotype_button.get_style_context().add_class("suggested-action")
+        self.action_preferences_group.add(self.autotype_button)
+
         self.login_button = Gtk.Button()
         self.login_button.set_label("Login")
         self.login_button.connect("clicked", lambda button: show_login())
@@ -130,6 +135,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 locked = status["locked"]
                 self.login_button.set_sensitive(pin_set and not locked)
                 self.set_pin_button.set_sensitive(not pin_set or not locked)
+                self.autotype_button.set_sensitive(not locked)
                 self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
                 self.login_row.set_subtitle(str(status["loginEntries"]))
                 self.notes_row.set_subtitle(str(status["noteEntries"]))
@@ -159,6 +165,7 @@ class MyApp(Adw.Application):
         self.settings_win = SettingsWinvdow(application=app)
         self.settings_win.present()
 
+app = MyApp(application_id="com.quexten.Goldwarden")
 
 def show_login():
     dialog = Gtk.Dialog(title="Goldwarden")
