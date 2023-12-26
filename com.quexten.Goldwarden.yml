@@ -24,20 +24,29 @@ finish-args:
   # biometric / user password auth
   - --system-talk-name=org.freedesktop.PolicyKit1
 modules:
-  - name: goldwarden
+  - ./ui/python3-requirements.json
+  - name: wl-clipboard
     buildsystem: simple
-    build-options:
-      build-args:
-        - "--share=network"
     build-commands:
-      - pip3 install --prefix=/app tendo
-      - git clone https://github.com/bugaevc/wl-clipboard.git
-      - cd wl-clipboard && meson setup build && cd build && ninja
-      - install -D wl-clipboard/build/src/wl-copy /app/bin/wl-copy
+      - meson setup build && cd build && ninja
+      - install -D build/src/wl-copy /app/bin/wl-copy
+    sources:
+      - type: git
+        url: https://github.com/bugaevc/wl-clipboard.git
+  - name: goldwarden-ui
+    buildsystem: simple
+    build-commands:
       - install -D main.py /app/bin/main.py
+      - cp -R ./ /app/bin
       - install -D com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
       - install -D goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
-      - cp -R ./ /app/bin/
     sources:
       - type: dir
         path: ui
+  - name: goldwarden
+    buildsystem: simple
+    build-commands:
+      - install -D goldwarden /app/bin/goldwarden
+    sources:
+      - type: file
+        path: goldwarden

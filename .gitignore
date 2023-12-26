@@ -2,3 +2,5 @@
 goldwarden
 __pycache__
 .flatpak-builder
+flatpak-pip-generator
+repo

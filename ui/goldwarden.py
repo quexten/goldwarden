@@ -2,7 +2,12 @@ import subprocess
 import json
 import os
 
-BINARY_PATH = "/home/quexten/go/src/github.com/quexten/goldwarden/goldwarden"
+# if flatpak
+if os.path.exists("/app/bin/goldwarden"):
+    BINARY_PATH = "/app/bin/goldwarden"
+else:
+    res = subprocess.run(["which", "goldwarden"])
+    BINARY_PATH = res.stdout.decode("utf-8").strip()
 
 def set_api_url(url):
     restic_cmd = f"{BINARY_PATH} config set-api-url {url}"
