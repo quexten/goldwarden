@@ -6,6 +6,7 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 from threading import Thread
+import gi.repository.GLib
 
 on_autofill = lambda: None
 
@@ -19,5 +20,8 @@ class GoldwardenDBUSService(dbus.service.Object):
         on_autofill()
         return ""
 
-DBusGMainLoop(set_as_default=True)
-service = GoldwardenDBUSService()
+def run_daemon():
+    mainloop = DBusGMainLoop(set_as_default=True)
+    service = GoldwardenDBUSService()
+    mloop = gi.repository.GLib.MainLoop()
+    mloop.run()

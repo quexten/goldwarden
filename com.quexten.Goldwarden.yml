@@ -22,6 +22,9 @@ modules:
         - "--share=network"
     build-commands:
       - pip3 install --prefix=/app tendo
+      - git clone https://github.com/bugaevc/wl-clipboard.git
+      - cd wl-clipboard && meson setup build && cd build && ninja
+      - install -D wl-clipboard/build/src/wl-copy /app/bin/wl-copy
       - install -D main.py /app/bin/main.py
       - install -D com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
       - install -D goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
