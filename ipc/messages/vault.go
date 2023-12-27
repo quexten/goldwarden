@@ -21,11 +21,11 @@ type VaultStatusRequest struct {
 }
 
 type VaultStatusResponse struct {
-	Locked         bool
-	NumberOfLogins int
-	NumberOfNotes  int
-	// todo websocket status
-	// todo last synced
+	Locked             bool
+	NumberOfLogins     int
+	NumberOfNotes      int
+	LastSynced         int64
+	WebsockedConnected bool
 }
 
 func init() {

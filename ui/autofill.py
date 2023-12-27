@@ -85,7 +85,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 def do_autotype(username, password):
                     time.sleep(0.5)
                     goldwarden.autotype(username, password)
-                    GLib.idle_add(lambda: self.show())
+                    os._exit(0)
                 autotypeThread = Thread(target=do_autotype, args=(self.history_list.get_selected_row().username, self.history_list.get_selected_row().password,))
                 autotypeThread.start()
                 print(self.history_list.get_selected_row().get_title())
@@ -104,5 +104,5 @@ class MainWindow(Gtk.ApplicationWindow):
         self.set_default_size(700, 700)
         self.set_title("Goldwarden")
 
-app = MyApp(application_id="com.quexten.Goldwarden.autofill")
+app = MyApp(application_id="com.quexten.Goldwarden.autofill-menu")
 app.run(sys.argv)

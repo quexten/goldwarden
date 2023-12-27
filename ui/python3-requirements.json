@@ -1,0 +1,49 @@
+{
+    "name": "python3-requirements",
+    "buildsystem": "simple",
+    "build-commands": [],
+    "modules": [
+        {
+            "name": "python3-ChaCha20",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"ChaCha20==1.1.1\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/7d/93/2c5c7203bcb1ece177a49d14b32f0e0511f7d4eaf8446c15f7d64af082ad/ChaCha20-1.1.1.tar.gz",
+                    "sha256": "6d6b1ef373058540369c14d2369ab14ee4ffaeae4dc53d8a18b5b617bd06c6bb"
+                }
+            ]
+        },
+        {
+            "name": "python3-chacha20poly1305",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"chacha20poly1305==0.0.3\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/38/2c/5b4eb73c5cb30ded3082af025e76f529764971c57c02b101e842ff998f63/chacha20poly1305-0.0.3.tar.gz",
+                    "sha256": "f2f005c7cf4638ffa4ff06c02c78748068b642916795c6d16c7cc5e355e70edf"
+                }
+            ]
+        },
+        {
+            "name": "python3-tendo",
+            "buildsystem": "simple",
+            "build-commands": [
+                "pip3 install --verbose --exists-action=i --no-index --find-links=\"file://${PWD}\" --prefix=${FLATPAK_DEST} \"tendo==0.3.0\" --no-build-isolation"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "url": "https://files.pythonhosted.org/packages/ce/3f/761077d55732b0b1a673b15d4fdaa947a7c1eb5c9a23b7142df557019823/tendo-0.3.0-py3-none-any.whl",
+                    "sha256": "026b70b355ea4c9da7c2123fa2d5c280c8983c1b34e329ff49260e2e78b93be7"
+                }
+            ]
+        }
+    ]
+}

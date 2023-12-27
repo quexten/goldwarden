@@ -11,13 +11,16 @@ on_autofill = lambda: None
 
 class GoldwardenDBUSService(dbus.service.Object):
     def __init__(self):
-        bus_name = dbus.service.BusName('com.quexten.goldwarden', bus=dbus.SessionBus())
-        dbus.service.Object.__init__(self, bus_name, '/com/quexten/goldwarden')
+        bus_name = dbus.service.BusName('com.quexten.Goldwarden.autofill', bus=dbus.SessionBus())
+        dbus.service.Object.__init__(self, bus_name, '/com/quexten/Goldwarden')
 
-    @dbus.service.method('com.quexten.goldwarden.Autofill')
+    @dbus.service.method('com.quexten.Goldwarden.Autofill')
     def autofill(self):
         on_autofill()
         return ""
 
-DBusGMainLoop(set_as_default=True)
-service = GoldwardenDBUSService()
+def run_daemon():
+    DBusGMainLoop(set_as_default=True)
+    service = GoldwardenDBUSService()
+    from gi.repository import GLib, GObject as gobject
+    gobject.MainLoop().run()

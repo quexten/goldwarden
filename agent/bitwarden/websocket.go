@@ -88,6 +88,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	defer c.Close()
 
 	websocketLog.Info("Connected to websocket server...")
+	vault.SetWebsocketConnected(true)
 
 	done := make(chan struct{})
 	//handshake required for official bitwarden implementation
@@ -101,7 +102,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 				websocketLog.Error("Error reading websocket message %s", err)
 				return
 			}
-			if len(message) < 3 {
+			if len(message) < 5 {
 				//ignore empty messages
 				continue
 			}
@@ -146,6 +147,8 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					} else {
 						vault.AddOrUpdateLogin(cipher)
 					}
+					vault.SetLastSynced(time.Now().Unix())
+
 					break
 				case SyncCipherCreate:
 					websocketLog.Warn("Create requested for cipher " + cipherid)
@@ -166,6 +169,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					} else {
 						vault.AddOrUpdateLogin(cipher)
 					}
+					vault.SetLastSynced(time.Now().Unix())
 
 					break
 				case SyncSendCreate, SyncSendUpdate, SyncSendDelete:
@@ -219,6 +223,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	}()
 
 	<-done
+	vault.SetWebsocketConnected(false)
 	return nil
 }
 

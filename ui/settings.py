@@ -8,6 +8,7 @@ import gc
 from gi.repository import Gtk, Adw, GLib
 import goldwarden
 from threading import Thread
+import subprocess
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -68,6 +69,16 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.status_row.set_subtitle("Locked")
         self.vault_status_preferences_group.add(self.status_row)
 
+        self.last_sync_row = Adw.ActionRow()
+        self.last_sync_row.set_title("Last Sync")
+        self.last_sync_row.set_subtitle("Never")
+        self.vault_status_preferences_group.add(self.last_sync_row)
+
+        self.websocket_connected_row = Adw.ActionRow()
+        self.websocket_connected_row.set_title("Websocket Connected")
+        self.websocket_connected_row.set_subtitle("False")
+        self.vault_status_preferences_group.add(self.websocket_connected_row)
+
         self.login_row = Adw.ActionRow()
         self.login_row.set_title("Vault Login Entries")
         self.login_row.set_subtitle("0")
@@ -82,6 +93,13 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.action_preferences_group.set_title("Actions")
         self.preferences_page.add(self.action_preferences_group)
         
+        self.autotype_button = Gtk.Button()
+        self.autotype_button.set_label("Autotype")
+        self.autotype_button.set_margin_top(10)
+        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+        self.autotype_button.get_style_context().add_class("suggested-action")
+        self.action_preferences_group.add(self.autotype_button)
+
         self.login_button = Gtk.Button()
         self.login_button.set_label("Login")
         self.login_button.connect("clicked", lambda button: show_login())
@@ -127,9 +145,12 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 locked = status["locked"]
                 self.login_button.set_sensitive(pin_set and not locked)
                 self.set_pin_button.set_sensitive(not pin_set or not locked)
+                self.autotype_button.set_sensitive(not locked)
                 self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
                 self.login_row.set_subtitle(str(status["loginEntries"]))
                 self.notes_row.set_subtitle(str(status["noteEntries"]))
+                self.websocket_connected_row.set_subtitle("Connected" if status["websocketConnected"] else "Disconnected")
+                self.last_sync_row.set_subtitle(str(status["lastSynced"]))
                 self.unlock_button.set_sensitive(True)
                 self.unlock_button.set_label("Unlock" if locked else "Lock")
             else:
@@ -218,4 +239,5 @@ def show_login():
     dialog.set_modal(True)
     dialog.present()
 
+app = MyApp(application_id="com.quexten.Goldwarden.settings")
 app.run(sys.argv)

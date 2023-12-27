@@ -18,6 +18,7 @@ if not is_hidden:
     try:
         subprocess.Popen(["python3", "/app/bin/settings.py"], start_new_session=True)
     except:
+        subprocess.Popen(["python3", "./settings.py"], start_new_session=True)
         pass
 
 try:
@@ -29,19 +30,20 @@ def run_daemon():
     # todo: do a proper check
     if is_hidden:
         time.sleep(20)
+    print("IS daemon running", goldwarden.is_daemon_running())
     if not goldwarden.is_daemon_running():
+        print("running daemon")
         goldwarden.run_daemon()
+        print("daemon running")
 
-if not goldwarden.is_daemon_running():
-    print("daemon not running.. autostarting")
-    daemonThread = Thread(target=run_daemon)
-    daemonThread.start()
-
-print("starting autofill monitor")
+thread = Thread(target=run_daemon)
+thread.start()
 
 def on_autofill():
     subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True)
-monitors.dbus_autofill_monitor.on_autofill = on_autofill
+
+monitors.dbus_autofill_monitor.on_autofill = lambda: on_autofill()
+monitors.dbus_autofill_monitor.run_daemon()
 
 while True:
     time.sleep(60)
