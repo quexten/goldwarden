@@ -14,11 +14,6 @@ do not (yet) have or are not willing to add, and enhanced security measures that
 - Fido2 (Webauthn) support
 - more to come...?
 
-The current goal is not to provide a full featured Bitwarden CLI, but to provide specific features that are not available in other tools.
-If you want an officially supported way to manage your Bitwarden vault, you should use the Bitwarden CLI (or a regular client).
-If you are looking to manage secrets for machine to machine communication, you should use bitwarden secret manager or something like 
-hashicorp vault.
-
 ### Requirements
 Right now, Goldwarden is only tested on Linux. Somewhat feature-stripped builds for Mac and Windows are available too, but untested.
 Autotype is currently implemented via the remotedesktop portal. This is supported on KDE and Gnome, but not yet on wl-root based environments.
