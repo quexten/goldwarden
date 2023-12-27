@@ -27,24 +27,37 @@ There is a flatpak that includes a small UI, autotype functionality and autostar
 <img src='https://github.com/quexten/goldwarden/assets/11866552/7a0bbd62-89ad-4762-8e0b-85bf69cdc864' width='400'>
 
 #### CLI
+##### Arch (AUR)
 On Arch linux, or other distributions with access to the AUR, simply:
 ```
 yay -S goldwarden
 ```
 should be enough to install goldwarden on your system.
 
+##### Deb / RPM
 For deb/rpm, download the deb/rpm from the latest release on GitHub and install it using your package manager.
 
+##### Github Binary Releases
 On other distributions, Mac and Windows, you can download it from the latest release on GitHub and put it into a location you want to have it in, f.e `/usr/bin`.
-Then run `goldwarden setup polkit`.
-Optionally run: `goldwarden setup systemd` and `goldwarden setup browserbiometrics`.
 
+##### Compiling
 Alternatively, you can build it yourself.
 ```
 go install github.com/quexten/goldwarden@latest
 ```
-### Usage
 
+### Setup
+For the CLI run:
+`goldwarden setup polkit`.
+
+To automatically start the daemonon boot:
+`goldwarden setup systemd`
+
+To set up browser biometrics integration:
+`goldwarden setup browserbiometrics`.
+
+
+### Usage
 Start the daemon (this is done by systemd automatically, when set up with `goldwarden setup systemd`):
 ```
 goldwarden daemon
@@ -224,13 +237,12 @@ To build, you will need libfido2-dev. And a go toolchain.
 
 Run:
 ```
-go install github.com/quexten/goldwarden@latest
-go install -tags autofill github.com/quexten/goldwarden@latest
+go install github.com/quexten/goldwarden@release
 ```
 
-or:
+Alternatively, to build without fido2 support:
 ```
-go build
+go install -tags nofido2  github.com/quexten/goldwarden@release
 ```
 
 ### Design
