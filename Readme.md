@@ -20,8 +20,8 @@ If you are looking to manage secrets for machine to machine communication, you s
 hashicorp vault.
 
 ### Requirements
-Right now, Goldwarden is only tested on Linux. It should be possible to port to mac / bsd, I'm open to PRs.
-On Linux, you need at least a working Polkit installation and a pinentry agent. Both X11 and Wayland are supported for autofill, albeit only Wayland is tested.
+Right now, Goldwarden is only tested on Linux. Somewhat feature-stripped builds for Mac and Windows are available too, but untested.
+Autotype is currently implemented via the remotedesktop portal. This is supported on KDE and Gnome, but not yet on wl-root based environments.
 
 ### Installation
 
