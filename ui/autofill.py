@@ -21,6 +21,7 @@ class MyApp(Adw.Application):
         self.autofill_window.present()
         logins = goldwarden.get_vault_logins()
         if logins == None:
+            os._exit(0)
             return
         app.autofill_window.logins = logins
 
