@@ -29,7 +29,6 @@ Autotype is currently implemented via the remotedesktop portal. This is supporte
 There is a flatpak that includes a small UI, autotype functionality and autostarting of the daemon.
 **Not yet on flathub**
 
-![Screenshot from 2023-12-27 02-05-27](https://github.com/quexten/goldwarden/assets/11866552/52a32e1d-bde4-4f83-95fc-90cb987ebff0)
 <img src='https://github.com/quexten/goldwarden/assets/11866552/7a0bbd62-89ad-4762-8e0b-85bf69cdc864' width='400'>
 
 #### CLI
