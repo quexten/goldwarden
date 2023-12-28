@@ -113,7 +113,9 @@ var statusCmd = &cobra.Command{
 			fmt.Println("  \"loginEntries\":", status.NumberOfLogins, ",")
 			fmt.Println("  \"noteEntries\":", status.NumberOfNotes, ",")
 			fmt.Println("  \"lastSynced\":	\"" + time.Unix(status.LastSynced, 0).String() + "\",")
-			fmt.Println("  \"websocketConnected\":", status.WebsockedConnected)
+			fmt.Println("  \"websocketConnected\":", status.WebsockedConnected, ",")
+			fmt.Println("  \"pinSet\":", status.PinSet, ",")
+			fmt.Println("  \"loggedIn\":", status.LoggedIn)
 			fmt.Println("}")
 		default:
 			println("Wrong response type")

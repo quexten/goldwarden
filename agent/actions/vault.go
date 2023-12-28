@@ -192,6 +192,8 @@ func handleVaultStatus(request messages.IPCMessage, cfg *config.Config, vault *v
 	vaultStatus.NumberOfNotes = len(vault.GetNotes())
 	vaultStatus.LastSynced = vault.GetLastSynced()
 	vaultStatus.WebsockedConnected = vault.IsWebsocketConnected()
+	vaultStatus.PinSet = cfg.HasPin()
+	vaultStatus.LoggedIn = cfg.IsLoggedIn()
 	response, err = messages.IPCMessageFromPayload(vaultStatus)
 	return
 }

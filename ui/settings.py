@@ -5,10 +5,11 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 import gc
 
-from gi.repository import Gtk, Adw, GLib
+from gi.repository import Gtk, Adw, GLib, Gdk
 import goldwarden
 from threading import Thread
 import subprocess
+import components
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -31,6 +32,9 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.ssh_row.set_subtitle("Listening at ~/.goldwarden-ssh-agent.sock")
         self.preferences_group.add(self.ssh_row)
 
+        self.icon = components.status_icon_ok("emblem-default")
+        self.ssh_row.add_prefix(self.icon)
+
         self.login_with_device = Adw.ActionRow()
         self.login_with_device.set_title("Login with device")
         self.login_with_device.set_subtitle("Waiting for requests...")
@@ -49,6 +53,10 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.autofill_row.set_title("Autofill Shortcut")
         self.autofill_row.set_subtitle("Unavailable, please set up a shortcut in your desktop environment (README)")
         self.shortcut_preferences_group.add(self.autofill_row)
+
+        self.autofill_icon = components.StatusIcon()
+        self.autofill_icon.set_icon("dialog-warning", "warning")
+        self.autofill_row.add_prefix(self.autofill_icon)
 
         self.copy_username_shortcut_row = Adw.ActionRow()
         self.copy_username_shortcut_row.set_title("Copy Username Shortcut")
@@ -69,9 +77,14 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.status_row.set_subtitle("Locked")
         self.vault_status_preferences_group.add(self.status_row)
 
+        self.vault_status_icon = components.StatusIcon()
+        self.vault_status_icon.set_icon("dialog-error", "error")
+        self.status_row.add_prefix(self.vault_status_icon)
+
         self.last_sync_row = Adw.ActionRow()
         self.last_sync_row.set_title("Last Sync")
         self.last_sync_row.set_subtitle("Never")
+        self.last_sync_row.set_icon_name("emblem-synchronizing-symbolic")
         self.vault_status_preferences_group.add(self.last_sync_row)
 
         self.websocket_connected_row = Adw.ActionRow()
@@ -79,14 +92,20 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.websocket_connected_row.set_subtitle("False")
         self.vault_status_preferences_group.add(self.websocket_connected_row)
 
+        self.websocket_connected_status_icon = components.StatusIcon()
+        self.websocket_connected_status_icon.set_icon("dialog-error", "error")
+        self.websocket_connected_row.add_prefix(self.websocket_connected_status_icon)
+        
         self.login_row = Adw.ActionRow()
         self.login_row.set_title("Vault Login Entries")
         self.login_row.set_subtitle("0")
+        self.login_row.set_icon_name("dialog-password-symbolic")
         self.vault_status_preferences_group.add(self.login_row)
 
         self.notes_row = Adw.ActionRow()
         self.notes_row.set_title("Vault Notes")
         self.notes_row.set_subtitle("0")
+        self.notes_row.set_icon_name("emblem-documents-symbolic")
         self.vault_status_preferences_group.add(self.notes_row)
 
         self.action_preferences_group = Adw.PreferencesGroup()
@@ -142,21 +161,55 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
             if status != None:
+                if pin_set:
+                    self.unlock_button.set_sensitive(True)
+                else:
+                    self.unlock_button.set_sensitive(False)
+                logged_in = status["loggedIn"]
+                if logged_in:
+                    self.preferences_group.set_visible(True)
+                    self.shortcut_preferences_group.set_visible(True)
+                    self.autotype_button.set_visible(True)
+                    self.login_row.set_sensitive(True)
+                    self.notes_row.set_sensitive(True)
+                    self.websocket_connected_row.set_sensitive(True)
+                else:
+                    self.preferences_group.set_visible(False)
+                    self.shortcut_preferences_group.set_visible(False)
+                    self.autotype_button.set_visible(False)
+                    self.websocket_connected_row.set_sensitive(False)
+                    self.login_row.set_sensitive(False)
+                    self.notes_row.set_sensitive(False)
+
                 locked = status["locked"]
                 self.login_button.set_sensitive(pin_set and not locked)
                 self.set_pin_button.set_sensitive(not pin_set or not locked)
                 self.autotype_button.set_sensitive(not locked)
-                self.status_row.set_subtitle(str("Unlocked" if not locked else "Locked"))
+                self.status_row.set_subtitle(str("Logged in" if (logged_in and not locked) else "Logged out") if not locked else "Locked")
+                if locked or not logged_in:
+                    self.vault_status_icon.set_icon("dialog-warning", "warning")
+                else:
+                    self.vault_status_icon.set_icon("emblem-default", "ok")
+                if not logged_in:
+                    self.logout_button.set_sensitive(False)
+                else:
+                    self.logout_button.set_sensitive(True)
                 self.login_row.set_subtitle(str(status["loginEntries"]))
                 self.notes_row.set_subtitle(str(status["noteEntries"]))
                 self.websocket_connected_row.set_subtitle("Connected" if status["websocketConnected"] else "Disconnected")
+                if status["websocketConnected"]:
+                    self.websocket_connected_status_icon.set_icon("emblem-default", "ok")
+                else:
+                    self.websocket_connected_status_icon.set_icon("dialog-error", "error")
                 self.last_sync_row.set_subtitle(str(status["lastSynced"]))
-                self.unlock_button.set_sensitive(True)
+                if status["lastSynced"].startswith("1970"):
+                    self.last_sync_row.set_subtitle("Never")
                 self.unlock_button.set_label("Unlock" if locked else "Lock")
             else:
                 is_daemon_running = goldwarden.is_daemon_running()
                 if not is_daemon_running:
                     self.status_row.set_subtitle("Daemon not running")
+                    self.vault_status_icon.set_icon("dialog-error", "error")
             GLib.timeout_add(1000, update_labels)
 
         GLib.timeout_add(1000, update_labels)
@@ -177,23 +230,26 @@ class MyApp(Adw.Application):
         self.settings_win = SettingsWinvdow(application=app)
         self.settings_win.present()
 
-app = MyApp(application_id="com.quexten.Goldwarden")
-
 def show_login():
     dialog = Gtk.Dialog(title="Goldwarden")
     preference_group = Adw.PreferencesGroup()
     preference_group.set_title("Config")
+    preference_group.set_margin_top(10)
+    preference_group.set_margin_bottom(10)
+    preference_group.set_margin_start(10)
+    preference_group.set_margin_end(10)
+
     dialog.get_content_area().append(preference_group)
 
     api_url_entry = Adw.EntryRow()
     api_url_entry.set_title("API Url")
     # set value
-    api_url_entry.set_text("https://api.bitwarden.com/")
+    api_url_entry.set_text("https://vault.bitwarden.com/api")
     preference_group.add(api_url_entry)
 
     identity_url_entry = Adw.EntryRow()
     identity_url_entry.set_title("Identity Url")
-    identity_url_entry.set_text("https://identity.bitwarden.com/")
+    identity_url_entry.set_text("https://vault.bitwarden.com/identity")
     preference_group.add(identity_url_entry)
 
     notification_url_entry = Adw.EntryRow()
@@ -238,6 +294,15 @@ def show_login():
     dialog.set_default_size(400, 200)
     dialog.set_modal(True)
     dialog.present()
+
+css_provider = Gtk.CssProvider()
+css_provider.load_from_path("style.css")
+Gtk.StyleContext.add_provider_for_display(
+    Gdk.Display.get_default(),
+    css_provider,
+    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+)
+
 
 app = MyApp(application_id="com.quexten.Goldwarden.settings")
 app.run(sys.argv)

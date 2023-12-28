@@ -6,9 +6,13 @@ import monitors.dbus_autofill_monitor
 import sys
 import goldwarden
 from threading import Thread
+import os
+
+isflatpak = os.path.exists("/.flatpak-info")
+pathprefix = "/app/bin/" if isflatpak else "./"
 
 try:
-    subprocess.Popen(["python3", "/app/bin/background.py"], start_new_session=True)
+    subprocess.Popen(["python3", f'{pathprefix}background.py'], start_new_session=True)
 except:
     pass
 
@@ -16,9 +20,9 @@ is_hidden = "--hidden" in sys.argv
 
 if not is_hidden:
     try:
-        subprocess.Popen(["python3", "/app/bin/settings.py"], start_new_session=True)
+        subprocess.Popen(["python3", f'{pathprefix}settings.py'], start_new_session=True)
     except:
-        subprocess.Popen(["python3", "./settings.py"], start_new_session=True)
+        subprocess.Popen(["python3", f'{pathprefix}settings.py'], start_new_session=True)
         pass
 
 try:
@@ -40,7 +44,7 @@ thread = Thread(target=run_daemon)
 thread.start()
 
 def on_autofill():
-    subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True)
+    subprocess.Popen(["python3", f'{pathprefix}autofill.py'], start_new_session=True)
 
 monitors.dbus_autofill_monitor.on_autofill = lambda: on_autofill()
 monitors.dbus_autofill_monitor.run_daemon()
