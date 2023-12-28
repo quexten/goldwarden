@@ -50,6 +50,7 @@ func (vault *Vault) Clear() {
 	vault.secureNotes = make(map[string]models.Cipher)
 	vault.sshKeyNoteIDs = make([]string, 0)
 	vault.envCredentials = make(map[string]string)
+	vault.lastSynced = 0
 	vault.unlockMutex()
 }
 
