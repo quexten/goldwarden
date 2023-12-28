@@ -182,9 +182,17 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		}
 	}()
 
-	if !runtimeConfig.WebsocketDisabled {
-		go bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
-	}
+	go func() {
+		if !runtimeConfig.WebsocketDisabled {
+			for {
+				// polling, switch this to signal based later
+				if !cfg.IsLocked() && cfg.IsLoggedIn() {
+					bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
+				}
+				time.Sleep(60 * time.Second)
+			}
+		}
+	}()
 
 	if !runtimeConfig.DisableSSHAgent {
 		vaultAgent := ssh.NewVaultAgent(vault, &cfg)
