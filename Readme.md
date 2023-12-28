@@ -4,7 +4,7 @@ Goldwarden is a Bitwarden compatible desktop integration written in Go. It focus
 do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
-- System wide autotype
+- System wide autotype (Gnome, KDE only for now)
 - Biometric authentication (via Polkit) for each credential access
 - Implements Bitwarden browser-extension biometrics on Linux
 - Support for injecting environment variables into the environment of a cli command
