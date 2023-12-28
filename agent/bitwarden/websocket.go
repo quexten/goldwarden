@@ -95,6 +95,16 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	c.WriteMessage(1, []byte(`{"protocol":"messagepack","version":1}`))
 
 	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			if vault.Keyring.IsLocked() || cfg.IsLocked() || !cfg.IsLoggedIn() {
+				c.Close()
+				return
+			}
+		}
+	}()
+
+	go func() {
 		defer close(done)
 		for {
 			_, message, err := c.ReadMessage()
