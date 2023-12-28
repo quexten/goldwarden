@@ -27,13 +27,13 @@
       <image>https://raw.githubusercontent.com/quexten/flathub/goldwarden/screenshots/goldwarden_settings.png</image>
     </screenshot>
   </screenshots>
-  <url type="homepage">https://github.com/quexten/goldwaden</url>
+  <url type="homepage">https://github.com/quexten/goldwarden</url>
   <url type="bugtracker">https://github.com/quexten/goldwarden/issues/</url>
-  <url type="help">https://github.com/quexten/issues</url>
+  <url type="help">https://github.com/quexten/goldwarden/issues</url>
   <developer_name>Bernd Schoolmann</developer_name>
   <update_contact>mail@quexten.com</update_contact>
   <releases>
-    <release version="0.2.2" date="2023-12-28"/>
+    <release version="0.2.5" date="2023-12-28"/>
   </releases>
   <content_rating type="oars-1.1"/>
 </component>
