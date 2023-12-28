@@ -1,6 +1,6 @@
 ## Goldwarden
 
-Goldwarden is a Bitwarden compatible desktop integration written in Go. It focuses on providing useful desktop features that the official tools 
+Goldwarden is a Bitwarden compatible desktop client. It focuses on providing useful desktop features that the official tools 
 do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
@@ -14,6 +14,8 @@ do not (yet) have or are not willing to add, and enhanced security measures that
 - Passwordless login (Both logging in, and approving logins)
 - Fido2 (Webauthn) support
 - more to come...?
+
+The aim is not to replace the official clietns, but to complement by implementing the missing features.
 
 ### Requirements
 Right now, Goldwarden is only tested on Linux. Somewhat feature-stripped builds for Mac and Windows are available too, but untested.
