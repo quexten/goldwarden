@@ -43,8 +43,8 @@ modules:
       - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
     sources:
       - type: archive
-        url: https://github.com/quexten/goldwarden/archive/refs/tags/v0.2.1.tar.gz
-        sha256: 9dbac2eeb524ed9bc70c4019dac6e826fa179520d604135e36d826361b86e8b8
+        url: https://github.com/quexten/goldwarden/archive/refs/tags/v0.2.2.tar.gz
+        sha256: 7c504639fe43d60544d4d98c4d5a62763b5167eeeb4c0bc7aec97e93ec2727e8
   - name: goldwarden-flathub-metainfo
     buildsystem: simple
     build-commands:
@@ -59,5 +59,5 @@ modules:
       - install -D goldwarden_linux_x86_64 /app/bin/goldwarden
     sources:
       - type: file
-        url: https://github.com/quexten/goldwarden/releases/download/v0.2.1/goldwarden_linux_x86_64
-        sha256: 7ebc9684a0e8967ea1ad911269bb69e3918e4e508b4d57268a152b08f57b37aa
+        url: https://github.com/quexten/goldwarden/releases/download/v0.2.2/goldwarden_linux_x86_64
+        sha256: 7c6b9e059c534abaa177aa6ed9b5eb9a1a782919049ef9086ca0c00529305064
