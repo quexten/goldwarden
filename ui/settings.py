@@ -166,7 +166,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 else:
                     self.unlock_button.set_sensitive(False)
                 logged_in = status["loggedIn"]
-                if logged_in:
+                if logged_in and not status["locked"]:
                     self.preferences_group.set_visible(True)
                     self.shortcut_preferences_group.set_visible(True)
                     self.autotype_button.set_visible(True)
