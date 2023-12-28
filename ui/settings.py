@@ -10,6 +10,7 @@ import goldwarden
 from threading import Thread
 import subprocess
 import components
+import os
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
