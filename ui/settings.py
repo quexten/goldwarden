@@ -158,6 +158,8 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.action_preferences_group.add(self.logout_button)
         
         def update_labels():
+            GLib.timeout_add(1000, update_labels)
+            
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
             if status != None:
@@ -210,7 +212,6 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 if not is_daemon_running:
                     self.status_row.set_subtitle("Daemon not running")
                     self.vault_status_icon.set_icon("dialog-error", "error")
-            GLib.timeout_add(1000, update_labels)
 
         GLib.timeout_add(1000, update_labels)
         self.set_default_size(400, 700)
