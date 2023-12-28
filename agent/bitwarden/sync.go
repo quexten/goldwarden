@@ -46,7 +46,6 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 			return err
 		}
 	} else {
-		vault.SetLastSynced(time.Now().Unix())
 		log.Info("Sync successful, initializing keyring and vault...")
 	}
 
@@ -63,6 +62,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 
 	log.Info("Clearing vault...")
 	vault.Clear()
+	vault.SetLastSynced(time.Now().Unix())
 	log.Info("Adding %d ciphers to vault...", len(sync.Ciphers))
 	for _, cipher := range sync.Ciphers {
 		switch cipher.Type {

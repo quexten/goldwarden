@@ -157,6 +157,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.logout_button.connect("clicked", lambda button: goldwarden.purge())
         self.logout_button.get_style_context().add_class("destructive-action")
         self.action_preferences_group.add(self.logout_button)
+
+        self.wiki_button = Gtk.LinkButton(uri="https://github.com/quexten/goldwarden/wiki/Flatpak-Configuration")
+        self.wiki_button.set_label("Help & Wiki")
+        self.wiki_button.set_margin_top(10)
+        self.action_preferences_group.add(self.wiki_button)
         
         def update_labels():
             GLib.timeout_add(1000, update_labels)

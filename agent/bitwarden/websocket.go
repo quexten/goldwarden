@@ -52,7 +52,6 @@ const (
 )
 
 func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Config) {
-	time.Sleep(5 * time.Second)
 	for {
 		if cfg.IsLocked() {
 			time.Sleep(5 * time.Second)

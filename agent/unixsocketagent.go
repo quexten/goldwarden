@@ -195,8 +195,9 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 				// polling, switch this to signal based later
 				if !cfg.IsLocked() && cfg.IsLoggedIn() {
 					bitwarden.RunWebsocketDaemon(ctx, vault, &cfg)
+					time.Sleep(60 * time.Second)
 				}
-				time.Sleep(60 * time.Second)
+				time.Sleep(1 * time.Second)
 			}
 		}
 	}()
