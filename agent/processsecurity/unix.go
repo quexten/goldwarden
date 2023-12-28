@@ -3,7 +3,7 @@
 package processsecurity
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/godbus/dbus/v5"
 	"golang.org/x/sys/unix"
@@ -11,6 +11,7 @@ import (
 
 func DisableDumpable() error {
 	return unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0)
+	// return nil
 }
 
 func MonitorLocks(onlock func()) error {
@@ -22,7 +23,7 @@ func MonitorLocks(onlock func()) error {
 	if err != nil {
 		return err
 	}
-	err = bus.AddMatchSignal(dbus.WithMatchMember("org.freedesktop.ScreenSaver"))
+	err = bus.AddMatchSignal(dbus.WithMatchInterface("org.freedesktop.ScreenSaver"))
 	if err != nil {
 		return err
 	}
@@ -32,8 +33,6 @@ func MonitorLocks(onlock func()) error {
 	for {
 		select {
 		case message := <-signals:
-			fmt.Println("Message:", message)
-			fmt.Println("name ", message.Name)
 			if message.Name == "org.gnome.ScreenSaver.ActiveChanged" {
 				if len(message.Body) == 0 {
 					continue
@@ -53,6 +52,35 @@ func MonitorLocks(onlock func()) error {
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+func MonitorIdle(onidle func()) error {
+	bus, err := dbus.SessionBus()
+	if err != nil {
+		return err
+	}
+
+	var wasidle = false
+	for {
+		var res int64
+		err = bus.Object("org.gnome.Mutter.IdleMonitor", "/org/gnome/Mutter/IdleMonitor/Core").Call("org.gnome.Mutter.IdleMonitor.GetIdletime", 0).Store(&res)
+		if err != nil {
+			return err
+		}
+		secondsIdle := res / 1000
+		if secondsIdle > 60*1 {
+			if !wasidle {
+				wasidle = true
+				onidle()
+			}
+		} else {
+			wasidle = false
+		}
+
+		time.Sleep(1 * time.Second)
 	}
 
 	return nil

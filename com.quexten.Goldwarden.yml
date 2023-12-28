@@ -34,21 +34,30 @@ modules:
       - type: git
         url: https://github.com/bugaevc/wl-clipboard.git
         tag: v2.2.1
-  - name: goldwarden-ui
+  - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:
-      - install -D main.py /app/bin/main.py
-      - cp -R ./ /app/bin
-      - install -D com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
-      - install -Dm644 com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
-      - install -D goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - cp -R ./ui/* /app/bin
+      - chmod +x /app/bin/main.py
+      - install -D ./ui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
+      - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
     sources:
-      - type: dir
-        path: ui
-  - name: goldwarden
+      - type: archive
+        url: https://github.com/quexten/goldwarden/archive/refs/tags/v0.2.1.tar.gz
+        sha256: 9dbac2eeb524ed9bc70c4019dac6e826fa179520d604135e36d826361b86e8b8
+  - name: goldwarden-flathub-metainfo
     buildsystem: simple
     build-commands:
-      - install -D goldwarden /app/bin/goldwarden
+      - install -Dm644 ./com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
     sources:
       - type: file
-        path: goldwarden
+        url: https://raw.githubusercontent.com/quexten/goldwarden/b95ec60d781b5cc33b5bfb2e20e0dfe6630b6bd5/ui/com.quexten.Goldwarden.metainfo.xml
+        sha256: f1c7f0f3ceae938275a1e88f14d72b2a1f3a0b9b311c2ca4d4f2e7867f409d06
+  - name: goldwarden-core-daemon
+    buildsystem: simple
+    build-commands:
+      - install -D goldwarden_linux_x86_64 /app/bin/goldwarden
+    sources:
+      - type: file
+        url: https://github.com/quexten/goldwarden/releases/download/v0.2.1/goldwarden_linux_x86_64
+        sha256: 7ebc9684a0e8967ea1ad911269bb69e3918e4e508b4d57268a152b08f57b37aa

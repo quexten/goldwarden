@@ -22,6 +22,8 @@ type VaultStatusRequest struct {
 
 type VaultStatusResponse struct {
 	Locked             bool
+	LoggedIn           bool
+	PinSet             bool
 	NumberOfLogins     int
 	NumberOfNotes      int
 	LastSynced         int64

@@ -1,0 +1,26 @@
+.status-icon {
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 9999px;
+}
+
+.ok-icon {
+    color: @green_5;
+    background-color: alpha(@green_3, .25);
+}
+
+.warning-icon {
+    color: #ae7b03;
+    background: alpha(@yellow_5, .25);
+}
+
+.error-icon {
+    color: @red_4;
+    background-color: alpha(@red_2, .25);
+}
+
+.accent-icon {
+    padding: 9px;
+    color: @blue_4;
+    background-color: alpha(@blue_3, .25);
+}
