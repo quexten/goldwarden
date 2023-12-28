@@ -208,7 +208,8 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 		"client_id", "connector",
 	))
 	if err != nil {
-		fmt.Println("Could not refresh token: ", err)
+		authLog.Error("Could not refresh token: %s", err.Error())
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
 		return false
 	}
 	cfg.SetToken(config.LoginToken{
