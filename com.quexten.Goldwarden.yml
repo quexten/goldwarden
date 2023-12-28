@@ -17,8 +17,12 @@ finish-args:
   - --talk-name=org.gnome.ScreenSaver
   - --talk-name=org.freedesktop.ScreenSaver
 
-  # Home directory access to setup browser ipc
+  # Notifications
+  - --talk-name=org.freedesktop.Notifications
+
+  # Home directory access to setup browser ipc, can posibly restrict this further if requried by listing each browser's nativehost directory separately
   - --filesystem=home
+
   # pinentry & approval
   - --talk-name=org.gnome.keyring.SystemPrompter
   # biometric / user password auth
