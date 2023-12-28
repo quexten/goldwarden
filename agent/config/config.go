@@ -9,6 +9,7 @@ import (
 	"errors"
 	"os"
 	"runtime/debug"
+	"strings"
 	"sync"
 
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ const (
 	KDFIterations     = 2
 	KDFMemory         = 2 * 1024 * 1024
 	KDFThreads        = 8
-	DefaultConfigPath = "~/.config/goldwarden.json"
+	DefaultConfigPath = "~/.config/goldwarden/goldwarden.json"
 )
 
 type RuntimeConfig struct {
@@ -372,6 +373,11 @@ func (config *Config) WriteConfig() error {
 
 	// write to disk
 	os.Remove(config.ConfigFile.RuntimeConfig.ConfigDirectory)
+	parentDirectory := config.ConfigFile.RuntimeConfig.ConfigDirectory[:len(config.ConfigFile.RuntimeConfig.ConfigDirectory)-len("/goldwarden.json")]
+	if _, err := os.Stat(parentDirectory); os.IsNotExist(err) {
+		os.Mkdir(parentDirectory, 0700)
+	}
+
 	file, err := os.OpenFile(config.ConfigFile.RuntimeConfig.ConfigDirectory, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
@@ -386,6 +392,21 @@ func (config *Config) WriteConfig() error {
 }
 
 func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
+	userHome, _ := os.UserHomeDir()
+	oldPath := strings.ReplaceAll("~/.config/goldwarden.json", "~", userHome)
+	newPathParent := strings.ReplaceAll("~/.config/goldwarden", "~", userHome)
+	newPath := strings.ReplaceAll("~/.config/goldwarden/goldwarden.json", "~", userHome)
+
+	// Migrate old config
+	if _, err := os.Stat(oldPath); err == nil {
+		if _, err := os.Stat(newPath); err != nil {
+			if _, err := os.Stat(newPathParent); os.IsNotExist(err) {
+				os.Mkdir(newPathParent, 0700)
+			}
+			os.Rename(oldPath, newPath)
+		}
+	}
+
 	file, err := os.Open(rtCfg.ConfigDirectory)
 	if err != nil {
 		key := NewBuffer(32, rtCfg.UseMemguard)
