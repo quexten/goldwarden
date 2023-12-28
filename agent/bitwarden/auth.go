@@ -17,6 +17,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/twofactor"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
@@ -68,6 +69,7 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.ApiUrl+"/accounts/prelogin", &preLogin, preLoginRequest{
 		Email: email,
 	}); err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not pre-login: %v", err), "", func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not pre-login: %v", err)
 	}
 
@@ -77,11 +79,13 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 
 	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
 	masterKey, err = crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(preLogin.KDF), Iterations: uint32(preLogin.KDFIterations), Memory: uint32(preLogin.KDFMemory), Parallelism: uint32(preLogin.KDFParallelism)})
 	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
@@ -104,12 +108,14 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
 		loginResponseToken, err = Perform2FA(values, errsc, cfg, ctx)
 		if err != nil {
+			notify.Notify("Goldwarden", fmt.Sprintf("Could not login via two-factor: %v", err), "", func() {})
 			return LoginResponseToken{}, crypto.MasterKey{}, "", err
 		}
 	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
+		notify.Notify("Goldwarden", fmt.Sprintf("Captcha required"), "", func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
-
 	} else if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via password: %v", err), "", func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %v", err)
 	}
 

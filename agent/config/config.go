@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/tink-crypto/tink-go/v2/aead/subtle"
@@ -146,6 +147,7 @@ func (c *Config) Lock() {
 		return
 	}
 	(*c.key).Wipe()
+	notify.Notify("Goldwarden", "Vault Locked", "", func() {})
 }
 
 func (c *Config) Purge() {

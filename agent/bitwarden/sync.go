@@ -10,6 +10,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/logging"
 )
@@ -34,6 +35,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 	sync, err := Sync(ctx, config)
 	if err != nil {
 		log.Error("Could not sync: %v", err)
+		notify.Notify("Goldwarden", "Could not sync", "", func() {})
 		if allowCache {
 			home, _ := os.UserHomeDir()
 			sync, err = ReadVault(home + path)

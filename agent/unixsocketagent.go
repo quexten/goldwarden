@@ -12,6 +12,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
@@ -179,6 +180,12 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		})
 		if err != nil {
 			log.Warn("Could not monitor idle: %s", err.Error())
+		}
+	}()
+	go func() {
+		err = notify.ListenForNotifications()
+		if err != nil {
+			log.Warn("Could not listen for notifications: %s", err.Error())
 		}
 	}()
 

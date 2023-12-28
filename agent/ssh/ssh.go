@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
@@ -113,6 +114,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 
 	var rand = rand.Reader
 	log.Info("Sign Request for key: %s %s accepted", ssh.FingerprintSHA256(key), sshKey.Name)
+	notify.Notify("Goldwarden", fmt.Sprintf("SSH Key Signing Request Approved for %s", sshKey.Name), "", func() {})
 	return signer.Sign(rand, data)
 }
 
