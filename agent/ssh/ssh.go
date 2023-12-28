@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
@@ -99,7 +100,17 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		}
 	}
 
-	message := fmt.Sprintf("%s on %s>%s>%s is requesting signage with key %s", vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
+	isGit := false
+	magicHeader := []byte("SSHSIG\x00\x00\x00\x03git")
+	if bytes.HasPrefix(data, magicHeader) {
+		isGit = true
+	}
+
+	requestTemplate := "%s on %s>%s>%s is requesting ssh signage with key %s"
+	if isGit {
+		requestTemplate = "%s on %s>%s>%s is requesting git signage with key %s"
+	}
+	message := fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
 
 	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
 		log.Info("Sign Request for key: %s denied", sshKey.Name)
@@ -113,6 +124,11 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 
 	var rand = rand.Reader
 	log.Info("Sign Request for key: %s %s accepted", ssh.FingerprintSHA256(key), sshKey.Name)
+	if isGit {
+		notify.Notify("Goldwarden", fmt.Sprintf("Git Signing Request Approved for %s", sshKey.Name), "", func() {})
+	} else {
+		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", func() {})
+	}
 	return signer.Sign(rand, data)
 }
 

@@ -18,6 +18,13 @@ var daemonizeCmd = &cobra.Command{
 		websocketDisabled := runtimeConfig.WebsocketDisabled
 		sshDisabled := runtimeConfig.DisableSSHAgent
 
+		_, err := os.Stat("/.flatpak-info")
+		isFlatpak := err == nil
+		if isFlatpak {
+			runtimeConfig.ConfigDirectory = "~/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
+			println("Flatpak Config directory: " + runtimeConfig.ConfigDirectory)
+		}
+
 		if websocketDisabled {
 			println("Websocket disabled")
 		}
