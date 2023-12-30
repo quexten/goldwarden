@@ -47,9 +47,8 @@ modules:
       - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
       - install -Dm644 ./ui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
     sources:
-      - type: archive
-        url: https://github.com/quexten/goldwarden/archive/refs/tags/v0.2.5.tar.gz
-        sha256: 9cff3f51f87cc6b93f90539666a5f18fe0ec7287f829cf028eac3e51ccddb7c2
+      - type: dir
+        path: ./
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
