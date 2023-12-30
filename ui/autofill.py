@@ -3,12 +3,13 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 import gc
 import time
-from gi.repository import Gtk, Adw, GLib
+from gi.repository import Gtk, Adw, GLib, Notify
 import goldwarden
 import clipboard
 from threading import Thread
 import sys
 import os
+Notify.init("Goldwarden")
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -93,9 +94,13 @@ class MainWindow(Gtk.ApplicationWindow):
             if keyval == 112:
                 print("copy password")
                 clipboard.write(self.history_list.get_selected_row().password)
+                Notify.Notification.new("Goldwarden", "Password Copied", "dialog-information").show()
             elif keyval == 117:
                 print("copy username")
                 clipboard.write(self.history_list.get_selected_row().username)
+                notification=Notify.Notification.new("Goldwarden", "Username Copied", "dialog-information")
+                notification.set_timeout(5)
+                notification.show()
                 
         keycont.connect('key-pressed', handle_keypress, self)
         self.add_controller(keycont)

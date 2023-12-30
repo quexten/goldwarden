@@ -29,7 +29,7 @@ func Execute(cfg config.RuntimeConfig) {
 		recv, send := agent.StartVirtualAgent(runtimeConfig)
 		commandClient = client.NewVirtualClient(send, recv)
 	} else {
-		commandClient = client.NewUnixSocketClient()
+		commandClient = client.NewUnixSocketClient(&cfg)
 	}
 
 	err := rootCmd.Execute()

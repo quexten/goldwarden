@@ -144,6 +144,7 @@ func (vaultAgent) Unlock(passphrase []byte) error {
 type SSHAgentServer struct {
 	vault               *vault.Vault
 	config              *config.Config
+	runtimeConfig       *config.RuntimeConfig
 	unlockRequestAction func() bool
 }
 
@@ -151,10 +152,11 @@ func (v *SSHAgentServer) SetUnlockRequestAction(action func() bool) {
 	v.unlockRequestAction = action
 }
 
-func NewVaultAgent(vault *vault.Vault, config *config.Config) SSHAgentServer {
+func NewVaultAgent(vault *vault.Vault, config *config.Config, runtimeConfig *config.RuntimeConfig) SSHAgentServer {
 	return SSHAgentServer{
-		vault:  vault,
-		config: config,
+		vault:         vault,
+		config:        config,
+		runtimeConfig: runtimeConfig,
 		unlockRequestAction: func() bool {
 			log.Info("Unlock Request, but no action defined")
 			return false
@@ -163,13 +165,7 @@ func NewVaultAgent(vault *vault.Vault, config *config.Config) SSHAgentServer {
 }
 
 func (v SSHAgentServer) Serve() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
-	path := home + "/.goldwarden-ssh-agent.sock"
-
+	path := v.runtimeConfig.SSHAgentSocketPath
 	if _, err := os.Stat(path); err == nil {
 		if err := os.Remove(path); err != nil {
 			log.Error("Could not remove old socket file: %s", err)

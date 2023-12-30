@@ -103,6 +103,17 @@ def get_vault_logins():
     except Exception as e:
         print(e)
         return None
+
+def get_runtime_config():
+    restic_cmd = f"{BINARY_PATH} config get-runtime-config"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    try:
+        return json.loads(result.stdout)
+    except Exception as e:
+        print(e)
+        return None
     
 def autotype(username, password):
     # environment

@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 	"os/signal"
-	"strings"
 
 	"github.com/awnumar/memguard"
 	"github.com/quexten/goldwarden/agent"
@@ -19,15 +18,6 @@ var daemonizeCmd = &cobra.Command{
 		websocketDisabled := runtimeConfig.WebsocketDisabled
 		sshDisabled := runtimeConfig.DisableSSHAgent
 
-		_, err := os.Stat("/.flatpak-info")
-		isFlatpak := err == nil
-		if isFlatpak {
-			runtimeConfig.ConfigDirectory = "~/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
-			userHome, _ := os.UserHomeDir()
-			runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
-			println("Flatpak Config directory: " + runtimeConfig.ConfigDirectory)
-		}
-
 		if websocketDisabled {
 			println("Websocket disabled")
 		}
@@ -42,11 +32,7 @@ var daemonizeCmd = &cobra.Command{
 			<-signalChannel
 			memguard.SafeExit(0)
 		}()
-		home, err := os.UserHomeDir()
-		if err != nil {
-			panic(err)
-		}
-		err = agent.StartUnixAgent(home+"/.goldwarden.sock", runtimeConfig)
+		err := agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
 		if err != nil {
 			panic(err)
 		}

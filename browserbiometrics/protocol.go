@@ -6,12 +6,16 @@ import (
 	"io"
 	"os"
 
+	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics/logging"
 	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-func readLoop() {
+var runtimeConfig *config.RuntimeConfig
+
+func readLoop(rtCfg *config.RuntimeConfig) {
+	runtimeConfig = rtCfg
 	v := bufio.NewReader(os.Stdin)
 	s := bufio.NewReaderSize(v, bufferSize)
 
@@ -101,7 +105,7 @@ func handlePayloadMessage(msg PayloadMessage, appID string) {
 	case "biometricUnlock":
 		logging.Debugf("Biometric unlock requested")
 		// logging.Debugf("Biometrics authorized: %t", isAuthorized)
-		result, err := client.NewUnixSocketClient().SendToAgent(messages.GetBiometricsKeyRequest{})
+		result, err := client.NewUnixSocketClient(runtimeConfig).SendToAgent(messages.GetBiometricsKeyRequest{})
 		if err != nil {
 			logging.Errorf("Unable to send message to agent: %s", err.Error())
 			return

@@ -10,11 +10,6 @@ import (
 )
 
 func main() {
-	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
-		browserbiometrics.Main()
-		return
-	}
-
 	var configPath string
 	if path, found := os.LookupEnv("GOLDWARDEN_CONFIG_DIRECTORY"); found {
 		configPath = path
@@ -39,8 +34,37 @@ func main() {
 		Password:              os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
 		Pin:                   os.Getenv("GOLDWARDEN_PIN"),
 		UseMemguard:           os.Getenv("GOLDWARDEN_NO_MEMGUARD") != "true",
+		SSHAgentSocketPath:    os.Getenv("GOLDWARDEN_SSH_AUTH_SOCK"),
+		GoldwardenSocketPath:  os.Getenv("GOLDWARDEN_SOCKET_PATH"),
 
 		ConfigDirectory: configPath,
+	}
+
+	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
+		browserbiometrics.Main(&runtimeConfig)
+		return
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	if runtimeConfig.SSHAgentSocketPath == "" {
+		runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
+	}
+	if runtimeConfig.GoldwardenSocketPath == "" {
+		runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+	}
+
+	_, err = os.Stat("/.flatpak-info")
+	isFlatpak := err == nil
+	if isFlatpak {
+		userHome, _ := os.UserHomeDir()
+		runtimeConfig.ConfigDirectory = userHome + "/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
+		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
+		println("Flatpak Config directory: " + runtimeConfig.ConfigDirectory)
+		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
 	}
 
 	if runtimeConfig.SingleProcess {

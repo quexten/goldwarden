@@ -1,8 +1,8 @@
 pkgname=goldwarden
-pkgver=0.2.6
+pkgver=0.2.7
 pkgrel=1
 pkgdesc='A feature-packed Bitwarden compatible desktop integration'
-arch=('x86_64')
+arch=('x86_64', 'aarch64')
 url="https://github.com/quexten/$pkgname"
 license=('MIT')
 depends=('libfido2')
