@@ -15,7 +15,7 @@ do not (yet) have or are not willing to add, and enhanced security measures that
 - Fido2 (Webauthn) support
 - more to come...?
 
-The aim is not to replace the official clietns, but to complement by implementing the missing features.
+The aim is not to replace the official clients, but to complement by implementing the missing features.
 
 ### Requirements
 Right now, Goldwarden is only tested on Linux. Somewhat feature-stripped builds for Mac and Windows are available too, but untested.
@@ -27,7 +27,7 @@ Autotype is currently implemented via the remotedesktop portal. This is supporte
 There is a flatpak that includes a small UI, autotype functionality and autostarting of the daemon.
 **Not yet on flathub**
 
-<img src='https://github.com/quexten/goldwarden/assets/11866552/7a0bbd62-89ad-4762-8e0b-85bf69cdc864' width='400'>
+<img src='https://github.com/quexten/goldwarden/assets/11866552/5d36ed8c-46f1-4444-adb0-f4ca1d0433c5' width='400'>
 
 #### CLI
 ##### Arch (AUR)
