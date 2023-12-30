@@ -219,7 +219,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 else:
                     self.websocket_connected_status_icon.set_icon("dialog-error", "error")
                 self.last_sync_row.set_subtitle(str(status["lastSynced"]))
-                if status["lastSynced"].startswith("1970"):
+                if status["lastSynced"].startswith("1970") or status["lastSynced"].startswith("1969"):
                     self.last_sync_row.set_subtitle("Never")
                 self.unlock_button.set_label("Unlock" if locked else "Lock")
             else:
