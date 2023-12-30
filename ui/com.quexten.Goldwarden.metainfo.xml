@@ -24,7 +24,7 @@
   </categories>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/quexten/flathub/goldwarden/screenshots/goldwarden_settings.png</image>
+      <image>https://github.com/quexten/goldwarden/assets/11866552/5d36ed8c-46f1-4444-adb0-f4ca1d0433c5</image>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/quexten/goldwarden</url>
@@ -33,7 +33,7 @@
   <developer_name>Bernd Schoolmann</developer_name>
   <update_contact>mail@quexten.com</update_contact>
   <releases>
-    <release version="0.2.5" date="2023-12-28"/>
+    <release version="0.2.6" date="2023-12-30"/>
   </releases>
   <content_rating type="oars-1.1"/>
 </component>
