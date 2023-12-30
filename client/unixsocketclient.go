@@ -5,18 +5,21 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 
+	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/ipc/messages"
 )
 
 const READ_BUFFER = 1 * 1024 * 1024 // 1MB
 
 type UnixSocketClient struct {
+	runtimeConfig *config.RuntimeConfig
 }
 
-func NewUnixSocketClient() UnixSocketClient {
-	return UnixSocketClient{}
+func NewUnixSocketClient(runtimeConfig *config.RuntimeConfig) UnixSocketClient {
+	return UnixSocketClient{
+		runtimeConfig: runtimeConfig,
+	}
 }
 
 func reader(r io.Reader) interface{} {
@@ -37,12 +40,7 @@ func reader(r io.Reader) interface{} {
 }
 
 func (client UnixSocketClient) SendToAgent(request interface{}) (interface{}, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-
-	c, err := net.Dial("unix", home+"/.goldwarden.sock")
+	c, err := net.Dial("unix", client.runtimeConfig.GoldwardenSocketPath)
 	if err != nil {
 		return nil, err
 	}

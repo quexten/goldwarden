@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics/logging"
 )
 
@@ -13,7 +14,7 @@ const appID = "com.quexten.bw-bio-handler"
 
 var transportKey []byte
 
-func Main() {
+func Main(rtCfg *config.RuntimeConfig) {
 	if os.Args[1] == "install" {
 		var err error
 		err = detectAndInstallBrowsers(".config")
@@ -32,7 +33,7 @@ func Main() {
 	logging.Debugf("Generated transport key")
 
 	setupCommunication()
-	readLoop()
+	readLoop(rtCfg)
 }
 
 func DetectAndInstallBrowsers() error {

@@ -55,8 +55,17 @@ func handleSetNotifications(request messages.IPCMessage, cfg *config.Config, vau
 	})
 }
 
+func handleGetRuntimeConfig(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	return messages.IPCMessageFromPayload(messages.GetRuntimeConfigResponse{
+		UseMemguard:          cfg.ConfigFile.RuntimeConfig.UseMemguard,
+		SSHAgentSocketPath:   cfg.ConfigFile.RuntimeConfig.SSHAgentSocketPath,
+		GoldwardenSocketPath: cfg.ConfigFile.RuntimeConfig.GoldwardenSocketPath,
+	})
+}
+
 func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetIdentityURLRequest{}), handleSetIdentity)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetApiURLRequest{}), handleSetApiURL)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetNotificationsURLRequest{}), handleSetNotifications)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetRuntimeConfigRequest{}), handleGetRuntimeConfig)
 }

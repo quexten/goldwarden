@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
@@ -104,6 +106,32 @@ var setNotificationsURLCmd = &cobra.Command{
 	},
 }
 
+var getRuntimeConfigCmd = &cobra.Command{
+	Use:   "get-runtime-config",
+	Short: "Get the runtime config",
+	Long:  `Get the runtime config.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		request := messages.GetRuntimeConfigRequest{}
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result := result.(type) {
+		case messages.GetRuntimeConfigResponse:
+			fmt.Println("{")
+			fmt.Println("  \"useMemguard\": " + fmt.Sprintf("%t", result.UseMemguard) + ",")
+			fmt.Println("  \"SSHAgentSocketPath\": \"" + result.SSHAgentSocketPath + "\",")
+			fmt.Println("  \"goldwardenSocketPath\": \"" + result.GoldwardenSocketPath + "\"")
+			fmt.Println("}")
+		default:
+			println("Wrong IPC response type")
+		}
+	},
+}
+
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the configuration",
@@ -115,4 +143,5 @@ func init() {
 	configCmd.AddCommand(setApiUrlCmd)
 	configCmd.AddCommand(setIdentityURLCmd)
 	configCmd.AddCommand(setNotificationsURLCmd)
+	configCmd.AddCommand(getRuntimeConfigCmd)
 }

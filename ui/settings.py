@@ -30,11 +30,15 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
 
         self.ssh_row = Adw.ActionRow()
         self.ssh_row.set_title("SSH Daemon")
-        self.ssh_row.set_subtitle("Listening at ~/.goldwarden-ssh-agent.sock")
+        self.ssh_row.set_subtitle("Getting status...")
+        self.ssh_row.set_icon_name("emblem-default")
         self.preferences_group.add(self.ssh_row)
 
-        self.icon = components.status_icon_ok("emblem-default")
-        self.ssh_row.add_prefix(self.icon)
+        self.goldwarden_daemon_row = Adw.ActionRow()
+        self.goldwarden_daemon_row.set_title("Goldwarden Daemon")
+        self.goldwarden_daemon_row.set_subtitle("Getting status...")
+        self.goldwarden_daemon_row.set_icon_name("emblem-default")
+        self.preferences_group.add(self.goldwarden_daemon_row)
 
         self.login_with_device = Adw.ActionRow()
         self.login_with_device.set_title("Login with device")
@@ -168,6 +172,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
+            runtimeCfg = goldwarden.get_runtime_config()
+            if runtimeCfg != None:
+                self.ssh_row.set_subtitle("Listening at "+runtimeCfg["SSHAgentSocketPath"])
+                self.goldwarden_daemon_row.set_subtitle("Listening at "+runtimeCfg["goldwardenSocketPath"])
+
             if status != None:
                 if pin_set:
                     self.unlock_button.set_sensitive(True)

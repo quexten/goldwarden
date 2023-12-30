@@ -46,6 +46,8 @@ type RuntimeConfig struct {
 	Password              string
 	Pin                   string
 	UseMemguard           bool
+	SSHAgentSocketPath    string
+	GoldwardenSocketPath  string
 }
 
 type ConfigFile struct {
