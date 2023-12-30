@@ -30,10 +30,9 @@ finish-args:
 modules:
   - ./ui/python3-requirements.json
   - name: wl-clipboard
-    buildsystem: simple
-    build-commands:
-      - meson setup build && cd build && ninja
-      - install -D build/src/wl-copy /app/bin/wl-copy
+    buildsystem: meson 
+    config-opts:
+      - -Dfishcompletiondir=no
     sources:
       - type: git
         url: https://github.com/bugaevc/wl-clipboard.git
@@ -47,14 +46,22 @@ modules:
       - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
       - install -Dm644 ./ui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
     sources:
-      - type: archive
-        url: https://github.com/quexten/goldwarden/archive/refs/tags/v0.2.3.tar.gz
-        sha256: cec00e4990ab002bd78cb7578ade3af5a75fb04172e31d23ad2a0cd8baee8e98
+      - type: dir
+        path: ./
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
-      - install -D goldwarden_linux_x86_64 /app/bin/goldwarden
+      - install -D goldwarden_linux_* /app/bin/goldwarden
     sources:
       - type: file
-        url: https://github.com/quexten/goldwarden/releases/download/v0.2.3/goldwarden_linux_x86_64
-        sha256: a8069c8cf90805bca4ebc1ef5562f834109e1f0b0e781f0ce4f375074a8130e9
+        url: https://github.com/quexten/goldwarden/releases/download/v0.2.5/goldwarden_linux_x86_64
+        sha256: 8854594e40516b01d3647c5bd0085442b4c31f715b6c53db91748f0456fa5f2a
+        only-arches: [x86_64]
+      - type: file
+        url: https://github.com/quexten/goldwarden/releases/download/v0.2.5/goldwarden_linux_arm64
+        sha256: 30d3b8ece22557d82ec21aa7b01cfd5b0b50ff489868a4d4ec71d57bf8c4d8c1
+        only-arches: [aarch64]
+      - type: file
+        url: https://github.com/quexten/goldwarden/releases/download/v0.2.5/goldwarden_linux_x86
+        sha256: e1166098f46c4947d176714318c40a96930626c149d73e511ea6ca75099acfbc
+        only-arches: [i386]
