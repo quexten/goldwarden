@@ -23,9 +23,9 @@ Autotype is currently implemented via the remotedesktop portal. This is supporte
 
 ### Installation
 
-#### Flatpak (WIP)
+#### Flatpak
 There is a flatpak that includes a small UI, autotype functionality and autostarting of the daemon.
-**Not yet on flathub**
+[<img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png' />](https://flathub.org/apps/details/com.quexten.Goldwarden)
 
 <img src='https://github.com/quexten/goldwarden/assets/11866552/5d36ed8c-46f1-4444-adb0-f4ca1d0433c5' width='700'>
 
@@ -39,6 +39,9 @@ should be enough to install goldwarden on your system.
 
 ##### Deb / RPM
 For deb/rpm, download the deb/rpm from the latest release on GitHub and install it using your package manager.
+
+#### NixOS
+https://github.com/NixOS/nixpkgs/pull/278362
 
 ##### Github Binary Releases
 On other distributions, Mac and Windows, you can download it from the latest release on GitHub and put it into a location you want to have it in, f.e `/usr/bin`.
