@@ -282,6 +282,16 @@ def show_login():
     email_entry.set_text("")
     auth_preference_group.add(email_entry)
 
+    client_id_entry = Adw.EntryRow()
+    client_id_entry.set_title("Client ID (optional)")
+    client_id_entry.set_text("")
+    auth_preference_group.add(client_id_entry)
+
+    client_secret_entry = Adw.EntryRow()
+    client_secret_entry.set_title("Client Secret (optional)")
+    client_secret_entry.set_text("")
+    auth_preference_group.add(client_secret_entry)
+
     dialog.add_button("Login", Gtk.ResponseType.OK)
     def on_save(res):
         if res != Gtk.ResponseType.OK:
@@ -289,6 +299,8 @@ def show_login():
         goldwarden.set_api_url(api_url_entry.get_text())
         goldwarden.set_identity_url(identity_url_entry.get_text())
         goldwarden.set_notification_url(notification_url_entry.get_text())
+        goldwarden.set_client_id(client_id_entry.get_text())
+        goldwarden.set_client_secret(client_secret_entry.get_text())
         def login():
             res = goldwarden.login_with_password(email_entry.get_text(), "password")
             def handle_res():

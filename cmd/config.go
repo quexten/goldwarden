@@ -107,9 +107,9 @@ var setNotificationsURLCmd = &cobra.Command{
 }
 
 var setApiClientIDCmd = &cobra.Command{
-	Use:   "set-api-client-id",
-	Short: "Set the api client id",
-	Long:  `Set the api client id.`,
+	Use:   "set-client-id",
+	Short: "Set the client id",
+	Long:  `Set the client id.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			return
@@ -140,7 +140,7 @@ var setApiClientIDCmd = &cobra.Command{
 }
 
 var setApiSecretCmd = &cobra.Command{
-	Use:   "set-api-client-secret",
+	Use:   "set-client-secret",
 	Short: "Set the api secret",
 	Long:  `Set the api secret.`,
 	Run: func(cmd *cobra.Command, args []string) {
