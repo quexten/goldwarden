@@ -304,10 +304,8 @@ def show_login():
         def login():
             res = goldwarden.login_with_password(email_entry.get_text(), "password")
             def handle_res():
-                print("handle res", res)
                 if res == "ok":
                     dialog.close()
-                    print("ok")
                 elif res == "badpass":
                     bad_pass_diag = Gtk.MessageDialog(transient_for=dialog, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Bad password")
                     bad_pass_diag.connect("response", lambda dialog, response: bad_pass_diag.close())
