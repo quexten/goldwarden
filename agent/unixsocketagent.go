@@ -23,7 +23,7 @@ import (
 
 const (
 	FullSyncInterval     = 60 * time.Minute
-	TokenRefreshInterval = 30 * time.Minute
+	TokenRefreshInterval = 10 * time.Minute
 )
 
 var log = logging.GetLogger("Goldwarden", "Agent")
@@ -248,6 +248,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		for {
 			time.Sleep(FullSyncInterval)
 			if !cfg.IsLocked() {
+				bitwarden.RefreshToken(ctx, &cfg)
 				token, err := cfg.GetToken()
 				if err != nil {
 					log.Warn("Could not get token: %s", err.Error())

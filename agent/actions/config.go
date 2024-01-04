@@ -55,6 +55,38 @@ func handleSetNotifications(request messages.IPCMessage, cfg *config.Config, vau
 	})
 }
 
+func handleSetClientID(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	clientID := messages.ParsePayload(request).(messages.SetClientIDRequest).Value
+	cfg.SetClientID(clientID)
+	err = cfg.WriteConfig()
+	if err != nil {
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
+		Success: true,
+	})
+}
+
+func handleSetClientSecret(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	clientSecret := messages.ParsePayload(request).(messages.SetClientSecretRequest).Value
+	cfg.SetClientSecret(clientSecret)
+	err = cfg.WriteConfig()
+	if err != nil {
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
+		Success: true,
+	})
+}
+
 func handleGetRuntimeConfig(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	return messages.IPCMessageFromPayload(messages.GetRuntimeConfigResponse{
 		UseMemguard:          cfg.ConfigFile.RuntimeConfig.UseMemguard,
@@ -68,4 +100,6 @@ func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetApiURLRequest{}), handleSetApiURL)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetNotificationsURLRequest{}), handleSetNotifications)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetRuntimeConfigRequest{}), handleGetRuntimeConfig)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetClientIDRequest{}), handleSetClientID)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetClientSecretRequest{}), handleSetClientSecret)
 }

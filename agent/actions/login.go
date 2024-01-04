@@ -32,7 +32,9 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	var masterKey crypto.MasterKey
 	var masterpasswordHash string
 
-	if req.Passwordless {
+	if secret, err := cfg.GetClientSecret(); err == nil && secret != "" {
+		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithApiKey(ctx, req.Email, cfg, vault)
+	} else if req.Passwordless {
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithDevice(ctx, req.Email, cfg, vault)
 	} else {
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithMasterpassword(ctx, req.Email, cfg, vault)

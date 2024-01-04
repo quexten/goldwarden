@@ -106,6 +106,72 @@ var setNotificationsURLCmd = &cobra.Command{
 	},
 }
 
+var setApiClientIDCmd = &cobra.Command{
+	Use:   "set-api-client-id",
+	Short: "Set the api client id",
+	Long:  `Set the api client id.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		id := args[0]
+		request := messages.SetClientIDRequest{}
+		request.Value = id
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				println("Done")
+			} else {
+				println("Setting api client id failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			println("Wrong IPC response type")
+		}
+
+	},
+}
+
+var setApiSecretCmd = &cobra.Command{
+	Use:   "set-api-client-secret",
+	Short: "Set the api secret",
+	Long:  `Set the api secret.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		secret := args[0]
+		request := messages.SetClientSecretRequest{}
+		request.Value = secret
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				println("Done")
+			} else {
+				println("Setting api secret failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			println("Wrong IPC response type")
+		}
+
+	},
+}
+
 var getRuntimeConfigCmd = &cobra.Command{
 	Use:   "get-runtime-config",
 	Short: "Get the runtime config",
@@ -144,4 +210,6 @@ func init() {
 	configCmd.AddCommand(setIdentityURLCmd)
 	configCmd.AddCommand(setNotificationsURLCmd)
 	configCmd.AddCommand(getRuntimeConfigCmd)
+	configCmd.AddCommand(setApiClientIDCmd)
+	configCmd.AddCommand(setApiSecretCmd)
 }

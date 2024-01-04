@@ -54,6 +54,8 @@ type ConfigFile struct {
 	IdentityUrl                 string
 	ApiUrl                      string
 	NotificationsUrl            string
+	EncryptedClientID           string
+	EncryptedClientSecret       string
 	DeviceUUID                  string
 	ConfigKeyHash               string
 	EncryptedToken              string
@@ -88,6 +90,8 @@ func DefaultConfig(useMemguard bool) Config {
 			IdentityUrl:                 "https://vault.bitwarden.com/identity",
 			ApiUrl:                      "https://vault.bitwarden.com/api",
 			NotificationsUrl:            "https://notifications.bitwarden.com",
+			EncryptedClientID:           "",
+			EncryptedClientSecret:       "",
 			DeviceUUID:                  deviceUUID.String(),
 			ConfigKeyHash:               "",
 			EncryptedToken:              "",
@@ -236,6 +240,82 @@ func (c *Config) SetToken(token LoginToken) error {
 	}
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedToken = encryptedToken
+	// c.mu.Unlock()
+	c.WriteConfig()
+	return nil
+}
+
+func (c *Config) GetClientID() (string, error) {
+	if c.IsLocked() {
+		return "", errors.New("config is locked")
+	}
+
+	if c.ConfigFile.EncryptedClientID == "" {
+		return "", nil
+	}
+
+	decrypted, err := c.decryptString(c.ConfigFile.EncryptedClientID)
+	if err != nil {
+		return "", err
+	}
+	return decrypted, nil
+}
+
+func (c *Config) SetClientID(clientID string) error {
+	if c.IsLocked() {
+		return errors.New("config is locked")
+	}
+
+	if clientID == "" {
+		c.ConfigFile.EncryptedClientID = ""
+		c.WriteConfig()
+		return nil
+	}
+
+	encryptedClientID, err := c.encryptString(clientID)
+	if err != nil {
+		return err
+	}
+	// c.mu.Lock()
+	c.ConfigFile.EncryptedClientID = encryptedClientID
+	// c.mu.Unlock()
+	c.WriteConfig()
+	return nil
+}
+
+func (c *Config) GetClientSecret() (string, error) {
+	if c.IsLocked() {
+		return "", errors.New("config is locked")
+	}
+
+	if c.ConfigFile.EncryptedClientSecret == "" {
+		return "", nil
+	}
+
+	decrypted, err := c.decryptString(c.ConfigFile.EncryptedClientSecret)
+	if err != nil {
+		return "", err
+	}
+	return decrypted, nil
+}
+
+func (c *Config) SetClientSecret(clientSecret string) error {
+	if c.IsLocked() {
+		return errors.New("config is locked")
+	}
+
+	if clientSecret == "" {
+		c.ConfigFile.EncryptedClientSecret = ""
+		c.WriteConfig()
+		return nil
+	}
+
+	encryptedClientSecret, err := c.encryptString(clientSecret)
+	if err != nil {
+		return err
+	}
+	// c.mu.Lock()
+	c.ConfigFile.EncryptedClientSecret = encryptedClientSecret
 	// c.mu.Unlock()
 	c.WriteConfig()
 	return nil
