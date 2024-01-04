@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
@@ -116,6 +117,10 @@ var setApiClientIDCmd = &cobra.Command{
 		}
 
 		id := args[0]
+		if len(id) >= 2 && strings.HasPrefix(id, "\"") && strings.HasSuffix(id, "\"") {
+			id = id[1 : len(id)-1]
+		}
+		id = strings.TrimSpace(id)
 		request := messages.SetClientIDRequest{}
 		request.Value = id
 
@@ -149,6 +154,10 @@ var setApiSecretCmd = &cobra.Command{
 		}
 
 		secret := args[0]
+		if len(secret) >= 2 && strings.HasPrefix(secret, "\"") && strings.HasSuffix(secret, "\"") {
+			secret = secret[1 : len(secret)-1]
+		}
+		secret = strings.TrimSpace(secret)
 		request := messages.SetClientSecretRequest{}
 		request.Value = secret
 

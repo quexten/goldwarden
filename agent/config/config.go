@@ -165,6 +165,8 @@ func (c *Config) Purge() {
 	c.ConfigFile.EncryptedMasterPasswordHash = ""
 	c.ConfigFile.EncryptedToken = ""
 	c.ConfigFile.EncryptedUserSymmetricKey = ""
+	c.ConfigFile.EncryptedClientID = ""
+	c.ConfigFile.EncryptedClientSecret = ""
 	c.ConfigFile.ConfigKeyHash = ""
 	c.ConfigFile.EncryptedMasterKey = ""
 	key := NewBuffer(32, c.useMemguard)
@@ -189,6 +191,8 @@ func (c *Config) UpdatePin(password string, write bool) {
 	plaintextUserSymmetricKey, err3 := c.decryptString(c.ConfigFile.EncryptedUserSymmetricKey)
 	plaintextEncryptedMasterPasswordHash, err4 := c.decryptString(c.ConfigFile.EncryptedMasterPasswordHash)
 	plaintextMasterKey, err5 := c.decryptString(c.ConfigFile.EncryptedMasterKey)
+	plaintextClientID, err6 := c.decryptString(c.ConfigFile.EncryptedClientID)
+	plaintextClientSecret, err7 := c.decryptString(c.ConfigFile.EncryptedClientSecret)
 
 	key := NewBufferFromBytes(newKey, c.useMemguard)
 	c.key = &key
@@ -204,6 +208,12 @@ func (c *Config) UpdatePin(password string, write bool) {
 	}
 	if err5 == nil {
 		c.ConfigFile.EncryptedMasterKey, err5 = c.encryptString(plaintextMasterKey)
+	}
+	if err6 == nil {
+		c.ConfigFile.EncryptedClientID, err6 = c.encryptString(plaintextClientID)
+	}
+	if err7 == nil {
+		c.ConfigFile.EncryptedClientSecret, err7 = c.encryptString(plaintextClientSecret)
 	}
 	c.mu.Unlock()
 

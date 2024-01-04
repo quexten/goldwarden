@@ -34,10 +34,13 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	var masterpasswordHash string
 
 	if secret, err := cfg.GetClientSecret(); err == nil && secret != "" {
+		actionsLog.Info("Logging in with client secret")
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithApiKey(ctx, req.Email, cfg, vault)
 	} else if req.Passwordless {
+		actionsLog.Info("Logging in with passwordless")
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithDevice(ctx, req.Email, cfg, vault)
 	} else {
+		actionsLog.Info("Logging in with master password")
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithMasterpassword(ctx, req.Email, cfg, vault)
 	}
 	if err != nil {
