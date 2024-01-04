@@ -131,6 +131,7 @@ func (c *Config) Unlock(password string) bool {
 
 	keyBuffer := NewBufferFromBytes(key, c.useMemguard)
 	c.key = &keyBuffer
+	notify.Notify("Goldwarden", "Vault Unlocked", "", func() {})
 	return true
 }
 
