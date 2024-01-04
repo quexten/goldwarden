@@ -51,7 +51,11 @@ func sync(ctx context.Context, vault *vault.Vault, cfg *config.Config) bool {
 	token, err := cfg.GetToken()
 	if err == nil {
 		if token.AccessToken != "" {
-			bitwarden.RefreshToken(ctx, cfg)
+			refreshed := bitwarden.RefreshToken(ctx, cfg)
+			if !refreshed {
+				return false
+			}
+
 			userSymmetricKey, err := cfg.GetUserSymmetricKey()
 			if err != nil {
 				return false
@@ -83,10 +87,17 @@ func ensureIsNotLocked(action Action) Action {
 			ctx1 := context.Background()
 			success := sync(ctx1, vault, cfg)
 			if err != nil || !success {
-				return messages.IPCMessageFromPayload(messages.ActionResponse{
-					Success: false,
-					Message: err.Error(),
-				})
+				if err != nil {
+					return messages.IPCMessageFromPayload(messages.ActionResponse{
+						Success: false,
+						Message: err.Error(),
+					})
+				} else {
+					return messages.IPCMessageFromPayload(messages.ActionResponse{
+						Success: false,
+						Message: "Could not sync vault",
+					})
+				}
 			}
 
 			systemauth.CreatePinSession(*ctx)

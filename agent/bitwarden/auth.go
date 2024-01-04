@@ -38,11 +38,15 @@ type preLoginResponse struct {
 }
 
 type LoginResponseToken struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	Key          string `json:"key"`
+	AccessToken    string `json:"access_token"`
+	ExpiresIn      int    `json:"expires_in"`
+	TokenType      string `json:"token_type"`
+	RefreshToken   string `json:"refresh_token"`
+	Key            string `json:"key"`
+	Kdf            int    `json:"Kdf"`
+	KdfIterations  int    `json:"KdfIterations"`
+	KdfMemory      int    `json:"KdfMemory"`
+	KdfParallelism int    `json:"KdfParallelism"`
 }
 
 const (
@@ -62,6 +66,52 @@ func deviceType() string {
 	default:
 		return "14"
 	}
+}
+
+func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
+	clientID, err := cfg.GetClientID()
+	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client ID: %v", err), "", func() {})
+		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not get client ID: %v", err)
+	}
+	clientSecret, err := cfg.GetClientSecret()
+	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client secret: %v", err), "", func() {})
+		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not get client secret: %v", err)
+	}
+
+	values := urlValues(
+		"client_id", clientID,
+		"client_secret", clientSecret,
+		"scope", loginApiKeyScope,
+		"grant_type", "client_credentials",
+		"deviceType", deviceType(),
+		"deviceName", deviceName,
+		"deviceIdentifier", cfg.ConfigFile.DeviceUUID,
+	)
+
+	var loginResponseToken LoginResponseToken
+	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
+	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via API key: %v", err), "", func() {})
+		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via API key: %v", err)
+	}
+
+	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
+	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", func() {})
+		return LoginResponseToken{}, crypto.MasterKey{}, "", err
+	}
+
+	masterKey, err := crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(loginResponseToken.Kdf), Iterations: uint32(loginResponseToken.KdfIterations), Memory: uint32(loginResponseToken.KdfMemory), Parallelism: uint32(loginResponseToken.KdfParallelism)})
+	if err != nil {
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", func() {})
+		return LoginResponseToken{}, crypto.MasterKey{}, "", err
+	}
+	hashedPassword := b64enc.EncodeToString(pbkdf2.Key(masterKey.GetBytes(), []byte(password), 1, 32, sha256.New))
+
+	authLog.Info("Logged in")
+	return loginResponseToken, masterKey, hashedPassword, nil
 }
 
 func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
@@ -200,25 +250,70 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 		fmt.Println("Could not get refresh token: ", err)
 		return false
 	}
+	if token.RefreshToken == "" {
+		authLog.Info("Refreshing using API Key")
+		clientID, err := cfg.GetClientID()
+		if err != nil {
+			authLog.Error("Could not get client ID: %s", err.Error())
+			return false
+		}
+		clientSecret, err := cfg.GetClientSecret()
+		if err != nil {
+			authLog.Error("Could not get client secret: %s", err.Error())
+			return false
+		}
 
-	var loginResponseToken LoginResponseToken
-	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, urlValues(
-		"grant_type", "refresh_token",
-		"refresh_token", token.RefreshToken,
-		"client_id", "connector",
-	))
-	if err != nil {
-		authLog.Error("Could not refresh token: %s", err.Error())
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
-		return false
+		if clientID != "" && clientSecret != "" {
+			values := urlValues(
+				"client_id", clientID,
+				"client_secret", clientSecret,
+				"scope", loginApiKeyScope,
+				"grant_type", "client_credentials",
+				"deviceType", deviceType(),
+				"deviceName", deviceName,
+				"deviceIdentifier", cfg.ConfigFile.DeviceUUID,
+			)
+
+			var loginResponseToken LoginResponseToken
+			err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
+			if err != nil {
+				authLog.Error("Could not refresh token: %s", err.Error())
+				notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
+				return false
+			}
+
+			cfg.SetToken(config.LoginToken{
+				AccessToken:  loginResponseToken.AccessToken,
+				RefreshToken: "",
+				Key:          loginResponseToken.Key,
+				TokenType:    loginResponseToken.TokenType,
+				ExpiresIn:    loginResponseToken.ExpiresIn,
+			})
+		} else {
+			authLog.Info("No api credentials set")
+		}
+	} else {
+		authLog.Info("Refreshing using refresh token")
+
+		var loginResponseToken LoginResponseToken
+		err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, urlValues(
+			"grant_type", "refresh_token",
+			"refresh_token", token.RefreshToken,
+			"client_id", "connector",
+		))
+		if err != nil {
+			authLog.Error("Could not refresh token: %s", err.Error())
+			notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
+			return false
+		}
+		cfg.SetToken(config.LoginToken{
+			AccessToken:  loginResponseToken.AccessToken,
+			RefreshToken: loginResponseToken.RefreshToken,
+			Key:          loginResponseToken.Key,
+			TokenType:    loginResponseToken.TokenType,
+			ExpiresIn:    loginResponseToken.ExpiresIn,
+		})
 	}
-	cfg.SetToken(config.LoginToken{
-		AccessToken:  loginResponseToken.AccessToken,
-		RefreshToken: loginResponseToken.RefreshToken,
-		Key:          loginResponseToken.Key,
-		TokenType:    loginResponseToken.TokenType,
-		ExpiresIn:    loginResponseToken.ExpiresIn,
-	})
 
 	authLog.Info("Token refreshed")
 

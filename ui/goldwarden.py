@@ -27,6 +27,18 @@ def set_notification_url(url):
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
 
+def set_client_id(client_id):
+    restic_cmd = f"{BINARY_PATH} config set-client-id {client_id}"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Failed err", result.stderr)
+
+def set_client_secret(client_secret):
+    restic_cmd = f"{BINARY_PATH} config set-client-secret {client_secret}"
+    result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Failed err", result.stderr)
+
 def login_with_password(email, password):
     restic_cmd = f"{BINARY_PATH} vault login --email {email}"
     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True)

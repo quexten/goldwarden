@@ -14,6 +14,14 @@ type SetNotificationsURLRequest struct {
 	Value string
 }
 
+type SetClientIDRequest struct {
+	Value string
+}
+
+type SetClientSecretRequest struct {
+	Value string
+}
+
 type GetRuntimeConfigRequest struct{}
 
 type GetRuntimeConfigResponse struct {
@@ -67,4 +75,22 @@ func init() {
 		}
 		return req, nil
 	}, GetRuntimeConfigResponse{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req SetClientIDRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, SetClientIDRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req SetClientSecretRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, SetClientSecretRequest{})
 }

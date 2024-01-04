@@ -32,6 +32,9 @@ type Fido2Response struct {
 
 func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Config) (string, error) {
 	url, err := url.Parse(config.ConfigFile.ApiUrl)
+	if err != nil {
+		return "", err
+	}
 	rpid := url.Host
 
 	locs, err := libfido2.DeviceLocations()
@@ -52,7 +55,7 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	for i, cred := range credentials {
 		decodedPublicKey, err := base64.RawURLEncoding.DecodeString(cred)
 		if err != nil {
-			twofactorLog.Fatal(err.Error())
+			return "", err
 		}
 		creds[i] = decodedPublicKey
 	}
@@ -61,21 +64,51 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	clientDataHash := sha256.Sum256([]byte(clientDataJson))
 	clientDataJson = base64.URLEncoding.EncodeToString([]byte(clientDataJson))
 
-	pin, err := pinentry.GetPassword("Fido2 PIN", "Enter your token's PIN")
+	info, err := device.Info()
 	if err != nil {
-		twofactorLog.Fatal(err.Error())
+		return "", err
+	}
+	hasPin := false
+	for _, option := range info.Options {
+		if option.Name == "clientPin" && option.Value == "true" {
+			hasPin = true
+		}
 	}
 
-	assertion, err := device.Assertion(
-		rpid,
-		clientDataHash[:],
-		creds,
-		pin,
-		&libfido2.AssertionOpts{
-			Extensions: []libfido2.Extension{},
-			UV:         libfido2.False,
-		},
-	)
+	var assertion *libfido2.Assertion
+	if hasPin {
+		pin, err := pinentry.GetPassword("Fido2 PIN", "Enter your token's PIN")
+		if err != nil {
+			return "", err
+		}
+
+		assertion, err = device.Assertion(
+			rpid,
+			clientDataHash[:],
+			creds,
+			pin,
+			&libfido2.AssertionOpts{
+				Extensions: []libfido2.Extension{},
+				UV:         libfido2.False,
+			},
+		)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		assertion, err = device.Assertion(
+			rpid,
+			clientDataHash[:],
+			creds,
+			"",
+			&libfido2.AssertionOpts{
+				Extensions: []libfido2.Extension{},
+			},
+		)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	authDataRaw := assertion.AuthDataCBOR[2:] // first 2 bytes seem to be from cbor, don't have a proper decoder ATM but this works
 	authData := base64.URLEncoding.EncodeToString(authDataRaw)
@@ -101,5 +134,5 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 	}
 
 	respjson, err := json.Marshal(resp)
-	return string(respjson), nil
+	return string(respjson), err
 }
