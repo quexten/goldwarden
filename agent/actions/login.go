@@ -7,6 +7,7 @@ import (
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
@@ -80,6 +81,12 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 
 	err = crypto.InitKeyringFromMasterKey(vault.Keyring, profile.Profile.Key, profile.Profile.PrivateKey, orgKeys, masterKey)
 	if err != nil {
+		defer func() {
+			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", func() {})
+			cfg.SetToken(config.LoginToken{})
+			vault.Clear()
+		}()
+
 		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not sync vault: %s", err.Error()),
@@ -101,6 +108,12 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	}
 	if err != nil {
+		defer func() {
+			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", func() {})
+			cfg.SetToken(config.LoginToken{})
+			vault.Clear()
+		}()
+
 		var payload = messages.ActionResponse{
 			Success: false,
 			Message: fmt.Sprintf("Could not sync vault: %s", err.Error()),
