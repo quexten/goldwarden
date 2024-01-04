@@ -18,6 +18,9 @@
       <li> Browser biometric login </li>
       <li> Kernel level memory protection </li>
     </ul>
+    <p>
+        For setup instructions for SSH keys and auto-type please read the wiki on the GitHub page.
+    </p>
   </description>
   <categories>
     <category>Utility</category>
@@ -33,6 +36,8 @@
   <developer_name>Bernd Schoolmann</developer_name>
   <update_contact>mail@quexten.com</update_contact>
   <releases>
+    <release version="0.2.8" date="2024-01-04"/>
+    <release version="0.2.7" date="2023-12-30"/>
     <release version="0.2.6" date="2023-12-30"/>
   </releases>
   <content_rating type="oars-1.1"/>
