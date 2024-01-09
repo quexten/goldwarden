@@ -154,6 +154,12 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 		if !isMacValid(msg, s.MAC, macKeyData) {
 			return nil, fmt.Errorf("decrypt: MAC mismatch")
 		}
+	} else if s.Type == AesCbc256_B64 {
+		return nil, fmt.Errorf("decrypt: cipher of unsupported type %q", s.Type)
+	}
+
+	if len(s.IV) != block.BlockSize() {
+		return nil, fmt.Errorf("decrypt: invalid IV length, expected %d, got %d", block.BlockSize(), len(s.IV))
 	}
 
 	mode := cipher.NewCBCDecrypter(block, s.IV)
@@ -168,7 +174,13 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 
 func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (EncString, error) {
 	encKeyData, err := key.EncryptionKeyBytes()
+	if err != nil {
+		return EncString{}, err
+	}
 	macKeyData, err := key.MacKeyBytes()
+	if err != nil {
+		return EncString{}, err
+	}
 
 	s := EncString{}
 	switch typ {
