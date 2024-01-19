@@ -4,6 +4,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+env:
+  GO_VERSION: '1.20'
 jobs:
   flatpak:
     name: "Flatpak"
@@ -27,6 +29,14 @@ jobs:
       uses: docker/setup-qemu-action@v2
       with:
         platforms: arm64
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GO_VERSION }}
+    - name: Install libfido2-dev
+      run: sudo apt-get install -y libfido2-dev
+    - name: Build
+      run: go build -o goldwarden -v .
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
         bundle: goldwarden.flatpak
