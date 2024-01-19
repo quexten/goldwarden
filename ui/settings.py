@@ -16,9 +16,24 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # vertical box
+        self.box = Gtk.Box()
+        self.box.set_orientation(Gtk.Orientation.VERTICAL)
+        self.set_child(self.box)
+        
+        def set_pin():
+            set_pin_thread = Thread(target=goldwarden.enable_pin)
+            set_pin_thread.start()
+
+        self.banner = Adw.Banner()
+        self.banner.set_title("No pin set, please set it now")
+        self.banner.set_button_label("Set Pin")
+        self.banner.connect("button-clicked", lambda banner: set_pin())
+        self.box.append(self.banner)
+
         self.stack = Gtk.Stack()
         self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-        self.set_child(self.stack)
+        self.box.append(self.stack)
 
         self.preferences_page = Adw.PreferencesPage()
         self.preferences_page.set_title("General")
@@ -134,9 +149,6 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
     
         self.set_pin_button = Gtk.Button()
         self.set_pin_button.set_label("Set Pin")
-        def set_pin():
-            set_pin_thread = Thread(target=goldwarden.enable_pin)
-            set_pin_thread.start()
         self.set_pin_button.connect("clicked", lambda button: set_pin())
         self.set_pin_button.set_margin_top(10)
         self.set_pin_button.set_sensitive(False)
@@ -180,8 +192,10 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             if status != None:
                 if pin_set:
                     self.unlock_button.set_sensitive(True)
+                    self.banner.set_revealed(False)
                 else:
                     self.unlock_button.set_sensitive(False)
+                    self.banner.set_revealed(True)
                 logged_in = status["loggedIn"]
                 if logged_in and not status["locked"]:
                     self.preferences_group.set_visible(True)
