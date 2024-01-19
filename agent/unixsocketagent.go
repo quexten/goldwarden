@@ -210,10 +210,14 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 				token, err := cfg.GetToken()
 				if err == nil {
 					if token.AccessToken != "" {
-						bitwarden.RefreshToken(ctx, &cfg)
+						gotToken := bitwarden.RefreshToken(ctx, &cfg)
+						if !gotToken {
+							log.Warn("Could not get token")
+							return false
+						}
 						userSymmetricKey, err := cfg.GetUserSymmetricKey()
 						if err != nil {
-							fmt.Println(err)
+							log.Error("Could not get user symmetric key: %s", err.Error())
 						}
 						var protectedUserSymetricKey crypto.SymmetricEncryptionKey
 						if vault.Keyring.IsMemguard {
@@ -224,11 +228,17 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 
 						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 						if err != nil {
-							fmt.Println(err)
+							log.Error("Could not sync: %s", err.Error())
 						}
+					} else {
+						log.Warn("Access token is empty")
 					}
+				} else {
+					log.Error("Could not get token: %s", err.Error())
 				}
 				return true
+			} else {
+				log.Warn("Could not unlock: %s", err.Error())
 			}
 			return false
 		})

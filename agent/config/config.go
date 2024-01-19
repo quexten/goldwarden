@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -131,7 +132,7 @@ func (c *Config) Unlock(password string) bool {
 
 	keyBuffer := NewBufferFromBytes(key, c.useMemguard)
 	c.key = &keyBuffer
-	notify.Notify("Goldwarden", "Vault Unlocked", "", func() {})
+	notify.Notify("Goldwarden", "Vault Unlocked", "", 60*time.Second, func() {})
 	return true
 }
 
@@ -155,7 +156,7 @@ func (c *Config) Lock() {
 		return
 	}
 	(*c.key).Wipe()
-	notify.Notify("Goldwarden", "Vault Locked", "", func() {})
+	notify.Notify("Goldwarden", "Vault Locked", "", 60*time.Second, func() {})
 }
 
 func (c *Config) Purge() {

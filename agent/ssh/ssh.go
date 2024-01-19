@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/notify"
@@ -125,9 +126,9 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 	var rand = rand.Reader
 	log.Info("Sign Request for key: %s %s accepted", ssh.FingerprintSHA256(key), sshKey.Name)
 	if isGit {
-		notify.Notify("Goldwarden", fmt.Sprintf("Git Signing Request Approved for %s", sshKey.Name), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Git Signing Request Approved for %s", sshKey.Name), "", 10*time.Second, func() {})
 	} else {
-		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", 10*time.Second, func() {})
 	}
 	return signer.Sign(rand, data)
 }

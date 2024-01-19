@@ -2,7 +2,6 @@ package actions
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -53,16 +52,25 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 		return
 	}
 
+	actionsLog.Info("Unlocking vault...")
 	if cfg.IsLoggedIn() {
 		token, err := cfg.GetToken()
 		if err == nil {
 			if token.AccessToken != "" {
 				ctx := context.Background()
-				bitwarden.RefreshToken(ctx, cfg)
+				gotToken := bitwarden.RefreshToken(ctx, cfg)
+				if gotToken {
+					actionsLog.Info("Token refreshed")
+				} else {
+					actionsLog.Warn("Token refresh failed")
+				}
 				token, err := cfg.GetToken()
+				if err != nil {
+					actionsLog.Error("Could not get token: %s", err.Error())
+				}
 				userSymmkey, err := cfg.GetUserSymmetricKey()
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not get user symmetric key: %s", err.Error())
 				}
 
 				var safeUserSymmkey crypto.SymmetricEncryptionKey
@@ -72,14 +80,18 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 					safeUserSymmkey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmkey)
 				}
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not create safe user symmetric key: %s", err.Error())
 				}
 
 				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &safeUserSymmkey, true)
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not sync: %s", err.Error())
 				}
+			} else {
+				actionsLog.Warn("Access token is empty")
 			}
+		} else {
+			actionsLog.Warn("Could not get token: %s", err.Error())
 		}
 	}
 

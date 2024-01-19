@@ -35,7 +35,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 	sync, err := Sync(ctx, config)
 	if err != nil {
 		log.Error("Could not sync: %v", err)
-		notify.Notify("Goldwarden", "Could not sync", "", func() {})
+		notify.Notify("Goldwarden", "Could not sync", "", 0, func() {})
 		if allowCache {
 			home, _ := os.UserHomeDir()
 			sync, err = ReadVault(home + path)
