@@ -10,8 +10,10 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
+	"github.com/quexten/goldwarden/logging"
 )
 
+var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 var AgentActionsRegistry = newActionsRegistry()
 
 type Action func(messages.IPCMessage, *config.Config, *vault.Vault, *sockets.CallingContext) (messages.IPCMessage, error)

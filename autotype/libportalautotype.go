@@ -7,13 +7,17 @@ import (
 	"time"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/quexten/goldwarden/logging"
 )
 
 var globalID = 0
 
 const autoTypeDelay = 1 * time.Millisecond
 
+var log = logging.GetLogger("Goldwarden", "Autotype")
+
 func TypeString(textToType string) {
+	log.Info("Starting to Type String")
 	bus, err := dbus.SessionBus()
 	if err != nil {
 		panic(err)
@@ -23,9 +27,13 @@ func TypeString(textToType string) {
 	obj.AddMatchSignal("org.freedesktop.portal.Request", "Response")
 
 	globalID++
-	obj.Call("org.freedesktop.portal.RemoteDesktop.CreateSession", 0, map[string]dbus.Variant{
+	res0 := obj.Call("org.freedesktop.portal.RemoteDesktop.CreateSession", 0, map[string]dbus.Variant{
 		"session_handle_token": dbus.MakeVariant("u" + fmt.Sprint(globalID)),
 	})
+	if res0.Err != nil {
+		log.Error("Error creating session: %s", res0.Err.Error())
+		return
+	}
 
 	signals := make(chan *dbus.Signal, 10)
 	bus.Signal(signals)
@@ -38,15 +46,24 @@ func TypeString(textToType string) {
 		case message := <-signals:
 			fmt.Println("Message:", message)
 			if state == 0 {
+				log.Info("Selecting Devices")
 				result := message.Body[1].(map[string]dbus.Variant)
 				resultSessionHandle := result["session_handle"]
 				sessionHandle = dbus.ObjectPath(resultSessionHandle.String()[1 : len(resultSessionHandle.String())-1])
-				obj.Call("org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, map[string]dbus.Variant{})
+				res := obj.Call("org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, map[string]dbus.Variant{})
+				if res.Err != nil {
+					log.Error("Error selecting devices: %s", res.Err.Error())
+				}
 				state = 1
 			} else if state == 1 {
-				obj.Call("org.freedesktop.portal.RemoteDesktop.Start", 0, sessionHandle, "", map[string]dbus.Variant{})
+				log.Info("Starting Session")
+				res := obj.Call("org.freedesktop.portal.RemoteDesktop.Start", 0, sessionHandle, "", map[string]dbus.Variant{})
+				if res.Err != nil {
+					log.Error("Error starting session: %s", res.Err.Error())
+				}
 				state = 2
 			} else if state == 2 {
+				log.Info("Performing Typing")
 				state = 3
 				time.Sleep(200 * time.Millisecond)
 				for _, char := range textToType {
@@ -63,6 +80,9 @@ func TypeString(textToType string) {
 					}
 				}
 				bus.Close()
+				return
+			} else {
+				log.Info("State 3")
 				return
 			}
 		}

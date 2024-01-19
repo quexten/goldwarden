@@ -11,10 +11,7 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
-	"github.com/quexten/goldwarden/logging"
 )
-
-var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 
 func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	req := messages.ParsePayload(msg).(messages.CreateSSHKeyRequest)
