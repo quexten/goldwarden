@@ -30,12 +30,15 @@ type vaultAgent struct {
 }
 
 func (vaultAgent) Add(key agent.AddedKey) error {
+	log.Warn("Add Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
+	log.Info("List Request")
 	if vaultAgent.vault.Keyring.IsLocked() {
 		if !vaultAgent.unlockRequestAction() {
+			log.Warn("List request failed - Vault is locked")
 			return nil, errors.New("vault is locked")
 		}
 
@@ -47,6 +50,7 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 	for _, vaultSSHKey := range vaultSSHKeys {
 		signer, err := ssh.ParsePrivateKey([]byte(vaultSSHKey.Key))
 		if err != nil {
+			log.Warn("List request key skipped - Could not parse key: %s", err)
 			continue
 		}
 		pub := signer.PublicKey()
@@ -60,14 +64,17 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 }
 
 func (vaultAgent) Lock(passphrase []byte) error {
+	log.Warn("Lock Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent) Remove(key ssh.PublicKey) error {
+	log.Warn("Remove Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent) RemoveAll() error {
+	log.Warn("RemoveAll Request - Not implemented")
 	return nil
 }
 
@@ -146,11 +153,12 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 }
 
 func (vaultAgent) Signers() ([]ssh.Signer, error) {
-
+	log.Warn("Signers Request - Not implemented")
 	return []ssh.Signer{}, nil
 }
 
 func (vaultAgent) Unlock(passphrase []byte) error {
+	log.Warn("Unlock Request - Not implemented")
 	return nil
 }
 
