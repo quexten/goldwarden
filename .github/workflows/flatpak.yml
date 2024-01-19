@@ -21,8 +21,8 @@ jobs:
       run: go build -o goldwarden -v .
     - uses: actions/upload-artifact@v3
       with:
-        name: goldwarden_linux
-        path: ./goldwarden_linux
+        name: goldwarden
+        path: ./goldwarden
   flatpak:
     name: "Flatpak"
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
     - name: Download daemon
       uses: actions/download-artifact@v2
       with:
-        name: goldwarden_linux
+        name: goldwarden
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
         bundle: goldwarden.flatpak
