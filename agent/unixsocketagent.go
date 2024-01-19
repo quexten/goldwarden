@@ -137,6 +137,11 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 				// attempt to sync every minute until successful
 				for {
 					bitwarden.RefreshToken(ctx, &cfg)
+					token, err := cfg.GetToken()
+					if err != nil {
+						log.Error("Could not get token: %s", err.Error())
+					}
+
 					userSymmetricKey, err := cfg.GetUserSymmetricKey()
 					if err != nil {
 						fmt.Println(err)
@@ -152,7 +157,8 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 
 					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 					if err != nil {
-						fmt.Println(err)
+						log.Error("Could not sync: %s", err.Error())
+						notify.Notify("Goldwarden", "Could not perform initial sync", "", 0, func() {})
 						time.Sleep(60 * time.Second)
 						continue
 					} else {
@@ -214,6 +220,12 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						if !gotToken {
 							log.Warn("Could not get token")
 							return false
+						} else {
+							token, err = cfg.GetToken()
+							if err != nil {
+								log.Warn("Could not get token: %s", err.Error())
+								return false
+							}
 						}
 						userSymmetricKey, err := cfg.GetUserSymmetricKey()
 						if err != nil {
@@ -229,6 +241,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
 						if err != nil {
 							log.Error("Could not sync: %s", err.Error())
+							notify.Notify("Goldwarden", "Could not perform initial sync on ssh unlock", "", 0, func() {})
 						}
 					} else {
 						log.Warn("Access token is empty")
@@ -265,7 +278,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 					continue
 				}
 
-				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token), vault, &cfg, nil, false)
+				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, nil, false)
 			}
 		}
 	}()

@@ -154,7 +154,7 @@ func StartVirtualAgent(runtimeConfig config.RuntimeConfig) (chan []byte, chan []
 					continue
 				}
 
-				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token), vault, &cfg, nil, false)
+				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, nil, false)
 			}
 		}
 	}()
