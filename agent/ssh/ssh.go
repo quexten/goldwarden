@@ -107,11 +107,23 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		isGit = true
 	}
 
-	requestTemplate := "%s on %s>%s>%s is requesting ssh signage with key %s"
-	if isGit {
-		requestTemplate = "%s on %s>%s>%s is requesting git signage with key %s"
+	requestTemplate := ""
+	message := ""
+	if !vaultAgent.context.Error {
+		if isGit {
+			requestTemplate = "%s on %s>%s>%s is requesting git signage with key %s"
+		} else {
+			requestTemplate = "%s on %s>%s>%s is requesting ssh signage with key %s"
+		}
+		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
+	} else {
+		if isGit {
+			requestTemplate = "%s is requesting git signage with key %s"
+		} else {
+			requestTemplate = "%s is requesting ssh signage with key %s"
+		}
+		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, sshKey.Name)
 	}
-	message := fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
 
 	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
 		log.Info("Sign Request for key: %s denied", sshKey.Name)
