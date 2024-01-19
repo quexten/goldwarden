@@ -7,36 +7,39 @@ on:
 env:
   GO_VERSION: '1.20'
 jobs:
-  flatpak:
-    name: "Flatpak"
+  build_daemon:
     runs-on: ubuntu-latest
-    container:
-      image: bilelmoussaoui/flatpak-github-actions:gnome-45
-      options: --privileged
-    strategy:
-      matrix:
-        arch: [x86_64, aarch64]
-      fail-fast: false
     steps:
-    - uses: actions/checkout@v4
-    - name: Install deps
-      if: ${{ matrix.arch != 'x86_64' }}
-      run: |
-        dnf -y install docker
-    - name: Set up QEMU
-      if: ${{ matrix.arch != 'x86_64' }}
-      id: qemu
-      uses: docker/setup-qemu-action@v2
-      with:
-        platforms: arm64
+    - uses: actions/checkout@v3
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
     - name: Install libfido2-dev
-      run: sudo dnf install -y libfido2-devel
+      run: sudo apt-get install -y libfido2-dev
     - name: Build
       run: go build -o goldwarden -v .
+    - uses: actions/upload-artifact@v3
+      with:
+        name: goldwarden_linux
+        path: ./goldwarden_linux
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    needs: build_daemon
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:gnome-45
+      options: --privileged
+    strategy:
+      matrix:
+        arch: [x86_64]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download daemon
+      uses: actions/download-artifact@v2
+      with:
+        name: goldwarden_linux
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
         bundle: goldwarden.flatpak
