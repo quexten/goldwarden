@@ -3,8 +3,10 @@ package actions
 import (
 	"encoding/base64"
 	"fmt"
+	"time"
 
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
@@ -51,6 +53,7 @@ func handleGetBiometricsKey(request messages.IPCMessage, cfg *config.Config, vau
 		Key: masterKeyB64,
 	})
 	actionsLog.Info("Browser Biometrics: Sending key...")
+	notify.Notify("Goldwarden", "Unlocked Browser Extension", "", 10*time.Second, func() {})
 	return response, err
 }
 
