@@ -44,7 +44,6 @@ func TypeString(textToType string) {
 	for {
 		select {
 		case message := <-signals:
-			fmt.Println("Message:", message)
 			if state == 0 {
 				log.Info("Selecting Devices")
 				result := message.Body[1].(map[string]dbus.Variant)
