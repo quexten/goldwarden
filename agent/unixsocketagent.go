@@ -288,6 +288,8 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 			fd, err := l.Accept()
 			if err != nil {
 				println("accept error", err.Error())
+			} else {
+				log.Info("Accepted unix socket connection; handling request")
 			}
 
 			go serveAgentSession(fd, ctx, vault, &cfg)

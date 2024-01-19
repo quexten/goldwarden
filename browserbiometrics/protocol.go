@@ -105,6 +105,7 @@ func handlePayloadMessage(msg PayloadMessage, appID string) {
 	case "biometricUnlock":
 		logging.Debugf("Biometric unlock requested")
 		// logging.Debugf("Biometrics authorized: %t", isAuthorized)
+		logging.Debugf("Connecting to agent at path %s", runtimeConfig.GoldwardenSocketPath)
 		result, err := client.NewUnixSocketClient(runtimeConfig).SendToAgent(messages.GetBiometricsKeyRequest{})
 		if err != nil {
 			logging.Errorf("Unable to send message to agent: %s", err.Error())
