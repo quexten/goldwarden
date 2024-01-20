@@ -68,10 +68,10 @@ var polkitCmd = &cobra.Command{
 
 const SYSTEMD_SERVICE = `[Unit]
 Description="Goldwarden daemon"
+After=graphical-session.target
 
 [Service]
 ExecStart=BINARY_PATH daemonize
-Environment="DISPLAY=:0"
 
 [Install]
 WantedBy=graphical-session.target`

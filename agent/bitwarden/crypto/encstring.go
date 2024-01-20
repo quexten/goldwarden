@@ -154,6 +154,12 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 		if !isMacValid(msg, s.MAC, macKeyData) {
 			return nil, fmt.Errorf("decrypt: MAC mismatch")
 		}
+	} else if s.Type == AesCbc256_B64 {
+		return nil, fmt.Errorf("decrypt: cipher of unsupported type %q", s.Type)
+	}
+
+	if len(s.IV) != block.BlockSize() {
+		return nil, fmt.Errorf("decrypt: invalid IV length, expected %d, got %d", block.BlockSize(), len(s.IV))
 	}
 
 	mode := cipher.NewCBCDecrypter(block, s.IV)
@@ -166,17 +172,23 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 	return dst, nil
 }
 
-func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (EncString, error) {
+func EncryptWith(data []byte, encType EncStringType, key SymmetricEncryptionKey) (EncString, error) {
 	encKeyData, err := key.EncryptionKeyBytes()
+	if err != nil {
+		return EncString{}, err
+	}
 	macKeyData, err := key.MacKeyBytes()
+	if err != nil {
+		return EncString{}, err
+	}
 
 	s := EncString{}
-	switch typ {
+	switch encType {
 	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
 	default:
 		return s, fmt.Errorf("encrypt: unsupported cipher type %q", s.Type)
 	}
-	s.Type = typ
+	s.Type = encType
 	data = padPKCS7(data, aes.BlockSize)
 
 	block, err := aes.NewCipher(encKeyData)
@@ -191,7 +203,7 @@ func EncryptWith(data []byte, typ EncStringType, key SymmetricEncryptionKey) (En
 	mode := cipher.NewCBCEncrypter(block, s.IV)
 	mode.CryptBlocks(s.CT, data)
 
-	if typ == AesCbc256_HmacSha256_B64 {
+	if encType == AesCbc256_HmacSha256_B64 {
 		if len(macKeyData) == 0 {
 			return s, fmt.Errorf("encrypt: cipher string type expects a MAC")
 		}

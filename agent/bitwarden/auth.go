@@ -71,12 +71,12 @@ func deviceType() string {
 func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
 	clientID, err := cfg.GetClientID()
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client ID: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client ID: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not get client ID: %v", err)
 	}
 	clientSecret, err := cfg.GetClientSecret()
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client secret: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get client secret: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not get client secret: %v", err)
 	}
 
@@ -93,19 +93,19 @@ func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vaul
 	var loginResponseToken LoginResponseToken
 	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via API key: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via API key: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via API key: %v", err)
 	}
 
 	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
 	masterKey, err := crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(loginResponseToken.Kdf), Iterations: uint32(loginResponseToken.KdfIterations), Memory: uint32(loginResponseToken.KdfMemory), Parallelism: uint32(loginResponseToken.KdfParallelism)})
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 	hashedPassword := b64enc.EncodeToString(pbkdf2.Key(masterKey.GetBytes(), []byte(password), 1, 32, sha256.New))
@@ -119,7 +119,7 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.ApiUrl+"/accounts/prelogin", &preLogin, preLoginRequest{
 		Email: email,
 	}); err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not pre-login: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not pre-login: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not pre-login: %v", err)
 	}
 
@@ -129,13 +129,13 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 
 	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
 	masterKey, err = crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(preLogin.KDF), Iterations: uint32(preLogin.KDFIterations), Memory: uint32(preLogin.KDFMemory), Parallelism: uint32(preLogin.KDFParallelism)})
 	if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
@@ -158,14 +158,14 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	if ok && bytes.Contains(errsc.body, []byte("TwoFactor")) {
 		loginResponseToken, err = Perform2FA(values, errsc, cfg, ctx)
 		if err != nil {
-			notify.Notify("Goldwarden", fmt.Sprintf("Could not login via two-factor: %v", err), "", func() {})
+			notify.Notify("Goldwarden", fmt.Sprintf("Could not login via two-factor: %v", err), "", 0, func() {})
 			return LoginResponseToken{}, crypto.MasterKey{}, "", err
 		}
 	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
-		notify.Notify("Goldwarden", fmt.Sprintf("Captcha required"), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Captcha required"), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
 	} else if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via password: %v", err), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %v", err)
 	}
 
@@ -278,7 +278,7 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 			err = authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/connect/token", &loginResponseToken, values)
 			if err != nil {
 				authLog.Error("Could not refresh token: %s", err.Error())
-				notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
+				notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", 0, func() {})
 				return false
 			}
 
@@ -303,7 +303,7 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 		))
 		if err != nil {
 			authLog.Error("Could not refresh token: %s", err.Error())
-			notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", func() {})
+			notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", 0, func() {})
 			return false
 		}
 		cfg.SetToken(config.LoginToken{

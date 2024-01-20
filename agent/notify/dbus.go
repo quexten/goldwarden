@@ -3,12 +3,15 @@
 package notify
 
 import (
+	"time"
+
 	"github.com/godbus/dbus/v5"
 )
 
 var closeListenerMap = make(map[uint32]func())
+var notificationID uint32 = 1000000
 
-func Notify(title string, body string, actionName string, onclose func()) error {
+func Notify(title string, body string, actionName string, timeout time.Duration, onclose func()) error {
 	bus, err := dbus.SessionBus()
 	if err != nil {
 		return err
@@ -18,7 +21,10 @@ func Notify(title string, body string, actionName string, onclose func()) error 
 	if actionName != "" {
 		actions = append(actions, actionName)
 	}
-	call := obj.Call("org.freedesktop.Notifications.Notify", 0, "goldwarden", uint32(0), "", title, body, actions, map[string]dbus.Variant{}, int32(60000))
+
+	notificationID++
+
+	call := obj.Call("org.freedesktop.Notifications.Notify", 0, "goldwarden", uint32(notificationID), "", title, body, actions, map[string]dbus.Variant{}, int32(60000))
 	if call.Err != nil {
 		return call.Err
 	}
@@ -27,6 +33,18 @@ func Notify(title string, body string, actionName string, onclose func()) error 
 	}
 	id := call.Body[0].(uint32)
 	closeListenerMap[id] = onclose
+
+	if timeout == 0 {
+		return nil
+	} else {
+		go func(id uint32) {
+			time.Sleep(timeout)
+			call := obj.Call("org.freedesktop.Notifications.CloseNotification", 0, uint32(id))
+			if call.Err != nil {
+				return
+			}
+		}(id)
+	}
 
 	return nil
 }

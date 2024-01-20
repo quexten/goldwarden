@@ -10,8 +10,10 @@ import (
 	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
+	"github.com/quexten/goldwarden/logging"
 )
 
+var actionsLog = logging.GetLogger("Goldwarden", "Actions")
 var AgentActionsRegistry = newActionsRegistry()
 
 type Action func(messages.IPCMessage, *config.Config, *vault.Vault, *sockets.CallingContext) (messages.IPCMessage, error)
@@ -37,6 +39,7 @@ func (registry *ActionsRegistry) Get(messageType messages.IPCMessageType) (Actio
 func ensureIsLoggedIn(action Action) Action {
 	return func(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (messages.IPCMessage, error) {
 		if hash, err := cfg.GetMasterPasswordHash(); err != nil || len(hash) == 0 {
+			actionsLog.Error("EnsureIsLoggedIn - %s", err.Error())
 			return messages.IPCMessageFromPayload(messages.ActionResponse{
 				Success: false,
 				Message: "Not logged in",

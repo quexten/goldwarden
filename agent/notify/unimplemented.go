@@ -2,7 +2,9 @@
 
 package notify
 
-func Notify(title string, body string, actionName string, onclose func()) error {
+import "time"
+
+func Notify(title string, body string, actionName string, timeout time.Duration, onclose func()) error {
 	// no notifications on windows or darwin
 	return nil
 }

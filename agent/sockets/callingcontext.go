@@ -16,6 +16,7 @@ type CallingContext struct {
 	ProcessPid             int
 	ParentProcessPid       int
 	GrandParentProcessPid  int
+	Error                  bool
 }
 
 func GetCallingContext(connection net.Conn) CallingContext {
@@ -28,11 +29,23 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		ProcessPid:             0,
 		ParentProcessPid:       0,
 		GrandParentProcessPid:  0,
+		Error:                  true,
 	}
 	if err != nil {
 		return errorContext
 	}
-	pid, _ := creds.PID()
+	uid, _ := creds.UserID()
+	username, err := user.LookupId(uid)
+	if err != nil {
+		return errorContext
+	}
+	errorContext.UserName = username.Username
+
+	pid, ok := creds.PID()
+	if !ok {
+		return errorContext
+	}
+
 	process, err := gops.FindProcess(pid)
 	if err != nil {
 		return errorContext
@@ -50,7 +63,6 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		}
 	}
 
-	uid, _ := creds.UserID()
 	ppid := process.PPid()
 	if err != nil {
 		return errorContext
@@ -66,11 +78,6 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		return errorContext
 	}
 
-	username, err := user.LookupId(uid)
-	if err != nil {
-		return errorContext
-	}
-
 	return CallingContext{
 		UserName:               username.Username,
 		ProcessName:            process.Executable(),
@@ -79,5 +86,6 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		ProcessPid:             pid,
 		ParentProcessPid:       ppid,
 		GrandParentProcessPid:  parentParentProcess.PPid(),
+		Error:                  false,
 	}
 }

@@ -133,6 +133,8 @@ def autotype(username, password):
     env["PASSWORD"] = password
     restic_cmd = f"{BINARY_PATH} autotype --username {username}"
     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True, env=env)
+    print(result.stderr)
+    print(result.stdout)
     if result.returncode != 0:
         raise Exception("Failed to initialize repository, err", result.stderr)
 

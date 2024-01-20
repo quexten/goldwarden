@@ -3,6 +3,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -85,7 +86,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	err = crypto.InitKeyringFromMasterKey(vault.Keyring, profile.Profile.Key, profile.Profile.PrivateKey, orgKeys, masterKey)
 	if err != nil {
 		defer func() {
-			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", func() {})
+			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
 			cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()
@@ -112,7 +113,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	}
 	if err != nil {
 		defer func() {
-			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", func() {})
+			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
 			cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()

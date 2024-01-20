@@ -2,13 +2,12 @@ package actions
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/quexten/goldwarden/agent/bitwarden"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
-	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 
@@ -53,16 +52,25 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 		return
 	}
 
+	actionsLog.Info("Unlocking vault...")
 	if cfg.IsLoggedIn() {
 		token, err := cfg.GetToken()
 		if err == nil {
 			if token.AccessToken != "" {
 				ctx := context.Background()
-				bitwarden.RefreshToken(ctx, cfg)
+				gotToken := bitwarden.RefreshToken(ctx, cfg)
+				if gotToken {
+					actionsLog.Info("Token refreshed")
+				} else {
+					actionsLog.Warn("Token refresh failed")
+				}
 				token, err := cfg.GetToken()
+				if err != nil {
+					actionsLog.Error("Could not get token: %s", err.Error())
+				}
 				userSymmkey, err := cfg.GetUserSymmetricKey()
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not get user symmetric key: %s", err.Error())
 				}
 
 				var safeUserSymmkey crypto.SymmetricEncryptionKey
@@ -72,14 +80,18 @@ func handleUnlockVault(request messages.IPCMessage, cfg *config.Config, vault *v
 					safeUserSymmkey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmkey)
 				}
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not create safe user symmetric key: %s", err.Error())
 				}
 
 				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &safeUserSymmkey, true)
 				if err != nil {
-					fmt.Println(err)
+					actionsLog.Error("Could not sync: %s", err.Error())
 				}
+			} else {
+				actionsLog.Warn("Access token is empty")
 			}
+		} else {
+			actionsLog.Warn("Could not get token: %s", err.Error())
 		}
 	}
 
@@ -148,6 +160,56 @@ func handleWipeVault(request messages.IPCMessage, cfg *config.Config, vault *vau
 }
 
 func handleUpdateVaultPin(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	//todo refactor
+	if cfg.HasPin() {
+		authenticated := false
+		if cfg.IsLocked() {
+			actionsLog.Info("Browser Biometrics: Vault is locked, asking for pin...")
+			err := cfg.TryUnlock(vault)
+			if err != nil {
+				actionsLog.Info("Browser Biometrics: Vault not unlocked")
+				return messages.IPCMessage{}, err
+			}
+			ctx1 := context.Background()
+			success := sync(ctx1, vault, cfg)
+			if !success {
+				actionsLog.Info("Browser Biometrics: Vault not synced")
+				return messages.IPCMessage{}, err
+			}
+			actionsLog.Info("Browser Biometrics: Vault unlocked")
+			authenticated = true
+		} else {
+			authenticated = biometrics.CheckBiometrics(biometrics.BrowserBiometrics)
+			if !authenticated {
+				// todo, skip when explicitly denied instead of error
+				actionsLog.Info("Browser Biometrics: Biometrics not approved, asking for pin...")
+				pin, err := pinentry.GetPassword("Goldwarden", "Enter your pin to unlock your vault")
+				if err == nil {
+					authenticated = cfg.VerifyPin(pin)
+					if !authenticated {
+						actionsLog.Info("Browser Biometrics: Pin not approved")
+					} else {
+						actionsLog.Info("Browser Biometrics: Pin approved")
+					}
+				}
+			} else {
+				actionsLog.Info("Browser Biometrics: Biometrics approved")
+			}
+		}
+
+		if !authenticated {
+			response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+				Success: false,
+				Message: "Not authenticated",
+			})
+			if err != nil {
+				return messages.IPCMessage{}, err
+			} else {
+				return response, nil
+			}
+		}
+	}
+
 	pin, err := pinentry.GetPassword("Pin Change", "Enter your desired pin")
 	if err != nil {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
@@ -202,7 +264,7 @@ func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UnlockVaultRequest{}), handleUnlockVault)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.LockVaultRequest{}), handleLockVault)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.WipeVaultRequest{}), handleWipeVault)
-	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UpdateVaultPINRequest{}), ensureBiometricsAuthorized(systemauth.AccessVault, handleUpdateVaultPin))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.UpdateVaultPINRequest{}), handleUpdateVaultPin)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetVaultPINRequest{}), handlePinStatus)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.VaultStatusRequest{}), handleVaultStatus)
 }

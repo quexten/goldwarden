@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"time"
 
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/notify"
@@ -29,12 +30,15 @@ type vaultAgent struct {
 }
 
 func (vaultAgent) Add(key agent.AddedKey) error {
+	log.Warn("Add Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
+	log.Info("List Request")
 	if vaultAgent.vault.Keyring.IsLocked() {
 		if !vaultAgent.unlockRequestAction() {
+			log.Warn("List request failed - Vault is locked")
 			return nil, errors.New("vault is locked")
 		}
 
@@ -46,6 +50,7 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 	for _, vaultSSHKey := range vaultSSHKeys {
 		signer, err := ssh.ParsePrivateKey([]byte(vaultSSHKey.Key))
 		if err != nil {
+			log.Warn("List request key skipped - Could not parse key: %s", err)
 			continue
 		}
 		pub := signer.PublicKey()
@@ -59,14 +64,17 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 }
 
 func (vaultAgent) Lock(passphrase []byte) error {
+	log.Warn("Lock Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent) Remove(key ssh.PublicKey) error {
+	log.Warn("Remove Request - Not implemented")
 	return nil
 }
 
 func (vaultAgent) RemoveAll() error {
+	log.Warn("RemoveAll Request - Not implemented")
 	return nil
 }
 
@@ -106,11 +114,23 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		isGit = true
 	}
 
-	requestTemplate := "%s on %s>%s>%s is requesting ssh signage with key %s"
-	if isGit {
-		requestTemplate = "%s on %s>%s>%s is requesting git signage with key %s"
+	requestTemplate := ""
+	message := ""
+	if !vaultAgent.context.Error {
+		if isGit {
+			requestTemplate = "%s on %s>%s>%s is requesting git signage with key %s"
+		} else {
+			requestTemplate = "%s on %s>%s>%s is requesting ssh signage with key %s"
+		}
+		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
+	} else {
+		if isGit {
+			requestTemplate = "%s is requesting git signage with key %s"
+		} else {
+			requestTemplate = "%s is requesting ssh signage with key %s"
+		}
+		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, sshKey.Name)
 	}
-	message := fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, vaultAgent.context.GrandParentProcessName, vaultAgent.context.ParentProcessName, vaultAgent.context.ProcessName, sshKey.Name)
 
 	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
 		log.Info("Sign Request for key: %s denied", sshKey.Name)
@@ -125,19 +145,20 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 	var rand = rand.Reader
 	log.Info("Sign Request for key: %s %s accepted", ssh.FingerprintSHA256(key), sshKey.Name)
 	if isGit {
-		notify.Notify("Goldwarden", fmt.Sprintf("Git Signing Request Approved for %s", sshKey.Name), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Git Signing Request Approved for %s", sshKey.Name), "", 10*time.Second, func() {})
 	} else {
-		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", 10*time.Second, func() {})
 	}
 	return signer.Sign(rand, data)
 }
 
 func (vaultAgent) Signers() ([]ssh.Signer, error) {
-
+	log.Warn("Signers Request - Not implemented")
 	return []ssh.Signer{}, nil
 }
 
 func (vaultAgent) Unlock(passphrase []byte) error {
+	log.Warn("Unlock Request - Not implemented")
 	return nil
 }
 

@@ -40,11 +40,6 @@ func main() {
 		ConfigDirectory: configPath,
 	}
 
-	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
-		browserbiometrics.Main(&runtimeConfig)
-		return
-	}
-
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
@@ -54,6 +49,11 @@ func main() {
 	}
 	if runtimeConfig.GoldwardenSocketPath == "" {
 		runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+	}
+
+	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
+		browserbiometrics.Main(&runtimeConfig)
+		return
 	}
 
 	_, err = os.Stat("/.flatpak-info")
