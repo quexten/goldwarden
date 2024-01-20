@@ -56,3 +56,10 @@ go install github.com/quexten/goldwarden@latest
 ### Setup and Usage
 To get started, follow the instructions provided in the wiki https://github.com/quexten/goldwarden/wiki/Getting-Started.
 For instructions on specific features, also consult the wiki page for the feature.
+
+### Contributing
+Interested in contributing a feature or bug-fix? Great! Here is some information on how to set up your development environment:
+
+https://github.com/quexten/goldwarden/wiki/Setting-up-the-Development-Environment
+
+After that, create a PR. If you encounter any issues, feel free to open a discussion thread.
