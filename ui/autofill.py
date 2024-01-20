@@ -3,7 +3,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 import gc
 import time
-from gi.repository import Gtk, Adw, GLib, Notify
+from gi.repository import Gtk, Adw, GLib, Notify, Gdk
 import goldwarden
 import clipboard
 from threading import Thread
@@ -65,6 +65,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 action_row.set_activatable(True)
                 action_row.password = i["password"]
                 action_row.username = i["username"]
+                action_row.uuid = i["uuid"]
                 self.history_list.append(action_row)
             self.starts_with_logins = None
             self.other_logins = None
@@ -101,6 +102,13 @@ class MainWindow(Gtk.ApplicationWindow):
                 notification=Notify.Notification.new("Goldwarden", "Username Copied", "dialog-information")
                 notification.set_timeout(5)
                 notification.show()
+            elif keyval == 118:
+                print("open web vault")
+                environment = goldwarden.get_environment()
+                if environment == None:
+                    return
+                item_uri = environment["vault"] + "#/vault?itemId=" + self.history_list.get_selected_row().uuid
+                Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
                 
         keycont.connect('key-pressed', handle_keypress, self)
         self.add_controller(keycont)

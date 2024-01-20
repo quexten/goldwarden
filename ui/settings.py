@@ -39,6 +39,57 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.preferences_page.set_title("General")
         self.stack.add_named(self.preferences_page, "preferences_page")
 
+        self.action_preferences_group = Adw.PreferencesGroup()
+        self.action_preferences_group.set_title("Actions")
+        self.preferences_page.add(self.action_preferences_group)
+        
+        self.autotype_button = Gtk.Button()
+        self.autotype_button.set_label("Quick Access")
+        self.autotype_button.set_margin_top(10)
+        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+        self.autotype_button.get_style_context().add_class("suggested-action")
+        self.action_preferences_group.add(self.autotype_button)
+
+        self.login_button = Gtk.Button()
+        self.login_button.set_label("Login")
+        self.login_button.connect("clicked", lambda button: show_login())
+        self.login_button.set_sensitive(False)
+        self.login_button.set_margin_top(10)
+        self.login_button.get_style_context().add_class("suggested-action")
+        self.action_preferences_group.add(self.login_button)
+    
+        self.set_pin_button = Gtk.Button()
+        self.set_pin_button.set_label("Set Pin")
+        self.set_pin_button.connect("clicked", lambda button: set_pin())
+        self.set_pin_button.set_margin_top(10)
+        self.set_pin_button.set_sensitive(False)
+        self.set_pin_button.get_style_context().add_class("suggested-action")
+        self.action_preferences_group.add(self.set_pin_button)
+
+        self.unlock_button = Gtk.Button()
+        self.unlock_button.set_label("Unlock")
+        self.unlock_button.set_margin_top(10)
+        def unlock_button_clicked():
+            action = goldwarden.unlock if self.unlock_button.get_label() == "Unlock" else goldwarden.lock
+            unlock_thread = Thread(target=action)
+            unlock_thread.start()
+        self.unlock_button.connect("clicked", lambda button: unlock_button_clicked())
+        # set disabled
+        self.unlock_button.set_sensitive(False)
+        self.action_preferences_group.add(self.unlock_button)
+
+        self.logout_button = Gtk.Button()
+        self.logout_button.set_label("Logout")
+        self.logout_button.set_margin_top(10)
+        self.logout_button.connect("clicked", lambda button: goldwarden.purge())
+        self.logout_button.get_style_context().add_class("destructive-action")
+        self.action_preferences_group.add(self.logout_button)
+
+        self.wiki_button = Gtk.LinkButton(uri="https://github.com/quexten/goldwarden/wiki/Flatpak-Configuration")
+        self.wiki_button.set_label("Help & Wiki")
+        self.wiki_button.set_margin_top(10)
+        self.action_preferences_group.add(self.wiki_button)
+
         self.preferences_group = Adw.PreferencesGroup()
         self.preferences_group.set_title("Services")
         self.preferences_page.add(self.preferences_group)
@@ -127,57 +178,6 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.notes_row.set_subtitle("0")
         self.notes_row.set_icon_name("emblem-documents-symbolic")
         self.vault_status_preferences_group.add(self.notes_row)
-
-        self.action_preferences_group = Adw.PreferencesGroup()
-        self.action_preferences_group.set_title("Actions")
-        self.preferences_page.add(self.action_preferences_group)
-        
-        self.autotype_button = Gtk.Button()
-        self.autotype_button.set_label("Autotype")
-        self.autotype_button.set_margin_top(10)
-        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
-        self.autotype_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.autotype_button)
-
-        self.login_button = Gtk.Button()
-        self.login_button.set_label("Login")
-        self.login_button.connect("clicked", lambda button: show_login())
-        self.login_button.set_sensitive(False)
-        self.login_button.set_margin_top(10)
-        self.login_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.login_button)
-    
-        self.set_pin_button = Gtk.Button()
-        self.set_pin_button.set_label("Set Pin")
-        self.set_pin_button.connect("clicked", lambda button: set_pin())
-        self.set_pin_button.set_margin_top(10)
-        self.set_pin_button.set_sensitive(False)
-        self.set_pin_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.set_pin_button)
-
-        self.unlock_button = Gtk.Button()
-        self.unlock_button.set_label("Unlock")
-        self.unlock_button.set_margin_top(10)
-        def unlock_button_clicked():
-            action = goldwarden.unlock if self.unlock_button.get_label() == "Unlock" else goldwarden.lock
-            unlock_thread = Thread(target=action)
-            unlock_thread.start()
-        self.unlock_button.connect("clicked", lambda button: unlock_button_clicked())
-        # set disabled
-        self.unlock_button.set_sensitive(False)
-        self.action_preferences_group.add(self.unlock_button)
-
-        self.logout_button = Gtk.Button()
-        self.logout_button.set_label("Logout")
-        self.logout_button.set_margin_top(10)
-        self.logout_button.connect("clicked", lambda button: goldwarden.purge())
-        self.logout_button.get_style_context().add_class("destructive-action")
-        self.action_preferences_group.add(self.logout_button)
-
-        self.wiki_button = Gtk.LinkButton(uri="https://github.com/quexten/goldwarden/wiki/Flatpak-Configuration")
-        self.wiki_button.set_label("Help & Wiki")
-        self.wiki_button.set_margin_top(10)
-        self.action_preferences_group.add(self.wiki_button)
         
         def update_labels():
             GLib.timeout_add(1000, update_labels)
@@ -271,21 +271,10 @@ def show_login():
 
     dialog.get_content_area().append(preference_group)
 
-    api_url_entry = Adw.EntryRow()
-    api_url_entry.set_title("API Url")
-    # set value
-    api_url_entry.set_text("https://vault.bitwarden.com/api")
-    preference_group.add(api_url_entry)
-
-    identity_url_entry = Adw.EntryRow()
-    identity_url_entry.set_title("Identity Url")
-    identity_url_entry.set_text("https://vault.bitwarden.com/identity")
-    preference_group.add(identity_url_entry)
-
-    notification_url_entry = Adw.EntryRow()
-    notification_url_entry.set_title("Notification URL")
-    notification_url_entry.set_text("https://notifications.bitwarden.com/")
-    preference_group.add(notification_url_entry)
+    url_entry = Adw.EntryRow()
+    url_entry.set_title("Base Url")
+    url_entry.set_text("https://vault.bitwarden.com/")
+    preference_group.add(url_entry)
 
     auth_preference_group = Adw.PreferencesGroup()
     auth_preference_group.set_title("Authentication")
@@ -310,9 +299,7 @@ def show_login():
     def on_save(res):
         if res != Gtk.ResponseType.OK:
             return
-        goldwarden.set_api_url(api_url_entry.get_text())
-        goldwarden.set_identity_url(identity_url_entry.get_text())
-        goldwarden.set_notification_url(notification_url_entry.get_text())
+        goldwarden.set_url(url_entry.get_text())
         goldwarden.set_client_id(client_id_entry.get_text())
         goldwarden.set_client_secret(client_secret_entry.get_text())
         def login():
