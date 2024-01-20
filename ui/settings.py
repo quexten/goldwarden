@@ -113,10 +113,22 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.copy_password_shortcut_row.set_subtitle("P")
         self.shortcut_preferences_group.add(self.copy_password_shortcut_row)
 
+        self.copy_totp_shortcut_row = Adw.ActionRow()
+        self.copy_totp_shortcut_row.set_title("Copy TOTP Shortcut")
+        self.copy_totp_shortcut_row.set_subtitle("T")
+        self.shortcut_preferences_group.add(self.copy_totp_shortcut_row)
+
+        self.launch_uri_shortcut_row = Adw.ActionRow()
+        self.launch_uri_shortcut_row.set_title("Launch URI Shortcut")
+        self.launch_uri_shortcut_row.set_subtitle("L")
+        self.shortcut_preferences_group.add(self.launch_uri_shortcut_row)
+
         self.launch_web_vault_shortcut_row = Adw.ActionRow()
         self.launch_web_vault_shortcut_row.set_title("Launch Web Vault Shortcut")
         self.launch_web_vault_shortcut_row.set_subtitle("V")
         self.shortcut_preferences_group.add(self.launch_web_vault_shortcut_row)
+
+        
 
         self.vault_status_preferences_group = Adw.PreferencesGroup()
         self.vault_status_preferences_group.set_title("Vault Status")
