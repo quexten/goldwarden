@@ -90,32 +90,6 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.wiki_button.set_margin_top(10)
         self.action_preferences_group.add(self.wiki_button)
 
-        self.preferences_group = Adw.PreferencesGroup()
-        self.preferences_group.set_title("Services")
-        self.preferences_page.add(self.preferences_group)
-
-        self.ssh_row = Adw.ActionRow()
-        self.ssh_row.set_title("SSH Daemon")
-        self.ssh_row.set_subtitle("Getting status...")
-        self.ssh_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.ssh_row)
-
-        self.goldwarden_daemon_row = Adw.ActionRow()
-        self.goldwarden_daemon_row.set_title("Goldwarden Daemon")
-        self.goldwarden_daemon_row.set_subtitle("Getting status...")
-        self.goldwarden_daemon_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.goldwarden_daemon_row)
-
-        self.login_with_device = Adw.ActionRow()
-        self.login_with_device.set_title("Login with device")
-        self.login_with_device.set_subtitle("Waiting for requests...")
-        self.preferences_group.add(self.login_with_device)
-
-        self.status_row = Adw.ActionRow()
-        self.status_row.set_title("DBUS Service")
-        self.status_row.set_subtitle("Listening")
-        self.preferences_group.add(self.status_row)
-
         self.shortcut_preferences_group = Adw.PreferencesGroup()
         self.shortcut_preferences_group.set_title("Shortcuts")
         self.preferences_page.add(self.shortcut_preferences_group)
@@ -138,6 +112,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.copy_password_shortcut_row.set_title("Copy Password Shortcut")
         self.copy_password_shortcut_row.set_subtitle("P")
         self.shortcut_preferences_group.add(self.copy_password_shortcut_row)
+
+        self.launch_web_vault_shortcut_row = Adw.ActionRow()
+        self.launch_web_vault_shortcut_row.set_title("Launch Web Vault Shortcut")
+        self.launch_web_vault_shortcut_row.set_subtitle("V")
+        self.shortcut_preferences_group.add(sefl.launch_web_vault_shortcut_row)
 
         self.vault_status_preferences_group = Adw.PreferencesGroup()
         self.vault_status_preferences_group.set_title("Vault Status")
@@ -178,6 +157,32 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.notes_row.set_subtitle("0")
         self.notes_row.set_icon_name("emblem-documents-symbolic")
         self.vault_status_preferences_group.add(self.notes_row)
+
+        self.preferences_group = Adw.PreferencesGroup()
+        self.preferences_group.set_title("Services")
+        self.preferences_page.add(self.preferences_group)
+
+        self.ssh_row = Adw.ActionRow()
+        self.ssh_row.set_title("SSH Daemon")
+        self.ssh_row.set_subtitle("Getting status...")
+        self.ssh_row.set_icon_name("emblem-default")
+        self.preferences_group.add(self.ssh_row)
+
+        self.goldwarden_daemon_row = Adw.ActionRow()
+        self.goldwarden_daemon_row.set_title("Goldwarden Daemon")
+        self.goldwarden_daemon_row.set_subtitle("Getting status...")
+        self.goldwarden_daemon_row.set_icon_name("emblem-default")
+        self.preferences_group.add(self.goldwarden_daemon_row)
+
+        self.login_with_device = Adw.ActionRow()
+        self.login_with_device.set_title("Login with device")
+        self.login_with_device.set_subtitle("Waiting for requests...")
+        self.preferences_group.add(self.login_with_device)
+
+        self.status_row = Adw.ActionRow()
+        self.status_row.set_title("DBUS Service")
+        self.status_row.set_subtitle("Listening")
+        self.preferences_group.add(self.status_row)
         
         def update_labels():
             GLib.timeout_add(1000, update_labels)
