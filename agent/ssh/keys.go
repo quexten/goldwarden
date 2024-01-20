@@ -3,7 +3,6 @@ package ssh
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/x509"
 	"encoding/pem"
 	"io"
 
@@ -21,14 +20,20 @@ func NewSSHKeyCipher(name string, keyring *crypto.Keyring) (models.Cipher, strin
 	if err != nil {
 		panic(err)
 	}
-	privateKey, err := x509.MarshalPKCS8PrivateKey(priv)
 	privBlock := pem.Block{
 		Type:  "OPENSSH PRIVATE KEY",
-		Bytes: edkey.MarshalED25519PrivateKey(privateKey),
+		Bytes: edkey.MarshalED25519PrivateKey(priv),
 	}
 
 	privatePEM := pem.EncodeToMemory(&privBlock)
 	publicKey, err := ssh.NewPublicKey(pub)
+	if err != nil {
+		log.Error("Generation of public key failed: %s", err)
+	}
+	_, err = ssh.ParsePrivateKey([]byte(string(privatePEM)))
+	if err != nil {
+		log.Error("Verification of generated private key failed: %s", err)
+	}
 
 	encryptedName, _ := crypto.EncryptWith([]byte(name), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
 	encryptedPublicKeyKey, _ := crypto.EncryptWith([]byte("public-key"), crypto.AesCbc256_HmacSha256_B64, keyring.GetAccountKey())
