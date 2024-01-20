@@ -9,6 +9,7 @@ import clipboard
 from threading import Thread
 import sys
 import os
+import totp
 Notify.init("Goldwarden")
 
 class MyApp(Adw.Application):
@@ -66,6 +67,8 @@ class MainWindow(Gtk.ApplicationWindow):
                 action_row.password = i["password"]
                 action_row.username = i["username"]
                 action_row.uuid = i["uuid"]
+                action_row.uri = i["uri"]
+                action_row.totp = i["totp"]
                 self.history_list.append(action_row)
             self.starts_with_logins = None
             self.other_logins = None
@@ -109,6 +112,17 @@ class MainWindow(Gtk.ApplicationWindow):
                     return
                 item_uri = environment["vault"] + "#/vault?itemId=" + self.history_list.get_selected_row().uuid
                 Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
+            elif keyval == 108:
+                print("launch")
+                print(self.history_list.get_selected_row().uri)
+                Gtk.show_uri(None, self.history_list.get_selected_row().uri, Gdk.CURRENT_TIME)
+            elif keyval == 116:
+                print("copy totp")
+                totp_code = totp.totp(self.history_list.get_selected_row().totp)
+                clipboard.write(totp_code)
+                notification=Notify.Notification.new("Goldwarden", "Totp Copied", "dialog-information")
+                notification.set_timeout(5)
+                notification.show()
                 
         keycont.connect('key-pressed', handle_keypress, self)
         self.add_controller(keycont)

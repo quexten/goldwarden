@@ -79,6 +79,8 @@ var listLoginsCmd = &cobra.Command{
 				"uuid":     stringsx.Clean(login.UUID),
 				"username": stringsx.Clean(login.Username),
 				"password": stringsx.Clean(strings.ReplaceAll(login.Password, "\"", "\\\"")),
+				"totp":     stringsx.Clean(login.TOTPSeed),
+				"uri":      stringsx.Clean(login.URI),
 			}
 			jsonString, err := json.Marshal(data)
 			if err != nil {

@@ -28,7 +28,8 @@ type DecryptedLoginCipher struct {
 	UUID          string
 	OrgaizationID string
 	Notes         string
-	TwoFactorCode string
+	TOTPSeed      string
+	URI           string
 }
 
 type AddLoginRequest struct {
