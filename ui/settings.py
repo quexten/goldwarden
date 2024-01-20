@@ -267,22 +267,13 @@ class MyApp(Adw.Application):
 
 def show_login():
     dialog = Gtk.Dialog(title="Goldwarden")
-    preference_group = Adw.PreferencesGroup()
-    preference_group.set_title("Config")
-    preference_group.set_margin_top(10)
-    preference_group.set_margin_bottom(10)
-    preference_group.set_margin_start(10)
-    preference_group.set_margin_end(10)
-
-    dialog.get_content_area().append(preference_group)
-
-    url_entry = Adw.EntryRow()
-    url_entry.set_title("Base Url")
-    url_entry.set_text("https://vault.bitwarden.com/")
-    preference_group.add(url_entry)
 
     auth_preference_group = Adw.PreferencesGroup()
     auth_preference_group.set_title("Authentication")
+    auth_preference_group.set_margin_top(10)
+    auth_preference_group.set_margin_bottom(10)
+    auth_preference_group.set_margin_start(10)
+    auth_preference_group.set_margin_end(10)
     dialog.get_content_area().append(auth_preference_group)
 
     email_entry = Adw.EntryRow()
@@ -320,6 +311,20 @@ def show_login():
 
         login_thread = Thread(target=login)
         login_thread.start()
+
+    preference_group = Adw.PreferencesGroup()
+    preference_group.set_title("Config")
+    preference_group.set_margin_top(10)
+    preference_group.set_margin_bottom(10)
+    preference_group.set_margin_start(10)
+    preference_group.set_margin_end(10)
+
+    dialog.get_content_area().append(preference_group)
+
+    url_entry = Adw.EntryRow()
+    url_entry.set_title("Base Url")
+    url_entry.set_text("https://vault.bitwarden.com/")
+    preference_group.add(url_entry)
 
     #ok response
     dialog.connect("response", lambda dialog, response: on_save(response))
