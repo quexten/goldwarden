@@ -55,6 +55,7 @@ type ConfigFile struct {
 	IdentityUrl                 string
 	ApiUrl                      string
 	NotificationsUrl            string
+	VaultUrl                    string
 	EncryptedClientID           string
 	EncryptedClientSecret       string
 	DeviceUUID                  string
@@ -91,6 +92,7 @@ func DefaultConfig(useMemguard bool) Config {
 			IdentityUrl:                 "https://vault.bitwarden.com/identity",
 			ApiUrl:                      "https://vault.bitwarden.com/api",
 			NotificationsUrl:            "https://notifications.bitwarden.com",
+			VaultUrl:                    "https://vault.bitwarden.com",
 			EncryptedClientID:           "",
 			EncryptedClientSecret:       "",
 			DeviceUUID:                  deviceUUID.String(),

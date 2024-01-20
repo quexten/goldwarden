@@ -107,6 +107,99 @@ var setNotificationsURLCmd = &cobra.Command{
 	},
 }
 
+var setVaultURLCmd = &cobra.Command{
+	Use:   "set-vault-url",
+	Short: "Set the vault url",
+	Long:  `Set the vault url.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		url := args[0]
+		request := messages.SetVaultURLRequest{}
+		request.Value = url
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				println("Done")
+			} else {
+				println("Setting vault url failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			println("Wrong IPC response type")
+		}
+
+	},
+}
+
+var setURLsAutomaticallyCmd = &cobra.Command{
+	Use:   "set-server",
+	Short: "Set the urls automatically",
+	Long:  `Set the api/identity/vault/notification urls automaticall from a base url.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		value := args[0]
+		request := messages.SetURLsAutomaticallyRequest{}
+		request.Value = value
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				println("Done")
+			} else {
+				println("Setting urls automatically failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			println("Wrong IPC response type")
+		}
+
+	},
+}
+
+var getEnvironmentCmd = &cobra.Command{
+	Use:   "get-environment",
+	Short: "Get the environment",
+	Long:  `Get the environment.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		request := messages.GetConfigEnvironmentRequest{}
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result := result.(type) {
+		case messages.GetConfigEnvironmentResponse:
+			fmt.Println("{")
+			fmt.Println("  \"api\": \"" + result.ApiURL + "\",")
+			fmt.Println("  \"identity\": \"" + result.IdentityURL + "\",")
+			fmt.Println("  \"notifications\": \"" + result.NotificationsURL + "\",")
+			fmt.Println("  \"vault\": \"" + result.VaultURL + "\"")
+			fmt.Println("}")
+		default:
+			println("Wrong IPC response type")
+		}
+	},
+}
+
 var setApiClientIDCmd = &cobra.Command{
 	Use:   "set-client-id",
 	Short: "Set the client id",
@@ -218,6 +311,9 @@ func init() {
 	configCmd.AddCommand(setApiUrlCmd)
 	configCmd.AddCommand(setIdentityURLCmd)
 	configCmd.AddCommand(setNotificationsURLCmd)
+	configCmd.AddCommand(setVaultURLCmd)
+	configCmd.AddCommand(setURLsAutomaticallyCmd)
+	configCmd.AddCommand(getEnvironmentCmd)
 	configCmd.AddCommand(getRuntimeConfigCmd)
 	configCmd.AddCommand(setApiClientIDCmd)
 	configCmd.AddCommand(setApiSecretCmd)
