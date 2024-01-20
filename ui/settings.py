@@ -116,7 +116,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.launch_web_vault_shortcut_row = Adw.ActionRow()
         self.launch_web_vault_shortcut_row.set_title("Launch Web Vault Shortcut")
         self.launch_web_vault_shortcut_row.set_subtitle("V")
-        self.shortcut_preferences_group.add(sefl.launch_web_vault_shortcut_row)
+        self.shortcut_preferences_group.add(self.launch_web_vault_shortcut_row)
 
         self.vault_status_preferences_group = Adw.PreferencesGroup()
         self.vault_status_preferences_group.set_title("Vault Status")
