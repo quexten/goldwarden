@@ -49,7 +49,9 @@ func TypeString(textToType string) {
 				result := message.Body[1].(map[string]dbus.Variant)
 				resultSessionHandle := result["session_handle"]
 				sessionHandle = dbus.ObjectPath(resultSessionHandle.String()[1 : len(resultSessionHandle.String())-1])
-				res := obj.Call("org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, map[string]dbus.Variant{})
+				res := obj.Call("org.freedesktop.portal.RemoteDesktop.SelectDevices", 0, sessionHandle, map[string]dbus.Variant{
+					"types": dbus.MakeVariant(uint32(1)),
+				})
 				if res.Err != nil {
 					log.Error("Error selecting devices: %s", res.Err.Error())
 				}
@@ -64,7 +66,7 @@ func TypeString(textToType string) {
 			} else if state == 2 {
 				log.Info("Performing Typing")
 				state = 3
-				time.Sleep(200 * time.Millisecond)
+				time.Sleep(1000 * time.Millisecond)
 				for _, char := range textToType {
 					if char == '\t' {
 						obj.Call("org.freedesktop.portal.RemoteDesktop.NotifyKeyboardKeycode", 0, sessionHandle, map[string]dbus.Variant{}, 15, uint32(1))
