@@ -471,7 +471,10 @@ func (config *Config) WriteConfig() error {
 	os.Remove(config.ConfigFile.RuntimeConfig.ConfigDirectory)
 	parentDirectory := config.ConfigFile.RuntimeConfig.ConfigDirectory[:len(config.ConfigFile.RuntimeConfig.ConfigDirectory)-len("/goldwarden.json")]
 	if _, err := os.Stat(parentDirectory); os.IsNotExist(err) {
-		os.Mkdir(parentDirectory, 0700)
+		err := os.MkdirAll(parentDirectory, 0700)
+		if err != nil {
+			return err
+		}
 	}
 
 	file, err := os.OpenFile(config.ConfigFile.RuntimeConfig.ConfigDirectory, os.O_CREATE|os.O_WRONLY, 0600)
