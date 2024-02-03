@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/LlamaNite/llamalog v0.2.1
+	github.com/Microsoft/go-winio v0.6.1
 	github.com/amenzhinsky/go-polkit v0.0.0-20210519083301-ee6a51849123
 	github.com/atotto/clipboard v0.1.4
 	github.com/awnumar/memguard v0.22.4
@@ -33,7 +34,9 @@ require (
 	github.com/keybase/go-jsonw v0.0.0-20200325173637-df90f282c233 // indirect
 	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
 	github.com/keybase/msgpackzip v0.0.0-20221220225959-4abf538d2b9c // indirect
+	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/tools v0.16.1 // indirect
 )
 
 require (
