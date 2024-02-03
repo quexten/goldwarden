@@ -10,10 +10,10 @@ require (
 	github.com/google/uuid v1.5.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
+	github.com/keybase/client/go v0.0.0-20240202160538-668db6be75e4
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/pquerna/otp v1.4.0
 	github.com/spf13/cobra v1.8.0
 	github.com/tink-crypto/tink-go/v2 v2.1.0
 	github.com/twpayne/go-pinentry v0.3.0
@@ -23,7 +23,14 @@ require (
 )
 
 require (
-	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
+	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/keybase/backoff v1.0.1-0.20160517061000-726b63b835ec // indirect
+	github.com/keybase/clockwork v0.1.1-0.20161209210251-976f45f4a979 // indirect
+	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
+	github.com/keybase/go-framed-msgpack-rpc v0.0.0-20230103225103-1f052922b096 // indirect
+	github.com/keybase/go-jsonw v0.0.0-20200325173637-df90f282c233 // indirect
+	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
+	github.com/keybase/msgpackzip v0.0.0-20221220225959-4abf538d2b9c // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 )
