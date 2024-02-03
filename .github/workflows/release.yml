@@ -142,6 +142,22 @@ jobs:
           files: './goldwarden_macos_x86_64'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+  build_macos_aarch64:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - name: Build 
+        run: go build -tags "nofido2" -o "goldwarden_macos_aarch64" -v .
+      - uses: AButler/upload-release-assets@v2.0
+        with:
+          files: './goldwarden_macos_aarch64'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
   build_windows_x86_64:
     runs-on: windows-latest
     steps:
