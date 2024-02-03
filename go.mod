@@ -21,11 +21,13 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.17.0
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
-	golang.org/x/sys v0.15.0
+	golang.org/x/sys v0.16.0
 )
 
 require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
+	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea // indirect
+	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 // indirect
 	github.com/keybase/backoff v1.0.1-0.20160517061000-726b63b835ec // indirect
 	github.com/keybase/clockwork v0.1.1-0.20161209210251-976f45f4a979 // indirect
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
@@ -33,6 +35,8 @@ require (
 	github.com/keybase/go-jsonw v0.0.0-20200325173637-df90f282c233 // indirect
 	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
 	github.com/keybase/msgpackzip v0.0.0-20221220225959-4abf538d2b9c // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
+	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/tools v0.16.1 // indirect
