@@ -14,7 +14,7 @@ type pinentrySecretStoreInfo string
 
 func (pi *pinentryInstance) useSecretStore(useSecretStore bool) (pinentrySecretStoreInfo, error) {
 	// unimplemented
-	return false
+	return "", nil
 }
 
 func (pi *pinentryInstance) shouldStoreSecret(info pinentrySecretStoreInfo) bool {
