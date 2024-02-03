@@ -43,8 +43,6 @@ github.com/keybase/go-framed-msgpack-rpc v0.0.0-20230103225103-1f052922b096 h1:r
 github.com/keybase/go-framed-msgpack-rpc v0.0.0-20230103225103-1f052922b096/go.mod h1:XO67nMjltHJ8OsBWnFiDU1F67wR+rtJB21NXtb1TKyA=
 github.com/keybase/go-jsonw v0.0.0-20200325173637-df90f282c233 h1:zLk+cB/0ShMCBcgBOXYgellLZiZahXFicJleKyrlqiM=
 github.com/keybase/go-jsonw v0.0.0-20200325173637-df90f282c233/go.mod h1:lofKQwj13L0/7ji5VYaY0257JDlQE2BRRf+rI2Vk1rU=
-github.com/keybase/go-keychain v0.0.0-20231219164618-57a3676c3af6 h1:IsMZxCuZqKuao2vNdfD82fjjgPLfyHLpR41Z88viRWs=
-github.com/keybase/go-keychain v0.0.0-20231219164618-57a3676c3af6/go.mod h1:3VeWNIJaW+O5xpRQbPp0Ybqu1vJd/pm7s2F473HRrkw=
 github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 h1:H4IvZdHXpeK963LgCMbTcEviEal4891UGf2iOqOGL94=
 github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6/go.mod h1:0yOEB+QF1Ega1Cr7oMKb3yUAc3C9/eg6fBHB5HLP7AA=
 github.com/keybase/msgpackzip v0.0.0-20221220225959-4abf538d2b9c h1:PRG2AXSelSy7MiDI+PwJR2QSqI1N3OybRUutsMiHtpo=

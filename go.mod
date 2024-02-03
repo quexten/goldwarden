@@ -12,7 +12,6 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
 	github.com/keybase/client/go v0.0.0-20240202160538-668db6be75e4
-	github.com/keybase/go-keychain v0.0.0-20231219164618-57a3676c3af6
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
