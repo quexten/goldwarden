@@ -11,6 +11,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
 	github.com/keybase/client/go v0.0.0-20240202160538-668db6be75e4
+	github.com/keybase/go-keychain v0.0.0-20231219164618-57a3676c3af6
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
@@ -20,6 +21,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.17.0
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
+	golang.org/x/sys v0.15.0
 )
 
 require (
@@ -32,7 +34,6 @@ require (
 	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
 	github.com/keybase/msgpackzip v0.0.0-20221220225959-4abf538d2b9c // indirect
 	golang.org/x/net v0.19.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
 )
 
 require (

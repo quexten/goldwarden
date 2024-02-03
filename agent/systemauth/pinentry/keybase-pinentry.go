@@ -6,8 +6,8 @@ import (
 	"errors"
 
 	"github.com/keybase/client/go/logger"
-	"github.com/keybase/client/go/pinentry"
 	"github.com/keybase/client/go/protocol/keybase1"
+	pinentry "github.com/quexten/goldwarden/agent/systemauth/pinentry/keybase-pinentry"
 )
 
 func GetPassword(title string, description string) (string, error) {
