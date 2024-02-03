@@ -3,6 +3,7 @@
 package ssh
 
 import (
+	"github.com/Microsoft/go-winio"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"golang.org/x/crypto/ssh/agent"
 )
@@ -15,7 +16,7 @@ func (v SSHAgentServer) Serve() {
 		log.Fatal("listen error:", err)
 	}
 	defer l.Close()
-	log.Printf("Server listening on named pipe %v\n", pipePath)
+	log.Info("Server listening on named pipe %v\n", pipePath)
 
 	for {
 		conn, err := l.Accept()
