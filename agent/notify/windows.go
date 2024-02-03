@@ -5,7 +5,7 @@ package notify
 import (
 	"time"
 
-	"gopkg.in/toast.v1"
+	"github.com/go-toast/toast"
 )
 
 func Notify(title string, body string, actionName string, timeout time.Duration, onclose func()) error {
