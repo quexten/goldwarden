@@ -85,7 +85,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
+        run: go build -tags "nofido2" -o "goldwarden_macos_aarch64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_aarch64
