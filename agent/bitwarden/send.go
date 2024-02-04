@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
@@ -38,6 +40,8 @@ type SendMetadata struct {
 }
 
 type SendCreateRequest struct {
+	AccessCount    *int             `json:"accessCount"`
+	AccessId       *string          `json:"accessId"`
 	DeletionDate   string           `json:"deletionDate"`
 	Disabled       bool             `json:"disabled"`
 	ExpirationDate *string          `json:"expirationDate"`
@@ -50,7 +54,7 @@ type SendCreateRequest struct {
 	Type           int              `json:"type"`
 }
 
-func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, name string, text string) (SendMetadata, error) {
+func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, name string, text string) (string, error) {
 	timestampIn14Days := time.Now().AddDate(0, 0, 14)
 	timestampIn14DaysStr := timestampIn14Days.Format("2006-01-02T15:04:05Z")
 
@@ -58,12 +62,12 @@ func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, nam
 	sendSourceKey := make([]byte, 32)
 	_, err := io.ReadFull(rand.Reader, sendSourceKey)
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
 	encryptedSendSourceKey, err := crypto.EncryptWithToString(sendSourceKey, crypto.AesCbc256_HmacSha256_B64, vault.Keyring.GetAccountKey())
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
 	sendUseKeyPairBytes := make([]byte, 64)
@@ -71,17 +75,17 @@ func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, nam
 
 	sendUseKeyPair, err := crypto.MemorySymmetricEncryptionKeyFromBytes(sendUseKeyPairBytes)
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
 	encryptedName, err := crypto.EncryptWithToString([]byte(name), crypto.AesCbc256_HmacSha256_B64, sendUseKeyPair)
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
 	encryptedText, err := crypto.EncryptWithToString([]byte(text), crypto.AesCbc256_HmacSha256_B64, sendUseKeyPair)
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
 	sendRequest := SendCreateRequest{
@@ -97,11 +101,11 @@ func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, nam
 		Type: 0,
 	}
 
-	var result interface{}
+	var result SendCreateRequest
 	err = authenticatedHTTPPost(ctx, cfg.ConfigFile.ApiUrl+"/sends", &result, sendRequest)
 	if err != nil {
-		return SendMetadata{}, err
+		return "", err
 	}
 
-	return SendMetadata{}, nil
+	return cfg.ConfigFile.VaultUrl + "/#/send/" + *result.AccessId + "/" + strings.ReplaceAll(base64.RawURLEncoding.EncodeToString(sendSourceKey), "+", "-"), nil
 }
