@@ -135,8 +135,13 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
+        run: go build -o "goldwarden_macos_x86_64" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: './goldwarden_macos_x86_64'
@@ -151,8 +156,13 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_aarch64" -v .
+        run: go build -o "goldwarden_macos_aarch64" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: './goldwarden_macos_aarch64'
@@ -167,8 +177,13 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.20'
+      - uses: MinoruSekine/setup-scoop@v2
+      - name: Fido2
+        run: |
+          scoop bucket add keys.pub https://github.com/keys-pub/scoop-bucket
+          scoop install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
+        run: go build -o "goldwarden_windows_x86_64.exe" -v .
       - uses: AButler/upload-release-assets@v2.0
         with:
           files: './goldwarden_windows_x86_64.exe'
