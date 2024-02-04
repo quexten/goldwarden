@@ -8,6 +8,8 @@ require (
 	github.com/amenzhinsky/go-polkit v0.0.0-20210519083301-ee6a51849123
 	github.com/atotto/clipboard v0.1.4
 	github.com/awnumar/memguard v0.22.4
+	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
+	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/google/uuid v1.5.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
@@ -26,8 +28,6 @@ require (
 
 require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
-	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea // indirect
-	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4 // indirect
 	github.com/keybase/backoff v1.0.1-0.20160517061000-726b63b835ec // indirect
 	github.com/keybase/clockwork v0.1.1-0.20161209210251-976f45f4a979 // indirect
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/awnumar/memcall v0.2.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/keys-pub/go-libfido2 v1.5.3
+	github.com/keys-pub/go-libfido2 v1.5.4-0.20230628153049-536daffdd394
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
