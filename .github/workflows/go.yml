@@ -68,15 +68,20 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags nofido2 -o "goldwarden_macos_x86_64" -v .
+        run: go build -o "goldwarden_macos_x86_64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_x86_64
           path: ./goldwarden_macos_x86_64
-
-  build_macos_x86_64_fido2:
-    runs-on: macos-latest
+  
+  build_macos_aarch64:
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -90,23 +95,7 @@ jobs:
       - name: Fido2
         run: brew install libfido2
       - name: Build 
-        run: go build -o "goldwarden_macos_x86_64" -v .
-      - uses: actions/upload-artifact@v3
-        with:
-          name: goldwarden-macos_x86_64_fido2
-          path: ./goldwarden_macos_x86_64_fido2
-  
-  build_macos_aarch64:
-    runs-on: macos-14
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      - name: Build 
-        run: go build -tags nofido2 -o "goldwarden_macos_aarch64" -v .
+        run: go build -o "goldwarden_macos_aarch64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_aarch64
