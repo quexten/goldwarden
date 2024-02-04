@@ -22,6 +22,7 @@ func (v SSHAgentServer) Serve() {
 	if err != nil {
 		panic(err)
 	}
+	defer listener.Close()
 
 	log.Info("SSH Agent listening on %s", path)
 

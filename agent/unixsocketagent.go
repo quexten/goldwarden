@@ -294,6 +294,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		println("listen error", err.Error())
 		return err
 	}
+	defer l.Close()
 	log.Info("Agent listening on %s...", path)
 
 	go func() {
