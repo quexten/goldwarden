@@ -71,8 +71,10 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
+        run: go build -o "goldwarden_macos_x86_64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_x86_64
@@ -90,8 +92,10 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_aarch64" -v .
+        run: go build -o "goldwarden_macos_aarch64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_aarch64
