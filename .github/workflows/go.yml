@@ -111,6 +111,10 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - uses: MinoruSekine/setup-scoop@v2
+      - name: Fido2
+        run: |
+          scoop bucket add keys.pub https://github.com/keys-pub/scoop-bucket
+          scoop install libfido2
       - name: Build 
         run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
       - uses: actions/upload-artifact@v3
