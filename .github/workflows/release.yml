@@ -188,3 +188,19 @@ jobs:
         with:
           files: './goldwarden_windows_x86_64.exe'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  build_windows_aarch64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - name: Build 
+        run: go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
+      - uses: AButler/upload-release-assets@v2.0
+        with:
+          files: './goldwarden_windows_aarch64.exe'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
