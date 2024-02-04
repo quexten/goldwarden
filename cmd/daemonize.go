@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"os"
-	"os/signal"
+	"fmt"
+	"syscall"
 
 	"github.com/awnumar/memguard"
 	"github.com/quexten/goldwarden/agent"
@@ -26,16 +26,27 @@ var daemonizeCmd = &cobra.Command{
 			println("SSH agent disabled")
 		}
 
-		go func() {
-			signalChannel := make(chan os.Signal, 1)
-			signal.Notify(signalChannel, os.Interrupt)
-			<-signalChannel
+		cleanup := func() {
+			fmt.Println("removing sockets and exiting")
+			fmt.Println("unlinking", runtimeConfig.GoldwardenSocketPath)
+			err := syscall.Unlink(runtimeConfig.GoldwardenSocketPath)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("unlinking", runtimeConfig.SSHAgentSocketPath)
+			err = syscall.Unlink(runtimeConfig.SSHAgentSocketPath)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println("memguard wiping memory and exiting")
 			memguard.SafeExit(0)
-		}()
+		}
+
 		err := agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
 		if err != nil {
 			panic(err)
 		}
+		cleanup()
 	},
 }
 

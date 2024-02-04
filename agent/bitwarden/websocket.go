@@ -5,7 +5,6 @@ import (
 	"context"
 	"net/url"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/awnumar/memguard"
@@ -71,9 +70,6 @@ func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Con
 }
 
 func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Config) error {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-
 	url, err := url.Parse(cfg.ConfigFile.NotificationsUrl)
 	if err != nil {
 		return err
