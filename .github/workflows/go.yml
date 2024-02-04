@@ -68,6 +68,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
       - name: Build 
         run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
       - uses: actions/upload-artifact@v3
@@ -84,6 +87,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
       - name: Build 
         run: go build -tags "nofido2" -o "goldwarden_macos_aarch64" -v .
       - uses: actions/upload-artifact@v3
