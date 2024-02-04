@@ -121,3 +121,19 @@ jobs:
         with:
           name: goldwarden-windows_x86_64.exe
           path: ./goldwarden_windows_x86_64.exe
+  
+  build_windows_aarch64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build 
+        run: GOARCH=arm64 go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: goldwarden-windows_aarch64.exe
+          path: ./goldwarden_windows_aarch64.exe
