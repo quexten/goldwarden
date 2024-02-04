@@ -132,7 +132,7 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: Build 
-        run: GOARCH=arm64 go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
+        run: set GOARCH=arm64 && go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-windows_aarch64.exe
