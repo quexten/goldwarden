@@ -53,7 +53,7 @@ var getLoginCmd = &cobra.Command{
 			}
 			break
 		case messages.ActionResponse:
-			println("Error: " + resp.(messages.ActionResponse).Message)
+			fmt.Println("Error: " + resp.(messages.ActionResponse).Message)
 			return
 		}
 	},

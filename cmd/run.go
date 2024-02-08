@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 
@@ -19,7 +20,7 @@ var runCmd = &cobra.Command{
 	The variables are stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
-			println("Error: No command specified")
+			fmt.Println("Error: No command specified")
 			return
 		}
 
@@ -43,7 +44,7 @@ var runCmd = &cobra.Command{
 				env = append(env, key+"="+value)
 			}
 		case messages.ActionResponse:
-			println("Error: " + result.(messages.ActionResponse).Message)
+			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 

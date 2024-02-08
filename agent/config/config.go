@@ -49,6 +49,7 @@ type RuntimeConfig struct {
 	UseMemguard           bool
 	SSHAgentSocketPath    string
 	GoldwardenSocketPath  string
+	DaemonAuthToken       string
 }
 
 type ConfigFile struct {

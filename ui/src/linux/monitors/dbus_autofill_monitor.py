@@ -19,8 +19,13 @@ class GoldwardenDBUSService(dbus.service.Object):
         on_autofill()
         return ""
 
-def run_daemon():
+def daemon():
     DBusGMainLoop(set_as_default=True)
     service = GoldwardenDBUSService()
     from gi.repository import GLib, GObject as gobject
     gobject.MainLoop().run()
+
+def run_daemon():
+    thread = Thread(target=daemon)
+    thread.start()
+    

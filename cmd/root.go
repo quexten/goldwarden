@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/quexten/goldwarden/agent"
@@ -62,8 +63,8 @@ func loginIfRequired() error {
 
 func handleSendToAgentError(err error) {
 	if err != nil {
-		println("Error: " + err.Error())
-		println("Is the daemon running?")
+		fmt.Println("Error: " + err.Error())
+		fmt.Println("Is the daemon running?")
 		return
 	}
 }

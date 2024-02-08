@@ -6,11 +6,13 @@ gi.require_version('Adw', '1')
 import gc
 
 from gi.repository import Gtk, Adw, GLib, Gdk
-import goldwarden
+from ..services import goldwarden
 from threading import Thread
 import subprocess
-import components
+from . import components
 import os
+
+goldwarden.create_authenticated_connection(None)
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -201,6 +203,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
+            print("status", status)
             runtimeCfg = goldwarden.get_runtime_config()
             if runtimeCfg != None:
                 self.ssh_row.set_subtitle("Listening at "+runtimeCfg["SSHAgentSocketPath"])

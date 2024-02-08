@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -30,12 +31,12 @@ var setApiUrlCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -63,12 +64,12 @@ var setIdentityURLCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting identity url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting identity url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -96,12 +97,12 @@ var setNotificationsURLCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting notifications url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting notifications url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -129,12 +130,12 @@ var setVaultURLCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting vault url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting vault url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -162,12 +163,12 @@ var setURLsAutomaticallyCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting urls automatically failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting urls automatically failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -188,14 +189,15 @@ var getEnvironmentCmd = &cobra.Command{
 
 		switch result := result.(type) {
 		case messages.GetConfigEnvironmentResponse:
-			fmt.Println("{")
-			fmt.Println("  \"api\": \"" + result.ApiURL + "\",")
-			fmt.Println("  \"identity\": \"" + result.IdentityURL + "\",")
-			fmt.Println("  \"notifications\": \"" + result.NotificationsURL + "\",")
-			fmt.Println("  \"vault\": \"" + result.VaultURL + "\"")
-			fmt.Println("}")
+			response := map[string]string{}
+			response["api"] = result.ApiURL
+			response["identity"] = result.IdentityURL
+			response["notifications"] = result.NotificationsURL
+			response["vault"] = result.VaultURL
+			responseJSON, _ := json.Marshal(response)
+			fmt.Println(string(responseJSON))
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 	},
 }
@@ -226,12 +228,12 @@ var setApiClientIDCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api client id failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api client id failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -263,12 +265,12 @@ var setApiSecretCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api secret failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api secret failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -289,13 +291,14 @@ var getRuntimeConfigCmd = &cobra.Command{
 
 		switch result := result.(type) {
 		case messages.GetRuntimeConfigResponse:
-			fmt.Println("{")
-			fmt.Println("  \"useMemguard\": " + fmt.Sprintf("%t", result.UseMemguard) + ",")
-			fmt.Println("  \"SSHAgentSocketPath\": \"" + result.SSHAgentSocketPath + "\",")
-			fmt.Println("  \"goldwardenSocketPath\": \"" + result.GoldwardenSocketPath + "\"")
-			fmt.Println("}")
+			response := map[string]interface{}{}
+			response["useMemguard"] = result.UseMemguard
+			response["SSHAgentSocketPath"] = result.SSHAgentSocketPath
+			response["goldwardenSocketPath"] = result.GoldwardenSocketPath
+			responseJSON, _ := json.Marshal(response)
+			fmt.Println(string(responseJSON))
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 	},
 }

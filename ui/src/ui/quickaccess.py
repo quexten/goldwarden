@@ -4,13 +4,16 @@ gi.require_version('Adw', '1')
 import gc
 import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
-import goldwarden
-import clipboard
+from ..services import goldwarden
+from ..linux import clipboard
 from threading import Thread
 import sys
 import os
-import totp
+from ..services import totp
 Notify.init("Goldwarden")
+
+token = sys.stdin.readline()
+goldwarden.create_authenticated_connection(token)
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -85,6 +88,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
         keycont = Gtk.EventControllerKey()
         def handle_keypress(cotroller, keyval, keycode, state, user_data):
+            # if ctrl is pressed
+            if state == 4:
+                print("ctrl")
             if keycode == 36:
                 print("enter")
                 self.hide()
@@ -130,7 +136,8 @@ class MainWindow(Gtk.ApplicationWindow):
         self.history_list.get_style_context().add_class("boxed-list")
         self.box.append(self.history_list)
         self.set_default_size(700, 700)
-        self.set_title("Goldwarden")
+        # self.set_title("Goldwarden")
+        self.set_title(token)
 
 app = MyApp(application_id="com.quexten.Goldwarden.autofill-menu")
 app.run(sys.argv)

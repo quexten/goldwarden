@@ -16,6 +16,7 @@ import (
 	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
+	"github.com/quexten/goldwarden/agent/systemauth"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/quexten/goldwarden/logging"
@@ -44,7 +45,7 @@ func writeError(c net.Conn, errMsg error) error {
 	return nil
 }
 
-func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg *config.Config) {
+func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 	for {
 		buf := make([]byte, 1024*1024)
 		nr, err := c.Read(buf)
@@ -61,7 +62,38 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 			continue
 		}
 
-		responseBytes := []byte{}
+		if msg.Type == messages.MessageTypeForEmptyPayload(messages.SessionAuthRequest{}) {
+			log.Info("Received session auth request")
+			req := messages.ParsePayload(msg).(messages.SessionAuthRequest)
+			fmt.Println("Daemontoken", cfg.ConfigFile.RuntimeConfig.DaemonAuthToken)
+			fmt.Println("Token", req.Token)
+			fmt.Println(len(cfg.ConfigFile.RuntimeConfig.DaemonAuthToken), len(req.Token))
+			payload := messages.SessionAuthResponse{
+				Verified: cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == req.Token,
+			}
+			log.Info("Verified: %t", payload.Verified)
+			callingContext := sockets.GetCallingContext(c)
+			systemauth.CreatePinSession(callingContext)
+
+			responsePayload, err := messages.IPCMessageFromPayload(payload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+			payloadBytes, err := json.Marshal(responsePayload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+
+			_, err = c.Write(payloadBytes)
+			if err != nil {
+				log.Error("Failed writing to socket " + err.Error())
+			}
+			continue
+		}
+
+		var responseBytes []byte
 		if action, actionFound := actions.AgentActionsRegistry.Get(msg.Type); actionFound {
 			callingContext := sockets.GetCallingContext(c)
 			payload, err := action(msg, cfg, vault, &callingContext)
@@ -291,7 +323,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 
 	l, err := net.Listen("unix", path)
 	if err != nil {
-		println("listen error", err.Error())
+		fmt.Println("listen error", err.Error())
 		return err
 	}
 	defer l.Close()
@@ -301,10 +333,11 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		for {
 			fd, err := l.Accept()
 			if err != nil {
-				println("accept error", err.Error())
+				fmt.Println("accept error", err.Error())
 			}
+			fmt.Println("Accepted connection")
 
-			go serveAgentSession(fd, ctx, vault, &cfg)
+			go serveAgentSession(fd, vault, &cfg)
 		}
 	}()
 

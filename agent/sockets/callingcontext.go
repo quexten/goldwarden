@@ -17,6 +17,7 @@ type CallingContext struct {
 	ParentProcessPid       int
 	GrandParentProcessPid  int
 	Error                  bool
+	Authenticated          bool
 }
 
 func GetCallingContext(connection net.Conn) CallingContext {
@@ -30,6 +31,7 @@ func GetCallingContext(connection net.Conn) CallingContext {
 		ParentProcessPid:       0,
 		GrandParentProcessPid:  0,
 		Error:                  true,
+		Authenticated:          false,
 	}
 	if err != nil {
 		return errorContext
