@@ -89,7 +89,7 @@ var listLoginsCmd = &cobra.Command{
 	},
 }
 
-func ListLogins(client client.Client) ([]messages.DecryptedLoginCipher, error) {
+func ListLogins(client client.UnixSocketClient) ([]messages.DecryptedLoginCipher, error) {
 	resp, err := client.SendToAgent(messages.ListLoginsRequest{})
 	if err != nil {
 		return []messages.DecryptedLoginCipher{}, err

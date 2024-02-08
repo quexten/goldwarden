@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/quexten/goldwarden/agent"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/client"
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
 
-var commandClient client.Client
+var commandClient client.UnixSocketClient
 var runtimeConfig config.RuntimeConfig
 
 var rootCmd = &cobra.Command{
@@ -25,13 +24,7 @@ var rootCmd = &cobra.Command{
 func Execute(cfg config.RuntimeConfig) {
 	runtimeConfig = cfg
 
-	goldwardenSingleProcess := os.Getenv("GOLDWARDEN_SINGLE_PROCESS")
-	if goldwardenSingleProcess == "true" {
-		recv, send := agent.StartVirtualAgent(runtimeConfig)
-		commandClient = client.NewVirtualClient(send, recv)
-	} else {
-		commandClient = client.NewUnixSocketClient(&cfg)
-	}
+	commandClient = client.NewUnixSocketClient(&cfg)
 
 	err := rootCmd.Execute()
 	if err != nil {

@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net"
 
 	"github.com/quexten/goldwarden/agent/config"
@@ -16,13 +15,17 @@ type UnixSocketClient struct {
 	runtimeConfig *config.RuntimeConfig
 }
 
+type UnixSocketConnection struct {
+	conn net.Conn
+}
+
 func NewUnixSocketClient(runtimeConfig *config.RuntimeConfig) UnixSocketClient {
 	return UnixSocketClient{
 		runtimeConfig: runtimeConfig,
 	}
 }
 
-func reader(r io.Reader) interface{} {
+func Reader(r io.Reader) interface{} {
 	buf := make([]byte, READ_BUFFER)
 	for {
 		n, err := r.Read(buf[:])
@@ -40,25 +43,55 @@ func reader(r io.Reader) interface{} {
 }
 
 func (client UnixSocketClient) SendToAgent(request interface{}) (interface{}, error) {
-	c, err := net.Dial("unix", client.runtimeConfig.GoldwardenSocketPath)
+	c, err := client.Connect()
 	if err != nil {
 		return nil, err
 	}
 	defer c.Close()
+	return c.SendCommand(request)
+}
 
-	message, err := messages.IPCMessageFromPayload(request)
+func (client UnixSocketClient) Connect() (UnixSocketConnection, error) {
+	c, err := net.Dial("unix", client.runtimeConfig.GoldwardenSocketPath)
+	if err != nil {
+		return UnixSocketConnection{}, err
+	}
+	return UnixSocketConnection{conn: c}, nil
+}
+
+func (conn UnixSocketConnection) SendCommand(request interface{}) (interface{}, error) {
+	err := conn.WriteMessage(request)
+	if err != nil {
+		return nil, err
+	}
+	return conn.ReadMessage(), nil
+}
+
+func (conn UnixSocketConnection) ReadMessage() interface{} {
+	result := Reader(conn.conn)
+	// fmt.Println("ReadMessag")
+	// fmt.Println(result)
+	payload := messages.ParsePayload(result.(messages.IPCMessage))
+	// fmt.Println(payload)
+	return payload
+}
+
+func (conn UnixSocketConnection) WriteMessage(message interface{}) error {
+	// fmt.Println("WriteMessage")
+	messagePacket, err := messages.IPCMessageFromPayload(message)
+	// fmt.Println(messagePacket)
 	if err != nil {
 		panic(err)
 	}
-	messageJson, err := json.Marshal(message)
+	messageJson, err := json.Marshal(messagePacket)
 	if err != nil {
 		panic(err)
 	}
+	// fmt.Println(messageJson)
+	_, err = conn.conn.Write(messageJson)
+	return err
+}
 
-	_, err = c.Write(messageJson)
-	if err != nil {
-		log.Fatal("write error:", err)
-	}
-	result := reader(c)
-	return messages.ParsePayload(result.(messages.IPCMessage)), nil
+func (conn UnixSocketConnection) Close() {
+	conn.conn.Close()
 }

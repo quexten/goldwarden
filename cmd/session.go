@@ -34,7 +34,37 @@ var pinentry = &cobra.Command{
 	Short:  "Registers as a pinentry program",
 	Long:   `Registers as a pinentry program.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		conn, err := commandClient.Connect()
+		if err != nil {
+			panic(err)
+		}
+		defer conn.Close()
+		_, err = conn.SendCommand(messages.PinentryRegistrationRequest{})
+		if err != nil {
+			panic(err)
+		}
 
+		for {
+			response := conn.ReadMessage()
+			switch response.(type) {
+			case messages.PinentryPinRequest:
+				fmt.Println("pin-request" + "," + response.(messages.PinentryPinRequest).Message)
+			case messages.PinentryApprovalRequest:
+				fmt.Println("approval-request" + "," + response.(messages.PinentryApprovalRequest).Message)
+			}
+
+			// read line
+			reader := bufio.NewReader(os.Stdin)
+			text, _ := reader.ReadString('\n')
+			text = strings.TrimSuffix(text, "\n")
+
+			switch response.(type) {
+			case messages.PinentryPinRequest:
+				err = conn.WriteMessage(messages.PinentryPinResponse{Pin: text})
+			case messages.PinentryApprovalRequest:
+				err = conn.WriteMessage(messages.PinentryApprovalResponse{Approved: text == "true"})
+			}
+		}
 	},
 }
 

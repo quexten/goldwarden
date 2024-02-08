@@ -17,6 +17,7 @@ import (
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
 	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/quexten/goldwarden/logging"
@@ -62,6 +63,7 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 			continue
 		}
 
+		// todo refactor to other file
 		if msg.Type == messages.MessageTypeForEmptyPayload(messages.SessionAuthRequest{}) {
 			log.Info("Received session auth request")
 			req := messages.ParsePayload(msg).(messages.SessionAuthRequest)
@@ -90,6 +92,125 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 			if err != nil {
 				log.Error("Failed writing to socket " + err.Error())
 			}
+			continue
+		}
+
+		// todo refactor to other file
+		if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryRegistrationRequest{}) {
+			log.Info("Received pinentry registration request")
+
+			getPasswordChan := make(chan struct {
+				title       string
+				description string
+			})
+			getPasswordReturnChan := make(chan struct {
+				password string
+				err      error
+			})
+			getApprovalChan := make(chan struct {
+				title       string
+				description string
+			})
+			getApprovalReturnChan := make(chan struct {
+				approved bool
+				err      error
+			})
+
+			pe := pinentry.Pinentry{
+				GetPassword: func(title string, description string) (string, error) {
+					getPasswordChan <- struct {
+						title       string
+						description string
+					}{title, description}
+					returnValue := <-getPasswordReturnChan
+					return returnValue.password, returnValue.err
+				},
+				GetApproval: func(title string, description string) (bool, error) {
+					getApprovalChan <- struct {
+						title       string
+						description string
+					}{title, description}
+					returnValue := <-getApprovalReturnChan
+					return returnValue.approved, returnValue.err
+				},
+			}
+
+			pinnentrySetError := pinentry.SetExternalPinentry(pe)
+			payload := messages.PinentryRegistrationResponse{
+				Success: pinnentrySetError == nil,
+			}
+			responsePayload, err := messages.IPCMessageFromPayload(payload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+			payloadBytes, err := json.Marshal(responsePayload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+
+			_, err = c.Write(payloadBytes)
+			if err != nil {
+				log.Error("Failed writing to socket " + err.Error())
+			}
+			_, err = c.Write([]byte("\n"))
+			time.Sleep(50 * time.Millisecond) //todo fix properly
+
+			if pinnentrySetError != nil {
+				return
+			}
+
+			for {
+				fmt.Println("Waiting for pinentry request")
+				select {
+				case getPasswordRequest := <-getPasswordChan:
+					log.Info("Received getPassword request")
+					payload := messages.PinentryPinRequest{
+						Message: getPasswordRequest.description,
+					}
+					payloadPayload, err := messages.IPCMessageFromPayload(payload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					payloadBytes, err := json.Marshal(payloadPayload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					_, err = c.Write(payloadBytes)
+					if err != nil {
+						log.Error("Failed writing to socket " + err.Error())
+					}
+
+					buf := make([]byte, 1024*1024)
+					nr, err := c.Read(buf)
+					if err != nil {
+						return
+					}
+
+					data := buf[0:nr]
+
+					var msg messages.IPCMessage
+					err = json.Unmarshal(data, &msg)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryPinResponse{}) {
+						getPasswordResponse := messages.ParsePayload(msg).(messages.PinentryPinResponse)
+						getPasswordReturnChan <- struct {
+							password string
+							err      error
+						}{getPasswordResponse.Pin, nil}
+					}
+				}
+			}
+
 			continue
 		}
 
