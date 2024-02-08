@@ -17,15 +17,15 @@ class GoldwardenDBUSService(dbus.service.Object):
     @dbus.service.method('com.quexten.Goldwarden.ui.QuickAccess')
     def quickaccess(self):
         p = subprocess.Popen(["python3", "-m", "src.ui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
-        print("writing token")
         p.stdin.write(f"{daemon_token}\n".encode())
         p.stdin.flush()
-        print("reading token")  
         return ""
 
     @dbus.service.method('com.quexten.Goldwarden.ui.Settings')
     def settings(self):
-        subprocess.Popen(["python3", "-m", "src.ui.settings"], cwd=root_path, start_new_session=True)
+        subprocess.Popen(["python3", "-m", "src.ui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+        p.stdin.write(f"{daemon_token}\n".encode())
+        p.stdin.flush()
         return ""
 
 def daemon():

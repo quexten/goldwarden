@@ -9,10 +9,12 @@ BINARY_PATHS = [
     str(Path.home()) + "/go/src/github.com/quexten/goldwarden/goldwarden"
 ]
 
+BINARY_PATH = ""
 authenticated_connection = None
 
 def create_authenticated_connection(token):
     global authenticated_connection
+    global BINARY_PATH
     BINARY_PATH = None
     for path in BINARY_PATHS:
         if os.path.exists(path):
@@ -123,16 +125,16 @@ def get_runtime_config():
     except Exception as e:
         return None
     
-# def autotype(username, password):
-#     # environment
-#     env = os.environ.copy()
-#     env["PASSWORD"] = password
-#     restic_cmd = f"{BINARY_PATH} autotype --username {username}"
-#     result = subprocess.run(restic_cmd.split(), capture_output=True, text=True, env=env)
-#     print(result.stderr)
-#     print(result.stdout)
-#     if result.returncode != 0:
-#         raise Exception("Failed to initialize repository, err", result.stderr)
+def autotype(username, password):
+    env = os.environ.copy()
+    # todo convert to stdin
+    env["PASSWORD"] = password
+    goldwarden_cmd = f"{BINARY_PATH} autotype --username {username}"
+    result = subprocess.run(goldwarden_cmd.split(), capture_output=True, text=True, env=env)
+    print(result.stderr)
+    print(result.stdout)
+    if result.returncode != 0:
+        raise Exception("Failed to initialize repository, err", result.stderr)
 
 def is_daemon_running():
     result = send_authenticated_command(f"vault status")

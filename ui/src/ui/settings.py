@@ -12,6 +12,8 @@ import subprocess
 from . import components
 import os
 
+root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
+token = sys.stdin.readline()
 goldwarden.create_authenticated_connection(None)
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
@@ -48,7 +50,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.autotype_button = Gtk.Button()
         self.autotype_button.set_label("Quick Access")
         self.autotype_button.set_margin_top(10)
-        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+        def quickaccess_button_clicked():
+            p = subprocess.Popen(["python3", "-m", "src.ui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+            p.stdin.write(f"{token}\n".encode())
+            p.stdin.flush()
+        self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
         self.autotype_button.get_style_context().add_class("suggested-action")
         self.action_preferences_group.add(self.autotype_button)
 

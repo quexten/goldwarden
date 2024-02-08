@@ -20,15 +20,20 @@ class MyApp(Adw.Application):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
 
-    def on_activate(self, app):
-        self.autofill_window = MainWindow(application=app)
-        self.autofill_window.logins = []
-        self.autofill_window.present()
+    def update_logins(self):
         logins = goldwarden.get_vault_logins()
         if logins == None:
             os._exit(0)
             return
-        app.autofill_window.logins = logins
+        self.app.autofill_window.logins = logins
+
+    def on_activate(self, app):
+        self.autofill_window = MainWindow(application=app)
+        self.autofill_window.logins = []
+        self.autofill_window.present()
+        self.app = app
+        thread = Thread(target=self.update_logins)
+        thread.start()
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
