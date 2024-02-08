@@ -335,7 +335,6 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 			if err != nil {
 				fmt.Println("accept error", err.Error())
 			}
-			fmt.Println("Accepted connection")
 
 			go serveAgentSession(fd, vault, &cfg)
 		}

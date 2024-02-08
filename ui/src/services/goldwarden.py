@@ -34,11 +34,9 @@ def send_authenticated_command(cmd):
         print("No daemon connection running, please restart the application completely.")
         return ""
 
-    print("sending command", cmd)
     authenticated_connection.stdin.write(cmd + "\n")
     authenticated_connection.stdin.flush()
     result = authenticated_connection.stdout.readline()
-    print("result", result)
     return result
 
 def set_api_url(url):
@@ -61,7 +59,6 @@ def get_environment():
     try:
         return json.loads(result)
     except Exception as e:
-        print(e)
         return None
 
 def set_client_id(client_id):
@@ -110,13 +107,10 @@ def get_vault_status():
     try:
         return json.loads(result)
     except Exception as e:
-        print(e)
         return None
     
 def get_vault_logins():
     result = send_authenticated_command(f"logins list")
-    if result.returncode != 0:
-        raise Exception("Failed to initialize repository, err", result.stderr)
     try:
         return json.loads(result)
     except Exception as e:
@@ -124,7 +118,6 @@ def get_vault_logins():
 
 def get_runtime_config():
     result = send_authenticated_command(f"config get-runtime-config")
-    print(result)
     try:
         return json.loads(result)
     except Exception as e:

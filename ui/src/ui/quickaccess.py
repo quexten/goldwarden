@@ -136,8 +136,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.history_list.get_style_context().add_class("boxed-list")
         self.box.append(self.history_list)
         self.set_default_size(700, 700)
-        # self.set_title("Goldwarden")
-        self.set_title(token)
+        self.set_title("Goldwarden Quick Access")
 
 app = MyApp(application_id="com.quexten.Goldwarden.autofill-menu")
 app.run(sys.argv)

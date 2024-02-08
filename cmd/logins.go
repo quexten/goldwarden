@@ -72,8 +72,8 @@ var listLoginsCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("[")
-		for index, login := range logins {
+		var toPrintLogins []map[string]string
+		for _, login := range logins {
 			data := map[string]string{
 				"name":     stringsx.Clean(login.Name),
 				"uuid":     stringsx.Clean(login.UUID),
@@ -82,19 +82,10 @@ var listLoginsCmd = &cobra.Command{
 				"totp":     stringsx.Clean(login.TOTPSeed),
 				"uri":      stringsx.Clean(login.URI),
 			}
-			jsonString, err := json.Marshal(data)
-			if err != nil {
-				handleSendToAgentError(err)
-				return
-			}
-			fmt.Print(string(jsonString))
-			if index != len(logins)-1 {
-				fmt.Println(",")
-			} else {
-				fmt.Println()
-			}
+			toPrintLogins = append(toPrintLogins, data)
 		}
-		fmt.Println("]")
+		toPrintJSON, _ := json.Marshal(toPrintLogins)
+		fmt.Println(string(toPrintJSON))
 	},
 }
 
