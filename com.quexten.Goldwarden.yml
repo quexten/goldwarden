@@ -41,7 +41,7 @@ modules:
     buildsystem: simple
     build-commands:
       - cp -R ./ui/* /app/bin
-      - chmod +x /app/bin/goldwarden_ui_main.py
+      - chmod +x /app/bin/src/goldwarden_ui_main.py
       - install -D ./ui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
       - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
       - install -Dm644 ./ui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
@@ -51,7 +51,7 @@ modules:
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
-      - install -D goldwarden /app/bin/goldwarden
+      - install -D goldwarden /app/bin/src/goldwarden
     sources:
       - type: file
         path: ./goldwarden
