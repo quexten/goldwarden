@@ -66,6 +66,10 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 
 		// todo refactor to other file
 		if msg.Type == messages.MessageTypeForEmptyPayload(messages.SessionAuthRequest{}) {
+			if cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == "" {
+				return
+			}
+
 			req := messages.ParsePayload(msg).(messages.SessionAuthRequest)
 			verified := subtle.ConstantTimeCompare([]byte(cfg.ConfigFile.RuntimeConfig.DaemonAuthToken), []byte(req.Token)) == 1
 
@@ -98,6 +102,11 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 
 		// todo refactor to other file
 		if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryRegistrationRequest{}) {
+			// todo lockdown this method better
+			if cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == "" {
+				return
+			}
+
 			log.Info("Received pinentry registration request")
 
 			getPasswordChan := make(chan struct {
