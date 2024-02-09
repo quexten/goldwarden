@@ -2,6 +2,13 @@ import subprocess
 import json
 import os
 from pathlib import Path
+from threading import Thread
+
+is_flatpak = os.path.exists("/.flatpak-info")
+log_directory = str(Path.home()) + "/.local/share/goldwarden"
+if is_flatpak:
+    log_directory = str(Path.home()) + "/.var/app/com.quexten.goldwarden/data/goldwarden"
+os.makedirs(log_directory, exist_ok=True)
 
 BINARY_PATHS = [
     "/app/bin/goldwarden",
@@ -163,14 +170,28 @@ def listen_for_pinentry(on_pinentry, on_pin_approval):
                 pinentry_process.stdin.write("false\n")
                 pinentry_process.stdin.flush()
 
-# def run_daemon():
-#     restic_cmd = f"daemonize"
-#     # print while running
-#     result = subprocess.Popen(restic_cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-#     if result.returncode != 0:
-#         print("Failed err", result.stderr)
-#     for line in result.stdout:
-#         print(line.decode("utf-8"))
-#     result.wait()
-#     print("quitting goldwarden daemon")
-#     return result.returncode
+def run_daemon(token):
+    #todo replace with stdin
+    daemon_env = os.environ.copy()
+    daemon_env["GOLDWARDEN_DAEMON_AUTH_TOKEN"] = token
+    
+    print("starting goldwarden daemon", BINARY_PATH, token)
+
+    # print while running
+    result = subprocess.Popen([f"{BINARY_PATH}", "daemonize"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=daemon_env)
+    if result.returncode != 0:
+        print("Failed err", result.stderr)
+        raise Exception("Failed to start daemon")
+
+    # log stdout and stderr to file
+    with open(f"{log_directory}/daemon.log", "w") as f:
+        f.write(result.stdout.read())
+        f.write(result.stderr.read())
+
+    result.wait()
+    print("quitting goldwarden daemon")
+    return result.returncode
+
+def run_daemon_background(token):
+    thread = Thread(target=lambda: run_daemon(token))
+    thread.start()
