@@ -382,7 +382,9 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}()
 	go func() {
 		err = processsecurity.MonitorIdle(func() {
-			log.Warn("Idling detected but no action is implemented")
+			cfg.Lock()
+			vault.Clear()
+			vault.Keyring.Lock()
 		})
 		if err != nil {
 			log.Warn("Could not monitor idle: %s", err.Error())

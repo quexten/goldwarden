@@ -9,6 +9,8 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+const IDLE_TIME = 60 * 15
+
 func DisableDumpable() error {
 	return unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0)
 }
@@ -70,7 +72,7 @@ func MonitorIdle(onidle func()) error {
 			return err
 		}
 		secondsIdle := res / 1000
-		if secondsIdle > 60*1 {
+		if secondsIdle > IDLE_TIME {
 			if !wasidle {
 				wasidle = true
 				onidle()
