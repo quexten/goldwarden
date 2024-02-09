@@ -69,17 +69,12 @@ func (conn UnixSocketConnection) SendCommand(request interface{}) (interface{}, 
 
 func (conn UnixSocketConnection) ReadMessage() interface{} {
 	result := Reader(conn.conn)
-	// fmt.Println("ReadMessag")
-	// fmt.Println(result)
 	payload := messages.ParsePayload(result.(messages.IPCMessage))
-	// fmt.Println(payload)
 	return payload
 }
 
 func (conn UnixSocketConnection) WriteMessage(message interface{}) error {
-	// fmt.Println("WriteMessage")
 	messagePacket, err := messages.IPCMessageFromPayload(message)
-	// fmt.Println(messagePacket)
 	if err != nil {
 		panic(err)
 	}
@@ -87,7 +82,6 @@ func (conn UnixSocketConnection) WriteMessage(message interface{}) error {
 	if err != nil {
 		panic(err)
 	}
-	// fmt.Println(messageJson)
 	_, err = conn.conn.Write(messageJson)
 	return err
 }
