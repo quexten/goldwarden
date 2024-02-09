@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -65,17 +66,17 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 
 		// todo refactor to other file
 		if msg.Type == messages.MessageTypeForEmptyPayload(messages.SessionAuthRequest{}) {
-			log.Info("Received session auth request")
 			req := messages.ParsePayload(msg).(messages.SessionAuthRequest)
-			fmt.Println("Daemontoken", cfg.ConfigFile.RuntimeConfig.DaemonAuthToken)
-			fmt.Println("Token", req.Token)
-			fmt.Println(len(cfg.ConfigFile.RuntimeConfig.DaemonAuthToken), len(req.Token))
+			verified := subtle.ConstantTimeCompare([]byte(cfg.ConfigFile.RuntimeConfig.DaemonAuthToken), []byte(req.Token)) == 1
+
 			payload := messages.SessionAuthResponse{
-				Verified: cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == req.Token,
+				Verified: verified,
 			}
-			log.Info("Verified: %t", payload.Verified)
+			log.Info("Verified: %t", verified)
 			callingContext := sockets.GetCallingContext(c)
-			systemauth.CreatePinSession(callingContext)
+			if verified {
+				systemauth.CreatePinSession(callingContext, 365*24*time.Hour) // permanent session
+			}
 
 			responsePayload, err := messages.IPCMessageFromPayload(payload)
 			if err != nil {

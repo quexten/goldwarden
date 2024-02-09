@@ -14,7 +14,8 @@ import (
 
 var log = logging.GetLogger("Goldwarden", "Systemauth")
 
-const tokenExpiry = 10 * time.Minute
+const tokenExpiry = 60 * time.Minute
+const SSHTTL = 60 * time.Minute
 
 type SessionType string
 
@@ -40,12 +41,12 @@ type SessionStore struct {
 	Store []Session
 }
 
-func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int, sessionType SessionType) Session {
+func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int, sessionType SessionType, ttl time.Duration) Session {
 	var session = Session{
 		Pid:            pid,
 		ParentPid:      parentpid,
 		GrandParentPid: grandparentpid,
-		Expires:        time.Now().Add(tokenExpiry),
+		Expires:        time.Now().Add(ttl),
 		sessionType:    sessionType,
 	}
 	s.Store = append(s.Store, session)
@@ -107,7 +108,7 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 		// }
 
 		log.Info("Permission granted, creating session")
-		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType)
+		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType, tokenExpiry)
 	}
 	return true, nil
 }
@@ -128,8 +129,8 @@ func CheckBiometrics(callingContext *sockets.CallingContext, approvalType biomet
 	return approval
 }
 
-func CreatePinSession(ctx sockets.CallingContext) {
-	sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, Pin)
+func CreatePinSession(ctx sockets.CallingContext, ttl time.Duration) Session {
+	return sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, Pin, ttl)
 }
 
 func VerifyPinSession(ctx sockets.CallingContext) bool {

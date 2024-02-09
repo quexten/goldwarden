@@ -40,7 +40,7 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 			return nil, errors.New("vault is locked")
 		}
 
-		systemauth.CreatePinSession(vaultAgent.context)
+		systemauth.CreatePinSession(vaultAgent.context, systemauth.SSHTTL)
 	}
 
 	vaultSSHKeys := (*vaultAgent.vault).GetSSHKeys()
@@ -87,7 +87,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 			return nil, errors.New("vault is locked")
 		}
 
-		systemauth.CreatePinSession(vaultAgent.context)
+		systemauth.CreatePinSession(vaultAgent.context, systemauth.SSHTTL)
 	}
 
 	var signer ssh.Signer
