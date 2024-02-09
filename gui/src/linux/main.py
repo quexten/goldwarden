@@ -6,6 +6,7 @@ from .monitors import dbus_autofill_monitor
 from .monitors import dbus_monitor
 import sys
 from src.services import goldwarden
+from src.services import pinentry
 from threading import Thread
 import os
 import secrets
@@ -36,6 +37,7 @@ def main():
     # start daemons
     dbus_autofill_monitor.run_daemon(token) # todo: remove after migration
     dbus_monitor.run_daemon(token)
+    pinentry.daemonize()
 
     if not "--hidden" in sys.argv:
         p = subprocess.Popen(["python3", "-m", "src.gui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)

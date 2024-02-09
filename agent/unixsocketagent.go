@@ -139,6 +139,8 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 			payload := messages.PinentryRegistrationResponse{
 				Success: pinnentrySetError == nil,
 			}
+			log.Info("Pinentry registration success: %t", payload.Success)
+
 			responsePayload, err := messages.IPCMessageFromPayload(payload)
 			if err != nil {
 				writeError(c, err)

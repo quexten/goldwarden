@@ -175,7 +175,7 @@ def run_daemon(token):
     daemon_env = os.environ.copy()
     daemon_env["GOLDWARDEN_DAEMON_AUTH_TOKEN"] = token
     
-    print("starting goldwarden daemon", BINARY_PATH, token)
+    print("starting goldwarden daemon", BINARY_PATH)
 
     # print while running
     result = subprocess.Popen([f"{BINARY_PATH}", "daemonize"], stdout=subprocess.PIPE, text=True, env=daemon_env)
