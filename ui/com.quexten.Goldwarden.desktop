@@ -2,7 +2,7 @@
 Name=Goldwarden
 Comment=A Bitwarden compatible desktop password manager
 Keywords=password;ssh;auto-type;keys;
-Exec=main.py
+Exec=src/goldwarden_ui_main.py
 Terminal=false
 Type=Application
 Icon=com.quexten.Goldwarden

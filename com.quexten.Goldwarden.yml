@@ -2,7 +2,7 @@ id: com.quexten.Goldwarden
 runtime: org.gnome.Platform
 runtime-version: '45'
 sdk: org.gnome.Sdk
-command: main.py
+command: src/goldwarden_ui_main.py
 finish-args:
   # Allow network access for sync
   - --share=network
