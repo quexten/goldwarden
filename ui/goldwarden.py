@@ -1,13 +1,19 @@
 import subprocess
 import json
+from shutil import which
 import os
+import sys
 
 # if flatpak
 if os.path.exists("/app/bin/goldwarden"):
     BINARY_PATH = "/app/bin/goldwarden"
 else:
-    res = subprocess.run(["which", "goldwarden"])
-    BINARY_PATH = res.stdout.decode("utf-8").strip()
+    BINARY_PATH = which('goldwarden')
+    if isinstance(BINARY_PATH,str):
+        BINARY_PATH = BINARY_PATH.strip()
+    else:
+        print("goldwarden executable not found")
+        sys.exit()
 
 def set_api_url(url):
     restic_cmd = f"{BINARY_PATH} config set-api-url {url}"
