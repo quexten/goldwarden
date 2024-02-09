@@ -1,6 +1,9 @@
 #Python DBUS Test Server
 #runs until the Quit() method is called via DBUS
 
+from gi import require_version
+require_version('Gtk', '4.0')
+require_version('Adw', '1')
 from gi.repository import Gtk
 import dbus
 import dbus.service
