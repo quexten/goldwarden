@@ -4,8 +4,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
@@ -13,7 +15,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func isRoot() bool {
+	currentUser, err := user.Current()
+	if err != nil {
+		log.Fatalf("[isRoot] Unable to get current user: %s", err)
+	}
+	return currentUser.Username == "root"
+}
+
 func setupPolkit() {
+	if isRoot() {
+		fmt.Println("Do not run this command as root!")
+		return
+	}
+
 	file, err := os.Create("/tmp/goldwarden-policy")
 	if err != nil {
 		panic(err)
@@ -77,6 +92,11 @@ ExecStart=BINARY_PATH daemonize
 WantedBy=graphical-session.target`
 
 func setupSystemd() {
+	if isRoot() {
+		fmt.Println("Do not run this command as root!")
+		return
+	}
+
 	file, err := os.Create("/tmp/goldwarden.service")
 	if err != nil {
 		panic(err)
@@ -125,6 +145,11 @@ var systemdCmd = &cobra.Command{
 	Short: "Sets up systemd autostart",
 	Long:  "Sets up systemd autostart",
 	Run: func(cmd *cobra.Command, args []string) {
+		if isRoot() {
+			fmt.Println("Do not run this command as root!")
+			return
+		}
+
 		setupSystemd()
 	},
 }
@@ -134,6 +159,11 @@ var browserbiometricsCmd = &cobra.Command{
 	Short: "Sets up browser biometrics",
 	Long:  "Sets up browser biometrics",
 	Run: func(cmd *cobra.Command, args []string) {
+		if isRoot() {
+			fmt.Println("Do not run this command as root!")
+			return
+		}
+
 		err := browserbiometrics.DetectAndInstallBrowsers()
 		if err != nil {
 			fmt.Println("Error: " + err.Error())
