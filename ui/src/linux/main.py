@@ -32,6 +32,7 @@ def main():
         reply = the_interface.settings()
         exit()
 
+    goldwarden.run_daemon_background(token)
     # start daemons
     dbus_autofill_monitor.run_daemon(token) # todo: remove after migration
     dbus_monitor.run_daemon(token)

@@ -178,17 +178,16 @@ def run_daemon(token):
     print("starting goldwarden daemon", BINARY_PATH, token)
 
     # print while running
-    result = subprocess.Popen([f"{BINARY_PATH}", "daemonize"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=daemon_env)
-    if result.returncode != 0:
-        print("Failed err", result.stderr)
-        raise Exception("Failed to start daemon")
+    result = subprocess.Popen([f"{BINARY_PATH}", "daemonize"], stdout=subprocess.PIPE, text=True, env=daemon_env)
 
-    # log stdout and stderr to file
-    with open(f"{log_directory}/daemon.log", "w") as f:
-        f.write(result.stdout.read())
-        f.write(result.stderr.read())
-
-    result.wait()
+    # write log to file until process exits
+    log_file = open(f"{log_directory}/daemon.log", "w")
+    while result.poll() == None:
+        # read stdout and stder
+        stdout = result.stdout.readline()
+        log_file.write(stdout)
+        log_file.flush()
+    log_file.close()
     print("quitting goldwarden daemon")
     return result.returncode
 
