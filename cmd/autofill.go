@@ -10,9 +10,10 @@ import (
 )
 
 var autofillCmd = &cobra.Command{
-	Use:   "autotype",
-	Short: "Autotype credentials",
-	Long:  `Autotype credentials`,
+	Hidden: true,
+	Use:    "autotype",
+	Short:  "Autotype credentials",
+	Long:   `Autotype credentials`,
 	Run: func(cmd *cobra.Command, args []string) {
 		username, _ := cmd.Flags().GetString("username")
 		// get pasword from env

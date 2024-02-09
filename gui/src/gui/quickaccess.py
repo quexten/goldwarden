@@ -4,28 +4,36 @@ gi.require_version('Adw', '1')
 import gc
 import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
-import goldwarden
-import clipboard
+from ..services import goldwarden
+from ..linux import clipboard
 from threading import Thread
 import sys
 import os
-import totp
+from ..services import totp
 Notify.init("Goldwarden")
+
+token = sys.stdin.readline()
+goldwarden.create_authenticated_connection(token)
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
 
-    def on_activate(self, app):
-        self.autofill_window = MainWindow(application=app)
-        self.autofill_window.logins = []
-        self.autofill_window.present()
+    def update_logins(self):
         logins = goldwarden.get_vault_logins()
         if logins == None:
             os._exit(0)
             return
-        app.autofill_window.logins = logins
+        self.app.autofill_window.logins = logins
+
+    def on_activate(self, app):
+        self.autofill_window = MainWindow(application=app)
+        self.autofill_window.logins = []
+        self.autofill_window.present()
+        self.app = app
+        thread = Thread(target=self.update_logins)
+        thread.start()
 
 class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -85,6 +93,9 @@ class MainWindow(Gtk.ApplicationWindow):
 
         keycont = Gtk.EventControllerKey()
         def handle_keypress(cotroller, keyval, keycode, state, user_data):
+            # if ctrl is pressed
+            if state == 4:
+                print("ctrl")
             if keycode == 36:
                 print("enter")
                 self.hide()
@@ -130,7 +141,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.history_list.get_style_context().add_class("boxed-list")
         self.box.append(self.history_list)
         self.set_default_size(700, 700)
-        self.set_title("Goldwarden")
+        self.set_title("Goldwarden Quick Access")
 
 app = MyApp(application_id="com.quexten.Goldwarden.autofill-menu")
 app.run(sys.argv)

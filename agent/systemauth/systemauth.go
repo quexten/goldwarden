@@ -65,6 +65,10 @@ func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType Ses
 
 // with session
 func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *config.Config) (bool, error) {
+	if ctx.Authenticated {
+		return true, nil
+	}
+
 	log.Info("Checking permission for " + ctx.ProcessName + " with session type " + string(sessionType))
 	var actionDescription = ""
 	biometricsApprovalType := biometrics.AccessVault

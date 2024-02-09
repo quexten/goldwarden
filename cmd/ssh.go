@@ -47,7 +47,7 @@ var sshAddCmd = &cobra.Command{
 			}
 			break
 		case messages.ActionResponse:
-			println("Error: " + result.(messages.ActionResponse).Message)
+			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 	},
@@ -74,7 +74,7 @@ var listSSHCmd = &cobra.Command{
 			}
 			break
 		case messages.ActionResponse:
-			println("Error: " + result.(messages.ActionResponse).Message)
+			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 	},

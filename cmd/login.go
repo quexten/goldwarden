@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
@@ -17,7 +19,7 @@ var loginCmd = &cobra.Command{
 		request := messages.DoLoginRequest{}
 		email, _ := cmd.Flags().GetString("email")
 		if email == "" {
-			println("Error: No email specified")
+			fmt.Println("Error: No email specified")
 			return
 		}
 
@@ -34,12 +36,12 @@ var loginCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Logged in")
+				fmt.Println("Logged in")
 			} else {
-				println("Login failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Login failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type for login")
+			fmt.Println("Wrong IPC response type for login")
 		}
 	},
 }

@@ -6,11 +6,15 @@ gi.require_version('Adw', '1')
 import gc
 
 from gi.repository import Gtk, Adw, GLib, Gdk
-import goldwarden
+from ..services import goldwarden
 from threading import Thread
 import subprocess
-import components
+from . import components
 import os
+
+root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
+token = sys.stdin.readline()
+goldwarden.create_authenticated_connection(None)
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -46,7 +50,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.autotype_button = Gtk.Button()
         self.autotype_button.set_label("Quick Access")
         self.autotype_button.set_margin_top(10)
-        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+        def quickaccess_button_clicked():
+            p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+            p.stdin.write(f"{token}\n".encode())
+            p.stdin.flush()
+        self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
         self.autotype_button.get_style_context().add_class("suggested-action")
         self.action_preferences_group.add(self.autotype_button)
 
@@ -201,6 +209,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
+            print("status", status)
             runtimeCfg = goldwarden.get_runtime_config()
             if runtimeCfg != None:
                 self.ssh_row.set_subtitle("Listening at "+runtimeCfg["SSHAgentSocketPath"])

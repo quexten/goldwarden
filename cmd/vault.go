@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -30,12 +31,12 @@ var unlockCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Unlocked")
+				fmt.Println("Unlocked")
 			} else {
-				println("Not unlocked: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Not unlocked: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }
@@ -56,12 +57,12 @@ var lockCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Locked")
+				fmt.Println("Locked")
 			} else {
-				println("Not locked: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Not locked: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }
@@ -82,12 +83,12 @@ var purgeCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Purged")
+				fmt.Println("Purged")
 			} else {
-				println("Not purged: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Not purged: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }
@@ -107,18 +108,19 @@ var statusCmd = &cobra.Command{
 
 		switch result.(type) {
 		case messages.VaultStatusResponse:
+			response := map[string]interface{}{}
 			status := result.(messages.VaultStatusResponse)
-			fmt.Println("{")
-			fmt.Println("  \"locked\":", status.Locked, ",")
-			fmt.Println("  \"loginEntries\":", status.NumberOfLogins, ",")
-			fmt.Println("  \"noteEntries\":", status.NumberOfNotes, ",")
-			fmt.Println("  \"lastSynced\":	\"" + time.Unix(status.LastSynced, 0).String() + "\",")
-			fmt.Println("  \"websocketConnected\":", status.WebsockedConnected, ",")
-			fmt.Println("  \"pinSet\":", status.PinSet, ",")
-			fmt.Println("  \"loggedIn\":", status.LoggedIn)
-			fmt.Println("}")
+			response["locked"] = status.Locked
+			response["loginEntries"] = status.NumberOfLogins
+			response["noteEntries"] = status.NumberOfNotes
+			response["lastSynced"] = time.Unix(status.LastSynced, 0).String()
+			response["websocketConnected"] = status.WebsockedConnected
+			response["pinSet"] = status.PinSet
+			response["loggedIn"] = status.LoggedIn
+			responseJSON, _ := json.Marshal(response)
+			fmt.Println(string(responseJSON))
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }

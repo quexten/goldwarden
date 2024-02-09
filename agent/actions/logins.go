@@ -97,16 +97,16 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 }
 
 func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
-	if approved, err := pinentry.GetApproval("Access Vault", fmt.Sprintf("%s on %s>%s>%s is trying access ALL CREDENTIALS", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
-		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
-			Success: false,
-			Message: "not approved",
-		})
-		if err != nil {
-			return messages.IPCMessage{}, err
-		}
-		return response, nil
-	}
+	// if approved, err := pinentry.GetApproval("Access Vault", fmt.Sprintf("%s on %s>%s>%s is trying access ALL CREDENTIALS", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
+	// 	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+	// 		Success: false,
+	// 		Message: "not approved",
+	// 	})
+	// 	if err != nil {
+	// 		return messages.IPCMessage{}, err
+	// 	}
+	// 	return response, nil
+	// }
 
 	logins := vault.GetLogins()
 	decryptedLoginCiphers := make([]messages.DecryptedLoginCipher, 0)

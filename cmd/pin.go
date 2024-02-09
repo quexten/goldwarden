@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/spf13/cobra"
 )
@@ -25,12 +27,12 @@ var setPinCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Pin updated")
+				fmt.Println("Pin updated")
 			} else {
-				println("Pin updating failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Pin updating failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }
@@ -48,9 +50,9 @@ var pinStatusCmd = &cobra.Command{
 
 		switch result.(type) {
 		case messages.ActionResponse:
-			println("Pin status: " + result.(messages.ActionResponse).Message)
+			fmt.Println("Pin status: " + result.(messages.ActionResponse).Message)
 		default:
-			println("Wrong response type")
+			fmt.Println("Wrong response type")
 		}
 	},
 }

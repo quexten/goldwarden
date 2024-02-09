@@ -36,6 +36,7 @@ func main() {
 		UseMemguard:           os.Getenv("GOLDWARDEN_NO_MEMGUARD") != "true",
 		SSHAgentSocketPath:    os.Getenv("GOLDWARDEN_SSH_AUTH_SOCK"),
 		GoldwardenSocketPath:  os.Getenv("GOLDWARDEN_SOCKET_PATH"),
+		DaemonAuthToken:       os.Getenv("GOLDWARDEN_DAEMON_AUTH_TOKEN"),
 
 		ConfigDirectory: configPath,
 	}
@@ -62,7 +63,6 @@ func main() {
 		userHome, _ := os.UserHomeDir()
 		runtimeConfig.ConfigDirectory = userHome + "/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
 		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
-		println("Flatpak Config directory: " + runtimeConfig.ConfigDirectory)
 		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
 	}

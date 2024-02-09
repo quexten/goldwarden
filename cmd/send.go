@@ -39,7 +39,7 @@ var sendCreateCmd = &cobra.Command{
 			fmt.Println("Send created: " + result.(messages.CreateSendResponse).URL)
 			break
 		case messages.ActionResponse:
-			println("Error: " + result.(messages.ActionResponse).Message)
+			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
 		}
 	},

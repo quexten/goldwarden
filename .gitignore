@@ -4,3 +4,4 @@ __pycache__
 .flatpak-builder
 flatpak-pip-generator
 repo
+__debug*

@@ -19,11 +19,11 @@ var daemonizeCmd = &cobra.Command{
 		sshDisabled := runtimeConfig.DisableSSHAgent
 
 		if websocketDisabled {
-			println("Websocket disabled")
+			fmt.Println("Websocket disabled")
 		}
 
 		if sshDisabled {
-			println("SSH agent disabled")
+			fmt.Println("SSH agent disabled")
 		}
 
 		cleanup := func() {

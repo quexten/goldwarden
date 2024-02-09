@@ -10,7 +10,7 @@ import (
 	pinentry "github.com/quexten/goldwarden/agent/systemauth/pinentry/keybase-pinentry"
 )
 
-func GetPassword(title string, description string) (string, error) {
+func getPassword(title string, description string) (string, error) {
 	pinentryInstance := pinentry.New("", logger.New(""), "")
 	result, err := pinentryInstance.Get(keybase1.SecretEntryArg{
 		Prompt: title,
@@ -28,7 +28,7 @@ func GetPassword(title string, description string) (string, error) {
 	return result.Text, nil
 }
 
-func GetApproval(title string, description string) (bool, error) {
+func getApproval(title string, description string) (bool, error) {
 	pinentryInstance := pinentry.New("", logger.New(""), "")
 	result, err := pinentryInstance.Get(keybase1.SecretEntryArg{
 		Prompt:     title,

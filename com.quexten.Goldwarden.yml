@@ -2,7 +2,7 @@ id: com.quexten.Goldwarden
 runtime: org.gnome.Platform
 runtime-version: '45'
 sdk: org.gnome.Sdk
-command: main.py
+command: goldwarden_ui_main.py
 finish-args:
   # Allow network access for sync
   - --share=network
@@ -28,7 +28,7 @@ finish-args:
   # biometric / user password auth
   - --system-talk-name=org.freedesktop.PolicyKit1
 modules:
-  - ./ui/python3-requirements.json
+  - ./gui/python3-requirements.json
   - name: wl-clipboard
     buildsystem: meson 
     config-opts:
@@ -40,18 +40,18 @@ modules:
   - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:
-      - cp -R ./ui/* /app/bin
-      - chmod +x /app/bin/main.py
-      - install -D ./ui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
-      - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
-      - install -Dm644 ./ui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
+      - cp -R ./gui/* /app/bin
+      - chmod +x /app/bin/goldwarden_ui_main.py
+      - install -D ./gui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
+      - install -D ./gui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - install -Dm644 ./gui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
     sources:
       - type: dir
         path: ./
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
-      - install -D goldwarden /app/bin/goldwarden
+      - install -D goldwarden /app/bin/src/goldwarden
     sources:
       - type: file
         path: ./goldwarden
