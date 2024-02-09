@@ -27,8 +27,8 @@ def main():
         import dbus
 
         bus = dbus.SessionBus()
-        the_object = bus.get_objeect("com.quexten.Goldwarden.dbus", "/com/quexten/Goldwarden")
-        the_interface = dbus.Interface(the_object, "com.quexten.Goldwarden.Settings")
+        the_object = bus.get_object("com.quexten.Goldwarden.gui", "/com/quexten/Goldwarden/gui")
+        the_interface = dbus.Interface(the_object, "com.quexten.Goldwarden.gui.actions")
         reply = the_interface.settings()
         exit()
 

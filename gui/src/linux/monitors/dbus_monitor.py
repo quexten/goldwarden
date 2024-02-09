@@ -11,19 +11,19 @@ daemon_token = None
 
 class GoldwardenDBUSService(dbus.service.Object):
     def __init__(self):
-        bus_name = dbus.service.BusName('com.quexten.Goldwarden.ui', bus=dbus.SessionBus())
-        dbus.service.Object.__init__(self, bus_name, '/com/quexten/Goldwarden/ui')
+        bus_name = dbus.service.BusName('com.quexten.Goldwarden.gui', bus=dbus.SessionBus())
+        dbus.service.Object.__init__(self, bus_name, '/com/quexten/Goldwarden/gui')
 
-    @dbus.service.method('com.quexten.Goldwarden.ui.QuickAccess')
+    @dbus.service.method('com.quexten.Goldwarden.gui.actions')
     def quickaccess(self):
         p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
         p.stdin.write(f"{daemon_token}\n".encode())
         p.stdin.flush()
         return ""
 
-    @dbus.service.method('com.quexten.Goldwarden.ui.Settings')
+    @dbus.service.method('com.quexten.Goldwarden.gui.actions')
     def settings(self):
-        subprocess.Popen(["python3", "-m", "src.gui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+        p = subprocess.Popen(["python3", "-m", "src.gui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
         p.stdin.write(f"{daemon_token}\n".encode())
         p.stdin.flush()
         return ""
