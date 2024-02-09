@@ -31,25 +31,19 @@ const (
 )
 
 type RuntimeConfig struct {
-	DisableAuth           bool
-	DisablePinRequirement bool
-	AuthMethod            string
-	DoNotPersistConfig    bool
-	ConfigDirectory       string
-	DisableSSHAgent       bool
-	WebsocketDisabled     bool
-	ApiURI                string
-	IdentityURI           string
-	NotificationsURI      string
-	SingleProcess         bool
-	DeviceUUID            string
-	User                  string
-	Password              string
-	Pin                   string
-	UseMemguard           bool
-	SSHAgentSocketPath    string
-	GoldwardenSocketPath  string
-	DaemonAuthToken       string
+	AuthMethod           string
+	DoNotPersistConfig   bool
+	ConfigDirectory      string
+	DisableSSHAgent      bool
+	WebsocketDisabled    bool
+	DeviceUUID           string
+	User                 string
+	Password             string
+	Pin                  string
+	UseMemguard          bool
+	SSHAgentSocketPath   string
+	GoldwardenSocketPath string
+	DaemonAuthToken      string
 }
 
 type ConfigFile struct {

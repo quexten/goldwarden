@@ -316,15 +316,6 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		cfg.WriteConfig()
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig
-	if cfg.ConfigFile.RuntimeConfig.ApiURI != "" {
-		cfg.ConfigFile.ApiUrl = cfg.ConfigFile.RuntimeConfig.ApiURI
-	}
-	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
-		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
-	}
-	if cfg.ConfigFile.RuntimeConfig.NotificationsURI != "" {
-		cfg.ConfigFile.NotificationsUrl = cfg.ConfigFile.RuntimeConfig.NotificationsURI
-	}
 	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
 		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID
 	}

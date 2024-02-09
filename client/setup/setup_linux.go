@@ -10,7 +10,7 @@ import (
 )
 
 func VerifySetup(runtimeConfig config.RuntimeConfig) bool {
-	if !cmd.IsPolkitSetup() && !runtimeConfig.DisableAuth {
+	if !cmd.IsPolkitSetup() {
 		fmt.Println("Polkit is not setup. Run 'goldwarden setup polkit' to set it up.")
 		return false
 	}

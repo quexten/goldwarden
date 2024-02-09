@@ -20,23 +20,18 @@ func main() {
 	configPath = strings.ReplaceAll(configPath, "~", userHome)
 
 	runtimeConfig := config.RuntimeConfig{
-		WebsocketDisabled:     os.Getenv("GOLDWARDEN_WEBSOCKET_DISABLED") == "true",
-		DisableSSHAgent:       os.Getenv("GOLDWARDEN_SSH_AGENT_DISABLED") == "true",
-		DisableAuth:           os.Getenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED") == "true",
-		DisablePinRequirement: os.Getenv("GOLDWARDEN_PIN_REQUIREMENT_DISABLED") == "true",
-		DoNotPersistConfig:    os.Getenv("GOLDWARDEN_DO_NOT_PERSIST_CONFIG") == "true",
-		ApiURI:                os.Getenv("GOLDWARDEN_API_URI"),
-		IdentityURI:           os.Getenv("GOLDWARDEN_IDENTITY_URI"),
-		SingleProcess:         os.Getenv("GOLDWARDEN_SINGLE_PROCESS") == "true",
-		DeviceUUID:            os.Getenv("GOLDWARDEN_DEVICE_UUID"),
-		AuthMethod:            os.Getenv("GOLDWARDEN_AUTH_METHOD"),
-		User:                  os.Getenv("GOLDWARDEN_AUTH_USER"),
-		Password:              os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
-		Pin:                   os.Getenv("GOLDWARDEN_PIN"),
-		UseMemguard:           os.Getenv("GOLDWARDEN_NO_MEMGUARD") != "true",
-		SSHAgentSocketPath:    os.Getenv("GOLDWARDEN_SSH_AUTH_SOCK"),
-		GoldwardenSocketPath:  os.Getenv("GOLDWARDEN_SOCKET_PATH"),
-		DaemonAuthToken:       os.Getenv("GOLDWARDEN_DAEMON_AUTH_TOKEN"),
+		WebsocketDisabled:    os.Getenv("GOLDWARDEN_WEBSOCKET_DISABLED") == "true",
+		DisableSSHAgent:      os.Getenv("GOLDWARDEN_SSH_AGENT_DISABLED") == "true",
+		DoNotPersistConfig:   os.Getenv("GOLDWARDEN_DO_NOT_PERSIST_CONFIG") == "true",
+		DeviceUUID:           os.Getenv("GOLDWARDEN_DEVICE_UUID"),
+		AuthMethod:           os.Getenv("GOLDWARDEN_AUTH_METHOD"),
+		User:                 os.Getenv("GOLDWARDEN_AUTH_USER"),
+		Password:             os.Getenv("GOLDWARDEN_AUTH_PASSWORD"),
+		Pin:                  os.Getenv("GOLDWARDEN_PIN"),
+		UseMemguard:          os.Getenv("GOLDWARDEN_NO_MEMGUARD") != "true",
+		SSHAgentSocketPath:   os.Getenv("GOLDWARDEN_SSH_AUTH_SOCK"),
+		GoldwardenSocketPath: os.Getenv("GOLDWARDEN_SOCKET_PATH"),
+		DaemonAuthToken:      os.Getenv("GOLDWARDEN_DAEMON_AUTH_TOKEN"),
 
 		ConfigDirectory: configPath,
 	}
@@ -65,19 +60,6 @@ func main() {
 		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
 		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
-	}
-
-	if runtimeConfig.SingleProcess {
-		runtimeConfig.DisablePinRequirement = true
-		runtimeConfig.DisableAuth = true
-	}
-
-	if runtimeConfig.DisablePinRequirement {
-		runtimeConfig.DoNotPersistConfig = true
-	}
-
-	if runtimeConfig.DisableAuth {
-		os.Setenv("GOLDWARDEN_SYSTEM_AUTH_DISABLED", "true")
 	}
 
 	cmd.Execute(runtimeConfig)
