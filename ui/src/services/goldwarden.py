@@ -10,18 +10,17 @@ BINARY_PATHS = [
 ]
 
 BINARY_PATH = ""
+BINARY_PATH = None
+for path in BINARY_PATHS:
+    if os.path.exists(path):
+        BINARY_PATH = path
+        break
+if BINARY_PATH == None:
+    raise Exception("Could not find goldwarden binary")
 authenticated_connection = None
 
 def create_authenticated_connection(token):
     global authenticated_connection
-    global BINARY_PATH
-    BINARY_PATH = None
-    for path in BINARY_PATHS:
-        if os.path.exists(path):
-            BINARY_PATH = path
-            break
-    if BINARY_PATH == None:
-        raise Exception("Could not find goldwarden binary")
     authenticated_connection = subprocess.Popen([f"{BINARY_PATH}", "session"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if not token == None:
         authenticated_connection.stdin.write("authenticate-session " + token + "\n")
@@ -140,6 +139,29 @@ def is_daemon_running():
     result = send_authenticated_command(f"vault status")
     daemon_not_running = ("daemon running" in result)
     return not daemon_not_running
+
+def listen_for_pinentry(on_pinentry, on_pin_approval):
+    print("listening for pinentry", BINARY_PATH)
+    pinentry_process = subprocess.Popen([f"{BINARY_PATH}", "pinentry"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    while True:
+        line = pinentry_process.stdout.readline()
+        # starts with pin-request
+        if line.startswith("pin-request"):
+            text = line.split(",")[1].strip()
+            pin = on_pinentry(text)
+            if pin == None:
+                pin = ""
+            pinentry_process.stdin.write(pin + "\n")
+            pinentry_process.stdin.flush()
+        if line.startswith("approval-request"):
+            text = line.split(",")[1].strip()
+            approval = on_pin_approval(text)
+            if approval:
+                pinentry_process.stdin.write("true\n")
+                pinentry_process.stdin.flush()
+            else:
+                pinentry_process.stdin.write("false\n")
+                pinentry_process.stdin.flush()
 
 # def run_daemon():
 #     restic_cmd = f"daemonize"

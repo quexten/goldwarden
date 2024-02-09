@@ -42,7 +42,7 @@ class MainWindow(Gtk.ApplicationWindow):
         cancel_button = Gtk.Button(label="Cancel")
         cancel_button.set_hexpand(True)  # Make the button expand horizontally
         def on_cancel_button_clicked(button):
-            print("false")
+            print("false", flush=True)
             os._exit(0)
         cancel_button.connect("clicked", on_cancel_button_clicked)
         button_box.append(cancel_button)
@@ -51,7 +51,7 @@ class MainWindow(Gtk.ApplicationWindow):
         approve_button = Gtk.Button(label="Approve")
         approve_button.set_hexpand(True)  # Make the button expand horizontally
         def on_approve_button_clicked(button):
-            print("true")
+            print("true", flush=True)
             os._exit(0)
         approve_button.connect("clicked", on_approve_button_clicked)
         button_box.append(approve_button)

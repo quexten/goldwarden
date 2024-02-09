@@ -208,6 +208,50 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 							err      error
 						}{getPasswordResponse.Pin, nil}
 					}
+				case getApprovalRequest := <-getApprovalChan:
+					log.Info("Received getApproval request")
+					payload := messages.PinentryApprovalRequest{
+						Message: getApprovalRequest.description,
+					}
+					payloadPayload, err := messages.IPCMessageFromPayload(payload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					payloadBytes, err := json.Marshal(payloadPayload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					_, err = c.Write(payloadBytes)
+					if err != nil {
+						log.Error("Failed writing to socket " + err.Error())
+					}
+
+					buf := make([]byte, 1024*1024)
+					nr, err := c.Read(buf)
+					if err != nil {
+						return
+					}
+
+					data := buf[0:nr]
+
+					var msg messages.IPCMessage
+					err = json.Unmarshal(data, &msg)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryApprovalResponse{}) {
+						getApprovalResponse := messages.ParsePayload(msg).(messages.PinentryApprovalResponse)
+						getApprovalReturnChan <- struct {
+							approved bool
+							err      error
+						}{getApprovalResponse.Approved, nil}
+					}
 				}
 			}
 
