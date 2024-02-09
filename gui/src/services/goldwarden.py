@@ -3,6 +3,8 @@ import json
 import os
 from pathlib import Path
 from threading import Thread
+from shutil import which
+import sys
 
 is_flatpak = os.path.exists("/.flatpak-info")
 log_directory = str(Path.home()) + "/.local/share/goldwarden"
@@ -17,19 +19,18 @@ BINARY_PATHS = [
     str(Path.home()) + "/go/src/github.com/quexten/goldwarden/goldwarden"
 ]
 
-BINARY_PATH = ""
 BINARY_PATH = None
 for path in BINARY_PATHS:
     if os.path.exists(path):
         BINARY_PATH = path
         break
 
-if BINARY_PATH == None:
+if BINARY_PATH is None:
     BINARY_PATH = which('goldwarden')
     if isinstance(BINARY_PATH,str):
         BINARY_PATH = BINARY_PATH.strip()
 
-if BINARY_PATH == None:
+if BINARY_PATH is None:
     print("goldwarden executable not found")
     sys.exit()
 
