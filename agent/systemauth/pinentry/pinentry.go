@@ -33,29 +33,29 @@ func SetExternalPinentry(pinentry Pinentry) error {
 }
 
 func GetPassword(title string, description string) (string, error) {
-	// password, err := getPassword(title, description)
-	// if err == nil {
-	// 	return password, nil
-	// }
+	password, err := getPassword(title, description)
+	if err == nil {
+		return password, nil
+	}
 
 	if externalPinentry.GetPassword != nil {
 		return externalPinentry.GetPassword(title, description)
 	}
 
-	return "", errors.New("Not implemented")
-	// return password, nil
+	// return "", errors.New("Not implemented")
+	return password, nil
 }
 
 func GetApproval(title string, description string) (bool, error) {
-	// approval, err := getApproval(title, description)
-	// if err == nil {
-	// 	return approval, nil
-	// }
+	approval, err := getApproval(title, description)
+	if err == nil {
+		return approval, nil
+	}
 
 	if externalPinentry.GetApproval != nil {
 		return externalPinentry.GetApproval(title, description)
 	}
 
-	// return approval, nil
-	return true, errors.New("Not implemented")
+	// return true, errors.New("Not implemented")
+	return approval, nil
 }
