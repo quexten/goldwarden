@@ -9,8 +9,11 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 from threading import Thread
+import subprocess
+import os
 
 daemon_token = None
+root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir, os.pardir))
 
 class GoldwardenDBUSService(dbus.service.Object):
     def __init__(self):
