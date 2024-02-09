@@ -16,7 +16,7 @@ class GoldwardenDBUSService(dbus.service.Object):
 
     @dbus.service.method('com.quexten.Goldwarden.Autofill')
     def autofill(self):
-        p = subprocess.Popen(["python3", "-m", "src.ui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+        p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
         p.stdin.write(f"{daemon_token}\n".encode())
         p.stdin.flush()
         return ""

@@ -5,7 +5,7 @@ from tendo import singleton
 from .monitors import dbus_autofill_monitor
 from .monitors import dbus_monitor
 import sys
-from services import goldwarden
+from src.services import goldwarden
 from threading import Thread
 import os
 import secrets
@@ -38,7 +38,7 @@ def main():
     dbus_monitor.run_daemon(token)
 
     if not "--hidden" in sys.argv:
-        p = subprocess.Popen(["python3", "-m", "src.ui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+        p = subprocess.Popen(["python3", "-m", "src.gui.settings"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
         p.stdin.write(f"{token}\n".encode())
         p.stdin.flush()
 

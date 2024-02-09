@@ -1,6 +1,6 @@
 import subprocess
 import os
-from src.services import goldwarden
+from gui.src.services import goldwarden
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
 

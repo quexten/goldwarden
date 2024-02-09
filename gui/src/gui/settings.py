@@ -51,7 +51,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.autotype_button.set_label("Quick Access")
         self.autotype_button.set_margin_top(10)
         def quickaccess_button_clicked():
-            p = subprocess.Popen(["python3", "-m", "src.ui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+            p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
             p.stdin.write(f"{token}\n".encode())
             p.stdin.flush()
         self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
