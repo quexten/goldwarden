@@ -43,10 +43,6 @@ const POLICY = `<?xml version="1.0" encoding="UTF-8"?>
 </policyconfig>`
 
 func CheckBiometrics(approvalType Approval) bool {
-	if biometricsDisabled {
-		return true
-	}
-
 	log.Info("Checking biometrics for %s", approvalType.String())
 
 	authority, err := polkit.NewAuthority()
@@ -84,10 +80,6 @@ func CheckBiometrics(approvalType Approval) bool {
 }
 
 func BiometricsWorking() bool {
-	if biometricsDisabled {
-		return false
-	}
-
 	authority, err := polkit.NewAuthority()
 	if err != nil {
 		log.Warn("Failed to create polkit authority: %s", err.Error())
