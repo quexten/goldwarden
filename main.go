@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -64,7 +63,6 @@ func main() {
 		userHome, _ := os.UserHomeDir()
 		runtimeConfig.ConfigDirectory = userHome + "/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
 		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
-		fmt.Println("Flatpak Config directory: " + runtimeConfig.ConfigDirectory)
 		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
 	}
