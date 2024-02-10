@@ -105,6 +105,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 # focus results
                 if self.results_list.get_first_child() != None:
                     self.results_list.get_first_child().grab_focus()
+                    self.results_list.select_row(self.results_list.get_first_child())
 
             if keyval == 113:
                 return False
