@@ -17,11 +17,11 @@ finish-args:
   - --talk-name=org.gnome.ScreenSaver
   - --talk-name=org.freedesktop.ScreenSaver
 
+  #  Lock on idle
+  - --talk-name=org.gnome.Mutter.IdleMonitor
+
   # Notifications
   - --talk-name=org.freedesktop.Notifications
-
-  # Home directory access to setup browser ipc, can posibly restrict this further if requried by listing each browser's nativehost directory separately
-  - --filesystem=home
 
   # pinentry & approval
   - --talk-name=org.gnome.keyring.SystemPrompter
@@ -51,7 +51,7 @@ modules:
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
-      - install -D goldwarden /app/bin/src/goldwarden
+      - install -D goldwarden /app/bin/goldwarden
     sources:
       - type: file
         path: ./goldwarden

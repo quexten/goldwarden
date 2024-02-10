@@ -136,7 +136,15 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.launch_web_vault_shortcut_row.set_subtitle("V")
         self.shortcut_preferences_group.add(self.launch_web_vault_shortcut_row)
 
-        
+        self.focus_search_shortcut_row = Adw.ActionRow()
+        self.focus_search_shortcut_row.set_title("Focus Search Shortcut")
+        self.focus_search_shortcut_row.set_subtitle("F")
+        self.shortcut_preferences_group.add(self.focus_search_shortcut_row)
+
+        self.quit_shortcut_row = Adw.ActionRow()
+        self.quit_shortcut_row.set_title("Quit Shortcut")
+        self.quit_shortcut_row.set_subtitle("Esc")
+        self.shortcut_preferences_group.add(self.quit_shortcut_row)
 
         self.vault_status_preferences_group = Adw.PreferencesGroup()
         self.vault_status_preferences_group.set_title("Vault Status")

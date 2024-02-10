@@ -52,12 +52,12 @@ class MainWindow(Gtk.ApplicationWindow):
         # on type func
         def on_type(entry):
             if len(entry.get_text()) > 1:
-                self.history_list.show()
+                self.results_list.show()
             else:
-                self.history_list.hide()
+                self.results_list.hide()
 
-            while self.history_list.get_first_child() != None:
-                self.history_list.remove(self.history_list.get_first_child())
+            while self.results_list.get_first_child() != None:
+                self.results_list.remove(self.results_list.get_first_child())
 
             self.filtered_logins = list(filter(lambda i: entry.get_text().lower() in i["name"].lower(), self.logins))
             if len( self.filtered_logins) > 10:
@@ -77,25 +77,39 @@ class MainWindow(Gtk.ApplicationWindow):
                 action_row.uuid = i["uuid"]
                 action_row.uri = i["uri"]
                 action_row.totp = i["totp"]
-                self.history_list.append(action_row)
+                self.results_list.append(action_row)
             self.starts_with_logins = None
             self.other_logins = None
         self.text_view.connect("changed", lambda entry: on_type(entry))
         self.box.append(self.text_view)
     
-        self.history_list = Gtk.ListBox()
+        self.results_list = Gtk.ListBox()
         # margin'
-        self.history_list.set_margin_start(10)
-        self.history_list.set_margin_end(10)
-        self.history_list.set_margin_top(10)
-        self.history_list.set_margin_bottom(10)
-        self.history_list.hide()
+        self.results_list.set_margin_start(10)
+        self.results_list.set_margin_end(10)
+        self.results_list.set_margin_top(10)
+        self.results_list.set_margin_bottom(10)
+        self.results_list.hide()
 
         keycont = Gtk.EventControllerKey()
         def handle_keypress(cotroller, keyval, keycode, state, user_data):
             # if ctrl is pressed
             if state == 4:
                 print("ctrl")
+
+            if keycode == 9:
+                print("esc")
+                os._exit(0)
+
+            if keyval == 65364:
+                # focus results
+                if self.results_list.get_first_child() != None:
+                    self.results_list.get_first_child().grab_focus()
+                    self.results_list.select_row(self.results_list.get_first_child())
+
+            if keyval == 113:
+                return False
+
             if keycode == 36:
                 print("enter")
                 self.hide()
@@ -103,16 +117,16 @@ class MainWindow(Gtk.ApplicationWindow):
                     time.sleep(0.5)
                     goldwarden.autotype(username, password)
                     os._exit(0)
-                autotypeThread = Thread(target=do_autotype, args=(self.history_list.get_selected_row().username, self.history_list.get_selected_row().password,))
+                autotypeThread = Thread(target=do_autotype, args=(self.results_list.get_selected_row().username, self.results_list.get_selected_row().password,))
                 autotypeThread.start()
-                print(self.history_list.get_selected_row().get_title())
+                print(self.results_list.get_selected_row().get_title())
             if keyval == 112:
                 print("copy password")
-                clipboard.write(self.history_list.get_selected_row().password)
+                clipboard.write(self.results_list.get_selected_row().password)
                 Notify.Notification.new("Goldwarden", "Password Copied", "dialog-information").show()
             elif keyval == 117:
                 print("copy username")
-                clipboard.write(self.history_list.get_selected_row().username)
+                clipboard.write(self.results_list.get_selected_row().username)
                 notification=Notify.Notification.new("Goldwarden", "Username Copied", "dialog-information")
                 notification.set_timeout(5)
                 notification.show()
@@ -121,25 +135,28 @@ class MainWindow(Gtk.ApplicationWindow):
                 environment = goldwarden.get_environment()
                 if environment == None:
                     return
-                item_uri = environment["vault"] + "#/vault?itemId=" + self.history_list.get_selected_row().uuid
+                item_uri = environment["vault"] + "#/vault?itemId=" + self.results_list.get_selected_row().uuid
                 Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
             elif keyval == 108:
                 print("launch")
-                print(self.history_list.get_selected_row().uri)
-                Gtk.show_uri(None, self.history_list.get_selected_row().uri, Gdk.CURRENT_TIME)
+                print(self.results_list.get_selected_row().uri)
+                Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
             elif keyval == 116:
                 print("copy totp")
-                totp_code = totp.totp(self.history_list.get_selected_row().totp)
+                totp_code = totp.totp(self.results_list.get_selected_row().totp)
                 clipboard.write(totp_code)
                 notification=Notify.Notification.new("Goldwarden", "Totp Copied", "dialog-information")
                 notification.set_timeout(5)
                 notification.show()
+            elif keyval == 102:
+                # focus search
+                self.text_view.grab_focus()
                 
         keycont.connect('key-pressed', handle_keypress, self)
         self.add_controller(keycont)
 
-        self.history_list.get_style_context().add_class("boxed-list")
-        self.box.append(self.history_list)
+        self.results_list.get_style_context().add_class("boxed-list")
+        self.box.append(self.results_list)
         self.set_default_size(700, 700)
         self.set_title("Goldwarden Quick Access")
 
