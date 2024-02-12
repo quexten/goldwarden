@@ -87,18 +87,8 @@ def set_client_secret(client_secret):
 
 def login_with_password(email, password):
     result = send_authenticated_command(f"vault login --email {email}")
-    if result.returncode != 0:
-        raise Exception("Failed to initialize repository, err", result.stderr)
-    if len(result.stderr.strip()) > 0:
-        print(result.stderr)
-        if "password" in result.stderr:
-            return "badpass"
-        else:
-            if "Logged in" in result.stderr:
-                print("ok")
-                return "ok"
-            return "error"
-    print("ok")
+    if not "Logged in" in result:
+        return "badpass"
     return "ok"
 
 def login_passwordless(email):
