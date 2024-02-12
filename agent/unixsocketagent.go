@@ -375,6 +375,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 			cfg.Lock()
 			vault.Clear()
 			vault.Keyring.Lock()
+			systemauth.WipeSessions()
 		})
 		if err != nil {
 			log.Warn("Could not monitor screensaver: %s", err.Error())
@@ -385,6 +386,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 			cfg.Lock()
 			vault.Clear()
 			vault.Keyring.Lock()
+			systemauth.WipeSessions()
 		})
 		if err != nil {
 			log.Warn("Could not monitor idle: %s", err.Error())

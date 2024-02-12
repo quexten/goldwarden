@@ -22,7 +22,7 @@ type SessionType string
 const (
 	AccessVault SessionType = "com.quexten.goldwarden.accessvault"
 	SSHKey      SessionType = "com.quexten.goldwarden.usesshkey"
-	Pin         SessionType = "com.quexten.goldwarden.pin" // this counts as all other permissions
+	Pin         SessionType = "com.quexten.goldwarden.pin"
 )
 
 var sessionStore = SessionStore{
@@ -55,7 +55,7 @@ func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int,
 
 func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType SessionType) bool {
 	for _, session := range s.Store {
-		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && (session.sessionType == sessionType || session.sessionType == Pin) {
+		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && session.sessionType == sessionType {
 			if session.Expires.After(time.Now()) {
 				return true
 			}
@@ -135,4 +135,16 @@ func CreatePinSession(ctx sockets.CallingContext, ttl time.Duration) Session {
 
 func VerifyPinSession(ctx sockets.CallingContext) bool {
 	return sessionStore.verifySession(ctx, Pin)
+}
+
+func CreateSSHSession(ctx sockets.CallingContext) Session {
+	return sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, SSHKey, SSHTTL)
+}
+
+func GetSSHSession(ctx sockets.CallingContext) bool {
+	return sessionStore.verifySession(ctx, SSHKey)
+}
+
+func WipeSessions() {
+	sessionStore.Store = []Session{}
 }

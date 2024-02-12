@@ -130,14 +130,23 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, sshKey.Name)
 	}
 
-	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
-		log.Info("Sign Request for key: %s denied", sshKey.Name)
-		return nil, errors.New("Approval not given")
-	}
+	// todo refactor
+	if !systemauth.GetSSHSession(vaultAgent.context) {
+		if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
+			log.Info("Sign Request for key: %s denied", sshKey.Name)
+			return nil, errors.New("Approval not given")
+		}
 
-	if permission, err := systemauth.GetPermission(systemauth.SSHKey, vaultAgent.context, vaultAgent.config); err != nil || !permission {
-		log.Info("Sign Request for key: %s denied", key.Marshal())
-		return nil, errors.New("Biometrics not checked")
+		if !systemauth.VerifyPinSession(vaultAgent.context) {
+			if permission, err := systemauth.GetPermission(systemauth.SSHKey, vaultAgent.context, vaultAgent.config); err != nil || !permission {
+				log.Info("Sign Request for key: %s denied", key.Marshal())
+				return nil, errors.New("Biometrics not checked")
+			}
+		}
+
+		systemauth.CreateSSHSession(vaultAgent.context)
+	} else {
+		log.Info("Using cached session approval")
 	}
 
 	var rand = rand.Reader
