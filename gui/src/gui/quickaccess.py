@@ -1,6 +1,7 @@
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
+gi.require_version('Notify', '0.7')
 import gc
 import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
