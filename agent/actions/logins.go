@@ -129,6 +129,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedName = []byte{}
 		}
 
 		if !login.Login.Username.IsNull() {
@@ -137,6 +139,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedUsername = []byte{}
 		}
 
 		if !login.Login.Password.IsNull() {
@@ -145,6 +149,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedPassword = []byte{}
 		}
 
 		if !login.Login.Totp.IsNull() {
@@ -153,6 +159,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedTotp = []byte{}
 		}
 
 		if !login.Login.URI.IsNull() {
@@ -161,6 +169,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedURL = []byte{}
 		}
 
 		decryptedLoginCiphers = append(decryptedLoginCiphers, messages.DecryptedLoginCipher{
