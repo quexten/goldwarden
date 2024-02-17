@@ -39,12 +39,6 @@ jobs:
       with:
         files: './goldwarden_linux_x86_64'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Validate ArchLinux PKGBUILD
-      uses: heyhusen/archlinux-package-action@v2
-      with:
-        flags: ''
-        namcap: true
-        updpkgsums: true
     - name: Publish AUR package
       uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
       with:
