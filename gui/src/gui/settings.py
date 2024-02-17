@@ -166,9 +166,6 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             status = goldwarden.get_vault_status()
             print("status", status)
             runtimeCfg = goldwarden.get_runtime_config()
-            if runtimeCfg != None:
-                self.ssh_row.set_subtitle("Listening at "+runtimeCfg["SSHAgentSocketPath"])
-                self.goldwarden_daemon_row.set_subtitle("Listening at "+runtimeCfg["goldwardenSocketPath"])
 
             if status != None:
                 if pin_set:
@@ -179,15 +176,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                     self.banner.set_revealed(True)
                 logged_in = status["loggedIn"]
                 if logged_in and not status["locked"]:
-                    self.preferences_group.set_visible(True)
-                    self.shortcut_preferences_group.set_visible(True)
                     self.autotype_button.set_visible(True)
                     self.login_row.set_sensitive(True)
                     self.notes_row.set_sensitive(True)
                     self.websocket_connected_row.set_sensitive(True)
                 else:
-                    self.preferences_group.set_visible(False)
-                    self.shortcut_preferences_group.set_visible(False)
                     self.autotype_button.set_visible(False)
                     self.websocket_connected_row.set_sensitive(False)
                     self.login_row.set_sensitive(False)
