@@ -9,7 +9,7 @@ import (
 	"github.com/quexten/goldwarden/ipc/messages"
 )
 
-const READ_BUFFER = 1 * 1024 * 1024 // 1MB
+const READ_BUFFER = 4 * 1024 * 1024 // 16MB
 
 type UnixSocketClient struct {
 	runtimeConfig *config.RuntimeConfig
