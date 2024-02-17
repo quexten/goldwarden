@@ -29,14 +29,6 @@ finish-args:
   - --system-talk-name=org.freedesktop.PolicyKit1
 modules:
   - ./gui/python3-requirements.json
-  - name: wl-clipboard
-    buildsystem: meson 
-    config-opts:
-      - -Dfishcompletiondir=no
-    sources:
-      - type: git
-        url: https://github.com/bugaevc/wl-clipboard.git
-        tag: v2.2.1
   - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:

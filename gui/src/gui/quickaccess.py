@@ -6,34 +6,33 @@ import gc
 import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
 from ..services import goldwarden
-from ..linux import clipboard
 from threading import Thread
 import sys
 import os
 from ..services import totp
 Notify.init("Goldwarden")
 
-token = sys.stdin.readline()
+token = "Test"
 goldwarden.create_authenticated_connection(token)
 
 def autotype(text):
-    time.sleep(0.5)
+    time.sleep(2)
+    print("Autotyping")
     goldwarden.autotype(text)
+    print("Autotyped")
+    time.sleep(5)
     os._exit(0)
 
 def set_clipboard(text):
-    print("Setting clipboard")  
-    try:
-        clipboard.write(text)
-    except Exception as e:
-        print(e)
-        pass
-    display = Gdk.Display.get_default()
-    clipboard = Gdk.Display.get_clipboard(display)
-    clipboard.set(text)
-    print("Clipboard set", text)
-    time.sleep(0.5)
-    os._exit(0)
+    Gdk.Display.get_clipboard(Gdk.Display.get_default()).set_content(
+            Gdk.ContentProvider.new_for_value(text)
+        )
+
+    def kill():
+        time.sleep(0.5)
+        os._exit(0)
+    thread = Thread(target=kill)
+    thread.start()
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
