@@ -135,12 +135,9 @@ def autotype(text):
     goldwarden_cmd = f"{BINARY_PATH} autotype"
     process = subprocess.Popen(goldwarden_cmd.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     text_hex = text.encode("utf-8").hex()
-    print("autotyping", text_hex)
     process.stdin.write(text_hex + "\n")
     process.stdin.flush()
-    # wait for process to finish
     process.wait()
-    print("autotype finished")
 
 def is_daemon_running():
     result = send_authenticated_command(f"vault status")

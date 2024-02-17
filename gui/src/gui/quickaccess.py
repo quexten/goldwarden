@@ -12,15 +12,13 @@ import os
 from ..services import totp
 Notify.init("Goldwarden")
 
-token = "Test"
+# read line from stdin
+token = sys.stdin.readline()
 goldwarden.create_authenticated_connection(token)
 
 def autotype(text):
-    time.sleep(2)
-    print("Autotyping")
     goldwarden.autotype(text)
-    print("Autotyped")
-    time.sleep(5)
+    time.sleep(0.1)
     os._exit(0)
 
 def set_clipboard(text):
@@ -137,13 +135,15 @@ class MainWindow(Gtk.ApplicationWindow):
                     set_clipboard(self.results_list.get_selected_row().password)
                 if ctrl_pressed and alt_pressed:
                     self.hide()
-                    autotype(self.results_list.get_selected_row().password)
+                    autotypeThread = Thread(target=autotype, args=(self.results_list.get_selected_row().password,))
+                    autotypeThread.start()
             elif keyval == 117:
                 if ctrl_pressed and not alt_pressed:
                     set_clipboard(self.results_list.get_selected_row().username)
                 if ctrl_pressed and alt_pressed:
                     self.hide()
-                    autotype(self.results_list.get_selected_row().username)
+                    autotypeThread = Thread(target=autotype, args=(self.results_list.get_selected_row().username,))
+                    autotypeThread.start()
             elif keyval == 118:
                 if ctrl_pressed and alt_pressed:
                     environment = goldwarden.get_environment()
@@ -160,7 +160,8 @@ class MainWindow(Gtk.ApplicationWindow):
                     set_clipboard(totp_code)
                 if ctrl_pressed and alt_pressed:
                     self.hide()
-                    autotype(totp_code)
+                    autotypeThread = Thread(target=autotype, args=(totp_code,))
+                    autotypeThread.start()
             elif keyval == 102:
                 # focus search
                 self.text_view.grab_focus()
