@@ -218,6 +218,20 @@ func EncryptWith(data []byte, encType EncStringType, key SymmetricEncryptionKey)
 	return s, nil
 }
 
+func EncryptWithToString(data []byte, encType EncStringType, key SymmetricEncryptionKey) (string, error) {
+	s, err := EncryptWith(data, encType, key)
+	if err != nil {
+		return "", err
+	}
+
+	marshalled, err := s.MarshalText()
+	if err != nil {
+		return "", err
+	}
+
+	return string(marshalled), nil
+}
+
 func GenerateAsymmetric(useMemguard bool) (AsymmetricEncryptionKey, error) {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {

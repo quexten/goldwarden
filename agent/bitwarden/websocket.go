@@ -5,13 +5,13 @@ import (
 	"context"
 	"net/url"
 	"os"
-	"os/signal"
 	"time"
 
 	"github.com/awnumar/memguard"
 	"github.com/gorilla/websocket"
 	"github.com/quexten/goldwarden/agent/bitwarden/models"
 	"github.com/quexten/goldwarden/agent/config"
+	"github.com/quexten/goldwarden/agent/notify"
 	"github.com/quexten/goldwarden/agent/systemauth/biometrics"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
@@ -70,9 +70,6 @@ func RunWebsocketDaemon(ctx context.Context, vault *vault.Vault, cfg *config.Con
 }
 
 func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Config) error {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-
 	url, err := url.Parse(cfg.ConfigFile.NotificationsUrl)
 	if err != nil {
 		return err
@@ -200,20 +197,23 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 					}
 					websocketLog.Info("AuthRequest details " + authRequest.RequestIpAddress + " " + authRequest.RequestDeviceType)
 
-					var message = "Do you want to allow " + authRequest.RequestIpAddress + " (" + authRequest.RequestDeviceType + ") to login to your account?"
-					if approved, err := pinentry.GetApproval("Paswordless Login Request", message); err != nil || !approved {
-						websocketLog.Info("AuthRequest denied")
-						break
-					}
-					if !biometrics.CheckBiometrics(biometrics.AccessVault) {
-						websocketLog.Info("AuthRequest denied - biometrics required")
-						break
-					}
+					notify.Notify("Passwordless Login Request", authRequest.RequestIpAddress+" - "+authRequest.RequestDeviceType, "", 0, func() {
+						var message = "Do you want to allow " + authRequest.RequestIpAddress + " (" + authRequest.RequestDeviceType + ") to login to your account?"
+						if approved, err := pinentry.GetApproval("Paswordless Login Request", message); err != nil || !approved {
+							websocketLog.Info("AuthRequest denied")
+							return
+						}
+						if !biometrics.CheckBiometrics(biometrics.AccessVault) {
+							websocketLog.Info("AuthRequest denied - biometrics required")
+							return
+						}
 
-					_, err = CreateAuthResponse(context.WithValue(ctx, AuthToken{}, token.AccessToken), authRequest, vault.Keyring, cfg)
-					if err != nil {
-						websocketLog.Error("Error creating auth response %s", err)
-					}
+						_, err = CreateAuthResponse(context.WithValue(ctx, AuthToken{}, token.AccessToken), authRequest, vault.Keyring, cfg)
+						if err != nil {
+							websocketLog.Error("Error creating auth response %s", err)
+						}
+					})
+
 					break
 				case AuthRequestResponse:
 					websocketLog.Info("AuthRequestResponse received")

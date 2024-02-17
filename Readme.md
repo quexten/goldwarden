@@ -4,8 +4,8 @@ Goldwarden is a Bitwarden compatible desktop client. It focuses on providing use
 do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
-- System wide autotype (Gnome, KDE only for now)
-- Biometric authentication (via Polkit) for each credential access
+- System wide autotype (Linux - Gnome, KDE only for now)
+- Biometric authentication
 - Implements Bitwarden browser-extension biometrics on Linux
 - Support for injecting environment variables into the environment of a cli command
 - Vault content is held encrypted in memory and only briefly decrypted when needed
@@ -56,3 +56,10 @@ go install github.com/quexten/goldwarden@latest
 ### Setup and Usage
 To get started, follow the instructions provided in the wiki https://github.com/quexten/goldwarden/wiki/Getting-Started.
 For instructions on specific features, also consult the wiki page for the feature.
+
+### Contributing
+Interested in contributing a feature or bug-fix? Great! Here is some information on how to set up your development environment:
+
+https://github.com/quexten/goldwarden/wiki/Setting-up-the-Development-Environment
+
+After that, create a PR. If you encounter any issues, feel free to open a discussion thread.

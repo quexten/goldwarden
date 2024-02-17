@@ -5,12 +5,45 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 import gc
 
-from gi.repository import Gtk, Adw, GLib, Gdk
-import goldwarden
+from gi.repository import Gtk, Adw, GLib, Gdk, Gio
+from ..services import goldwarden
 from threading import Thread
 import subprocess
-import components
+from . import components
 import os
+
+root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
+token = sys.stdin.readline()
+goldwarden.create_authenticated_connection(None)
+
+def quickaccess_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def shortcuts_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.shortcuts"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def ssh_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.ssh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def browserbiometrics_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.browserbiometrics"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def add_action_row(parent, title, subtitle, icon=None):
+    row = Adw.ActionRow()
+    row.set_title(title)
+    row.set_subtitle(subtitle)
+    if icon != None:
+        row.set_icon_name(icon)
+    parent.add(row)
+    return row
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -39,103 +72,15 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.preferences_page.set_title("General")
         self.stack.add_named(self.preferences_page, "preferences_page")
 
-        self.preferences_group = Adw.PreferencesGroup()
-        self.preferences_group.set_title("Services")
-        self.preferences_page.add(self.preferences_group)
-
-        self.ssh_row = Adw.ActionRow()
-        self.ssh_row.set_title("SSH Daemon")
-        self.ssh_row.set_subtitle("Getting status...")
-        self.ssh_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.ssh_row)
-
-        self.goldwarden_daemon_row = Adw.ActionRow()
-        self.goldwarden_daemon_row.set_title("Goldwarden Daemon")
-        self.goldwarden_daemon_row.set_subtitle("Getting status...")
-        self.goldwarden_daemon_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.goldwarden_daemon_row)
-
-        self.login_with_device = Adw.ActionRow()
-        self.login_with_device.set_title("Login with device")
-        self.login_with_device.set_subtitle("Waiting for requests...")
-        self.preferences_group.add(self.login_with_device)
-
-        self.status_row = Adw.ActionRow()
-        self.status_row.set_title("DBUS Service")
-        self.status_row.set_subtitle("Listening")
-        self.preferences_group.add(self.status_row)
-
-        self.shortcut_preferences_group = Adw.PreferencesGroup()
-        self.shortcut_preferences_group.set_title("Shortcuts")
-        self.preferences_page.add(self.shortcut_preferences_group)
-
-        self.autofill_row = Adw.ActionRow()
-        self.autofill_row.set_title("Autofill Shortcut")
-        self.autofill_row.set_subtitle("Unavailable, please set up a shortcut in your desktop environment (README)")
-        self.shortcut_preferences_group.add(self.autofill_row)
-
-        self.autofill_icon = components.StatusIcon()
-        self.autofill_icon.set_icon("dialog-warning", "warning")
-        self.autofill_row.add_prefix(self.autofill_icon)
-
-        self.copy_username_shortcut_row = Adw.ActionRow()
-        self.copy_username_shortcut_row.set_title("Copy Username Shortcut")
-        self.copy_username_shortcut_row.set_subtitle("U")
-        self.shortcut_preferences_group.add(self.copy_username_shortcut_row)
-
-        self.copy_password_shortcut_row = Adw.ActionRow()
-        self.copy_password_shortcut_row.set_title("Copy Password Shortcut")
-        self.copy_password_shortcut_row.set_subtitle("P")
-        self.shortcut_preferences_group.add(self.copy_password_shortcut_row)
-
-        self.vault_status_preferences_group = Adw.PreferencesGroup()
-        self.vault_status_preferences_group.set_title("Vault Status")
-        self.preferences_page.add(self.vault_status_preferences_group)
-        
-        self.status_row = Adw.ActionRow()
-        self.status_row.set_title("Vault Status")
-        self.status_row.set_subtitle("Locked")
-        self.vault_status_preferences_group.add(self.status_row)
-
-        self.vault_status_icon = components.StatusIcon()
-        self.vault_status_icon.set_icon("dialog-error", "error")
-        self.status_row.add_prefix(self.vault_status_icon)
-
-        self.last_sync_row = Adw.ActionRow()
-        self.last_sync_row.set_title("Last Sync")
-        self.last_sync_row.set_subtitle("Never")
-        self.last_sync_row.set_icon_name("emblem-synchronizing-symbolic")
-        self.vault_status_preferences_group.add(self.last_sync_row)
-
-        self.websocket_connected_row = Adw.ActionRow()
-        self.websocket_connected_row.set_title("Websocket Connected")
-        self.websocket_connected_row.set_subtitle("False")
-        self.vault_status_preferences_group.add(self.websocket_connected_row)
-
-        self.websocket_connected_status_icon = components.StatusIcon()
-        self.websocket_connected_status_icon.set_icon("dialog-error", "error")
-        self.websocket_connected_row.add_prefix(self.websocket_connected_status_icon)
-        
-        self.login_row = Adw.ActionRow()
-        self.login_row.set_title("Vault Login Entries")
-        self.login_row.set_subtitle("0")
-        self.login_row.set_icon_name("dialog-password-symbolic")
-        self.vault_status_preferences_group.add(self.login_row)
-
-        self.notes_row = Adw.ActionRow()
-        self.notes_row.set_title("Vault Notes")
-        self.notes_row.set_subtitle("0")
-        self.notes_row.set_icon_name("emblem-documents-symbolic")
-        self.vault_status_preferences_group.add(self.notes_row)
-
         self.action_preferences_group = Adw.PreferencesGroup()
         self.action_preferences_group.set_title("Actions")
         self.preferences_page.add(self.action_preferences_group)
         
         self.autotype_button = Gtk.Button()
-        self.autotype_button.set_label("Autotype")
+        self.autotype_button.set_label("Quick Access")
         self.autotype_button.set_margin_top(10)
-        self.autotype_button.connect("clicked", lambda button: subprocess.Popen(["python3", "/app/bin/autofill.py"], start_new_session=True))
+ 
+        self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
         self.autotype_button.get_style_context().add_class("suggested-action")
         self.action_preferences_group.add(self.autotype_button)
 
@@ -178,16 +123,59 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.wiki_button.set_label("Help & Wiki")
         self.wiki_button.set_margin_top(10)
         self.action_preferences_group.add(self.wiki_button)
+
+        self.vault_status_preferences_group = Adw.PreferencesGroup()
+        self.vault_status_preferences_group.set_title("Vault Status")
+        self.preferences_page.add(self.vault_status_preferences_group)
         
+        self.status_row = add_action_row(self.vault_status_preferences_group, "Vault Status", "Locked")
+
+        self.vault_status_icon = components.StatusIcon()
+        self.vault_status_icon.set_icon("dialog-error", "error")
+        self.status_row.add_prefix(self.vault_status_icon)
+
+        self.last_sync_row = add_action_row(self.vault_status_preferences_group, "Last Sync", "Never", "emblem-synchronizing-symbolic")
+        self.websocket_connected_row = add_action_row(self.vault_status_preferences_group, "Websocket Connected", "False")
+
+        self.websocket_connected_status_icon = components.StatusIcon()
+        self.websocket_connected_status_icon.set_icon("dialog-error", "error")
+        self.websocket_connected_row.add_prefix(self.websocket_connected_status_icon)
+
+        self.login_row = add_action_row(self.vault_status_preferences_group, "Vault Login Entries", "0", "dialog-password-symbolic")
+        self.notes_row = add_action_row(self.vault_status_preferences_group, "Vault Notes", "0", "emblem-documents-symbolic")
+ 
+        self.header = Gtk.HeaderBar()
+        self.set_titlebar(self.header)
+
+        action = Gio.SimpleAction.new("shortcuts", None)
+        action.connect("activate", lambda action, parameter: shortcuts_button_clicked())
+        self.add_action(action)
+        menu = Gio.Menu.new()
+        menu.append("Keyboard Shortcuts", "win.shortcuts") 
+        self.popover = Gtk.PopoverMenu() 
+        self.popover.set_menu_model(menu)
+
+        action = Gio.SimpleAction.new("ssh", None)
+        action.connect("activate", lambda action, parameter: ssh_button_clicked())
+        self.add_action(action)
+        menu.append("SSH Agent", "win.ssh")
+
+        action = Gio.SimpleAction.new("browserbiometrics", None)
+        action.connect("activate", lambda action, parameter: browserbiometrics_button_clicked())
+        self.add_action(action)
+        menu.append("Browser Biometrics", "win.browserbiometrics")
+        
+        self.hamburger = Gtk.MenuButton()
+        self.hamburger.set_popover(self.popover)
+        self.hamburger.set_icon_name("open-menu-symbolic")
+        self.header.pack_start(self.hamburger)
+
+
         def update_labels():
-            GLib.timeout_add(1000, update_labels)
-            
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
+            print("status", status)
             runtimeCfg = goldwarden.get_runtime_config()
-            if runtimeCfg != None:
-                self.ssh_row.set_subtitle("Listening at "+runtimeCfg["SSHAgentSocketPath"])
-                self.goldwarden_daemon_row.set_subtitle("Listening at "+runtimeCfg["goldwardenSocketPath"])
 
             if status != None:
                 if pin_set:
@@ -198,15 +186,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                     self.banner.set_revealed(True)
                 logged_in = status["loggedIn"]
                 if logged_in and not status["locked"]:
-                    self.preferences_group.set_visible(True)
-                    self.shortcut_preferences_group.set_visible(True)
                     self.autotype_button.set_visible(True)
                     self.login_row.set_sensitive(True)
                     self.notes_row.set_sensitive(True)
                     self.websocket_connected_row.set_sensitive(True)
                 else:
-                    self.preferences_group.set_visible(False)
-                    self.shortcut_preferences_group.set_visible(False)
                     self.autotype_button.set_visible(False)
                     self.websocket_connected_row.set_sensitive(False)
                     self.login_row.set_sensitive(False)
@@ -241,15 +225,12 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
                 if not is_daemon_running:
                     self.status_row.set_subtitle("Daemon not running")
                     self.vault_status_icon.set_icon("dialog-error", "error")
+            
+            GLib.timeout_add(5000, update_labels)
 
         GLib.timeout_add(1000, update_labels)
         self.set_default_size(400, 700)
         self.set_title("Goldwarden")
-
-
-        #add title buttons
-        self.title_bar = Gtk.HeaderBar()
-        self.set_titlebar(self.title_bar)
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -262,33 +243,13 @@ class MyApp(Adw.Application):
 
 def show_login():
     dialog = Gtk.Dialog(title="Goldwarden")
-    preference_group = Adw.PreferencesGroup()
-    preference_group.set_title("Config")
-    preference_group.set_margin_top(10)
-    preference_group.set_margin_bottom(10)
-    preference_group.set_margin_start(10)
-    preference_group.set_margin_end(10)
-
-    dialog.get_content_area().append(preference_group)
-
-    api_url_entry = Adw.EntryRow()
-    api_url_entry.set_title("API Url")
-    # set value
-    api_url_entry.set_text("https://vault.bitwarden.com/api")
-    preference_group.add(api_url_entry)
-
-    identity_url_entry = Adw.EntryRow()
-    identity_url_entry.set_title("Identity Url")
-    identity_url_entry.set_text("https://vault.bitwarden.com/identity")
-    preference_group.add(identity_url_entry)
-
-    notification_url_entry = Adw.EntryRow()
-    notification_url_entry.set_title("Notification URL")
-    notification_url_entry.set_text("https://notifications.bitwarden.com/")
-    preference_group.add(notification_url_entry)
 
     auth_preference_group = Adw.PreferencesGroup()
     auth_preference_group.set_title("Authentication")
+    auth_preference_group.set_margin_top(10)
+    auth_preference_group.set_margin_bottom(10)
+    auth_preference_group.set_margin_start(10)
+    auth_preference_group.set_margin_end(10)
     dialog.get_content_area().append(auth_preference_group)
 
     email_entry = Adw.EntryRow()
@@ -310,9 +271,7 @@ def show_login():
     def on_save(res):
         if res != Gtk.ResponseType.OK:
             return
-        goldwarden.set_api_url(api_url_entry.get_text())
-        goldwarden.set_identity_url(identity_url_entry.get_text())
-        goldwarden.set_notification_url(notification_url_entry.get_text())
+        goldwarden.set_url(url_entry.get_text())
         goldwarden.set_client_id(client_id_entry.get_text())
         goldwarden.set_client_secret(client_secret_entry.get_text())
         def login():
@@ -329,6 +288,20 @@ def show_login():
         login_thread = Thread(target=login)
         login_thread.start()
 
+    preference_group = Adw.PreferencesGroup()
+    preference_group.set_title("Config")
+    preference_group.set_margin_top(10)
+    preference_group.set_margin_bottom(10)
+    preference_group.set_margin_start(10)
+    preference_group.set_margin_end(10)
+
+    dialog.get_content_area().append(preference_group)
+
+    url_entry = Adw.EntryRow()
+    url_entry.set_title("Base Url")
+    url_entry.set_text("https://vault.bitwarden.com/")
+    preference_group.add(url_entry)
+
     #ok response
     dialog.connect("response", lambda dialog, response: on_save(response))
     dialog.set_default_size(400, 200)
@@ -344,7 +317,6 @@ Gtk.StyleContext.add_provider_for_display(
     css_provider,
     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 )
-
 
 app = MyApp(application_id="com.quexten.Goldwarden.settings")
 app.run(sys.argv)

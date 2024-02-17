@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/notify"
+	"github.com/quexten/goldwarden/agent/pincache"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/tink-crypto/tink-go/v2/aead/subtle"
@@ -31,30 +32,26 @@ const (
 )
 
 type RuntimeConfig struct {
-	DisableAuth           bool
-	DisablePinRequirement bool
-	AuthMethod            string
-	DoNotPersistConfig    bool
-	ConfigDirectory       string
-	DisableSSHAgent       bool
-	WebsocketDisabled     bool
-	ApiURI                string
-	IdentityURI           string
-	NotificationsURI      string
-	SingleProcess         bool
-	DeviceUUID            string
-	User                  string
-	Password              string
-	Pin                   string
-	UseMemguard           bool
-	SSHAgentSocketPath    string
-	GoldwardenSocketPath  string
+	AuthMethod           string
+	DoNotPersistConfig   bool
+	ConfigDirectory      string
+	DisableSSHAgent      bool
+	WebsocketDisabled    bool
+	DeviceUUID           string
+	User                 string
+	Password             string
+	Pin                  string
+	UseMemguard          bool
+	SSHAgentSocketPath   string
+	GoldwardenSocketPath string
+	DaemonAuthToken      string
 }
 
 type ConfigFile struct {
 	IdentityUrl                 string
 	ApiUrl                      string
 	NotificationsUrl            string
+	VaultUrl                    string
 	EncryptedClientID           string
 	EncryptedClientSecret       string
 	DeviceUUID                  string
@@ -91,6 +88,7 @@ func DefaultConfig(useMemguard bool) Config {
 			IdentityUrl:                 "https://vault.bitwarden.com/identity",
 			ApiUrl:                      "https://vault.bitwarden.com/api",
 			NotificationsUrl:            "https://notifications.bitwarden.com",
+			VaultUrl:                    "https://vault.bitwarden.com",
 			EncryptedClientID:           "",
 			EncryptedClientSecret:       "",
 			DeviceUUID:                  deviceUUID.String(),
@@ -133,6 +131,7 @@ func (c *Config) Unlock(password string) bool {
 	keyBuffer := NewBufferFromBytes(key, c.useMemguard)
 	c.key = &keyBuffer
 	notify.Notify("Goldwarden", "Vault Unlocked", "", 60*time.Second, func() {})
+	pincache.SetPin(c.useMemguard, []byte(password))
 	return true
 }
 
@@ -221,6 +220,8 @@ func (c *Config) UpdatePin(password string, write bool) {
 	if write {
 		c.WriteConfig()
 	}
+
+	pincache.SetPin(c.useMemguard, []byte(password))
 }
 
 func (c *Config) GetToken() (LoginToken, error) {
@@ -469,7 +470,10 @@ func (config *Config) WriteConfig() error {
 	os.Remove(config.ConfigFile.RuntimeConfig.ConfigDirectory)
 	parentDirectory := config.ConfigFile.RuntimeConfig.ConfigDirectory[:len(config.ConfigFile.RuntimeConfig.ConfigDirectory)-len("/goldwarden.json")]
 	if _, err := os.Stat(parentDirectory); os.IsNotExist(err) {
-		os.Mkdir(parentDirectory, 0700)
+		err := os.MkdirAll(parentDirectory, 0700)
+		if err != nil {
+			return err
+		}
 	}
 
 	file, err := os.OpenFile(config.ConfigFile.RuntimeConfig.ConfigDirectory, os.O_CREATE|os.O_WRONLY, 0600)
@@ -536,10 +540,21 @@ func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
 }
 
 func (cfg *Config) TryUnlock(vault *vault.Vault) error {
-	pin, err := pinentry.GetPassword("Unlock Goldwarden", "Enter the vault PIN")
-	if err != nil {
-		return err
+	var pin string
+	if pincache.HasPin() {
+		pinBytes, err := pincache.GetPin()
+		if err != nil {
+			return err
+		}
+		pin = string(pinBytes)
+	} else {
+		var err error
+		pin, err = pinentry.GetPassword("Unlock Goldwarden", "Enter the vault PIN")
+		if err != nil {
+			return err
+		}
 	}
+
 	success := cfg.Unlock(pin)
 	if !success {
 		return errors.New("invalid PIN")

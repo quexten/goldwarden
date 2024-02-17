@@ -68,12 +68,38 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_macos_x86_64" -v .
+        run: go build -o "goldwarden_macos_x86_64" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-macos_x86_64
           path: ./goldwarden_macos_x86_64
+  
+  build_macos_aarch64:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+      - name: Fido2
+        run: brew install libfido2
+      - name: Build 
+        run: go build -o "goldwarden_macos_aarch64" -v .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: goldwarden-macos_aarch64
+          path: ./goldwarden_macos_aarch64  
     
   build_windows_x86_64:
     runs-on: windows-latest
@@ -84,9 +110,30 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - uses: MinoruSekine/setup-scoop@v2
+      - name: Fido2
+        run: |
+          scoop bucket add keys.pub https://github.com/keys-pub/scoop-bucket
+          scoop install libfido2
       - name: Build 
-        run: go build -tags "nofido2" -o "goldwarden_windows_x86_64.exe" -v .
+        run: go build -o "goldwarden_windows_x86_64.exe" -v .
       - uses: actions/upload-artifact@v3
         with:
           name: goldwarden-windows_x86_64.exe
           path: ./goldwarden_windows_x86_64.exe
+  
+  build_windows_aarch64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Build 
+        run: set GOARCH=arm64 && go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: goldwarden-windows_aarch64.exe
+          path: ./goldwarden_windows_aarch64.exe

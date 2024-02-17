@@ -6,11 +6,18 @@ import (
 	"time"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/quexten/goldwarden/agent/processsecurity/isdelve"
 	"golang.org/x/sys/unix"
 )
 
+const IDLE_TIME = 60 * 15
+
 func DisableDumpable() error {
-	return unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0)
+	if isdelve.Enabled {
+		return nil
+	} else {
+		return unix.Prctl(unix.PR_SET_DUMPABLE, 0, 0, 0, 0)
+	}
 }
 
 func MonitorLocks(onlock func()) error {
@@ -70,7 +77,7 @@ func MonitorIdle(onidle func()) error {
 			return err
 		}
 		secondsIdle := res / 1000
-		if secondsIdle > 60*1 {
+		if secondsIdle > IDLE_TIME {
 			if !wasidle {
 				wasidle = true
 				onidle()

@@ -103,7 +103,7 @@ func ensureIsNotLocked(action Action) Action {
 				}
 			}
 
-			systemauth.CreatePinSession(*ctx)
+			systemauth.CreatePinSession(*ctx, systemauth.SSHTTL)
 		}
 
 		return action(request, cfg, vault, ctx)

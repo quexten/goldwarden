@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -30,12 +31,12 @@ var setApiUrlCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -63,12 +64,12 @@ var setIdentityURLCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting identity url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting identity url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -96,14 +97,108 @@ var setNotificationsURLCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting notifications url failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting notifications url failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
+	},
+}
+
+var setVaultURLCmd = &cobra.Command{
+	Use:   "set-vault-url",
+	Short: "Set the vault url",
+	Long:  `Set the vault url.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		url := args[0]
+		request := messages.SetVaultURLRequest{}
+		request.Value = url
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				fmt.Println("Done")
+			} else {
+				fmt.Println("Setting vault url failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			fmt.Println("Wrong IPC response type")
+		}
+
+	},
+}
+
+var setURLsAutomaticallyCmd = &cobra.Command{
+	Use:   "set-server",
+	Short: "Set the urls automatically",
+	Long:  `Set the api/identity/vault/notification urls automaticall from a base url.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		value := args[0]
+		request := messages.SetURLsAutomaticallyRequest{}
+		request.Value = value
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				fmt.Println("Done")
+			} else {
+				fmt.Println("Setting urls automatically failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			fmt.Println("Wrong IPC response type")
+		}
+
+	},
+}
+
+var getEnvironmentCmd = &cobra.Command{
+	Use:   "get-environment",
+	Short: "Get the environment",
+	Long:  `Get the environment.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		request := messages.GetConfigEnvironmentRequest{}
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result := result.(type) {
+		case messages.GetConfigEnvironmentResponse:
+			response := map[string]string{}
+			response["api"] = result.ApiURL
+			response["identity"] = result.IdentityURL
+			response["notifications"] = result.NotificationsURL
+			response["vault"] = result.VaultURL
+			responseJSON, _ := json.Marshal(response)
+			fmt.Println(string(responseJSON))
+		default:
+			fmt.Println("Wrong IPC response type")
+		}
 	},
 }
 
@@ -133,12 +228,12 @@ var setApiClientIDCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api client id failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api client id failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -170,12 +265,12 @@ var setApiSecretCmd = &cobra.Command{
 		switch result.(type) {
 		case messages.ActionResponse:
 			if result.(messages.ActionResponse).Success {
-				println("Done")
+				fmt.Println("Done")
 			} else {
-				println("Setting api secret failed: " + result.(messages.ActionResponse).Message)
+				fmt.Println("Setting api secret failed: " + result.(messages.ActionResponse).Message)
 			}
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 
 	},
@@ -196,13 +291,14 @@ var getRuntimeConfigCmd = &cobra.Command{
 
 		switch result := result.(type) {
 		case messages.GetRuntimeConfigResponse:
-			fmt.Println("{")
-			fmt.Println("  \"useMemguard\": " + fmt.Sprintf("%t", result.UseMemguard) + ",")
-			fmt.Println("  \"SSHAgentSocketPath\": \"" + result.SSHAgentSocketPath + "\",")
-			fmt.Println("  \"goldwardenSocketPath\": \"" + result.GoldwardenSocketPath + "\"")
-			fmt.Println("}")
+			response := map[string]interface{}{}
+			response["useMemguard"] = result.UseMemguard
+			response["SSHAgentSocketPath"] = result.SSHAgentSocketPath
+			response["goldwardenSocketPath"] = result.GoldwardenSocketPath
+			responseJSON, _ := json.Marshal(response)
+			fmt.Println(string(responseJSON))
 		default:
-			println("Wrong IPC response type")
+			fmt.Println("Wrong IPC response type")
 		}
 	},
 }
@@ -218,6 +314,9 @@ func init() {
 	configCmd.AddCommand(setApiUrlCmd)
 	configCmd.AddCommand(setIdentityURLCmd)
 	configCmd.AddCommand(setNotificationsURLCmd)
+	configCmd.AddCommand(setVaultURLCmd)
+	configCmd.AddCommand(setURLsAutomaticallyCmd)
+	configCmd.AddCommand(getEnvironmentCmd)
 	configCmd.AddCommand(getRuntimeConfigCmd)
 	configCmd.AddCommand(setApiClientIDCmd)
 	configCmd.AddCommand(setApiSecretCmd)

@@ -5,8 +5,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"net"
-	"os"
 	"time"
 
 	"github.com/quexten/goldwarden/agent/config"
@@ -42,7 +40,7 @@ func (vaultAgent vaultAgent) List() ([]*agent.Key, error) {
 			return nil, errors.New("vault is locked")
 		}
 
-		systemauth.CreatePinSession(vaultAgent.context)
+		systemauth.CreatePinSession(vaultAgent.context, systemauth.SSHTTL)
 	}
 
 	vaultSSHKeys := (*vaultAgent.vault).GetSSHKeys()
@@ -89,7 +87,7 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 			return nil, errors.New("vault is locked")
 		}
 
-		systemauth.CreatePinSession(vaultAgent.context)
+		systemauth.CreatePinSession(vaultAgent.context, systemauth.SSHTTL)
 	}
 
 	var signer ssh.Signer
@@ -132,14 +130,23 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 		message = fmt.Sprintf(requestTemplate, vaultAgent.context.UserName, sshKey.Name)
 	}
 
-	if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
-		log.Info("Sign Request for key: %s denied", sshKey.Name)
-		return nil, errors.New("Approval not given")
-	}
+	// todo refactor
+	if !systemauth.GetSSHSession(vaultAgent.context) {
+		if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
+			log.Info("Sign Request for key: %s denied", sshKey.Name)
+			return nil, errors.New("Approval not given")
+		}
 
-	if permission, err := systemauth.GetPermission(systemauth.SSHKey, vaultAgent.context, vaultAgent.config); err != nil || !permission {
-		log.Info("Sign Request for key: %s denied", key.Marshal())
-		return nil, errors.New("Biometrics not checked")
+		if !systemauth.VerifyPinSession(vaultAgent.context) {
+			if permission, err := systemauth.GetPermission(systemauth.SSHKey, vaultAgent.context, vaultAgent.config); err != nil || !permission {
+				log.Info("Sign Request for key: %s denied", key.Marshal())
+				return nil, errors.New("Biometrics not checked")
+			}
+		}
+
+		systemauth.CreateSSHSession(vaultAgent.context)
+	} else {
+		log.Info("Using cached session approval")
 	}
 
 	var rand = rand.Reader
@@ -182,40 +189,5 @@ func NewVaultAgent(vault *vault.Vault, config *config.Config, runtimeConfig *con
 			log.Info("Unlock Request, but no action defined")
 			return false
 		},
-	}
-}
-
-func (v SSHAgentServer) Serve() {
-	path := v.runtimeConfig.SSHAgentSocketPath
-	if _, err := os.Stat(path); err == nil {
-		if err := os.Remove(path); err != nil {
-			log.Error("Could not remove old socket file: %s", err)
-			return
-		}
-	}
-	listener, err := net.Listen("unix", path)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info("SSH Agent listening on %s", path)
-
-	for {
-		var conn, err = listener.Accept()
-		if err != nil {
-			panic(err)
-		}
-
-		callingContext := sockets.GetCallingContext(conn)
-
-		log.Info("SSH Agent connection from %s>%s>%s \nby user %s", callingContext.GrandParentProcessName, callingContext.ParentProcessName, callingContext.ProcessName, callingContext.UserName)
-		log.Info("SSH Agent connection accepted")
-
-		go agent.ServeAgent(vaultAgent{
-			vault:               v.vault,
-			config:              v.config,
-			unlockRequestAction: v.unlockRequestAction,
-			context:             callingContext,
-		}, conn)
 	}
 }

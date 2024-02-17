@@ -2,7 +2,7 @@ id: com.quexten.Goldwarden
 runtime: org.gnome.Platform
 runtime-version: '45'
 sdk: org.gnome.Sdk
-command: main.py
+command: goldwarden_ui_main.py
 finish-args:
   # Allow network access for sync
   - --share=network
@@ -17,34 +17,27 @@ finish-args:
   - --talk-name=org.gnome.ScreenSaver
   - --talk-name=org.freedesktop.ScreenSaver
 
+  #  Lock on idle
+  - --talk-name=org.gnome.Mutter.IdleMonitor
+
   # Notifications
   - --talk-name=org.freedesktop.Notifications
-
-  # Home directory access to setup browser ipc, can posibly restrict this further if requried by listing each browser's nativehost directory separately
-  - --filesystem=home
 
   # pinentry & approval
   - --talk-name=org.gnome.keyring.SystemPrompter
   # biometric / user password auth
   - --system-talk-name=org.freedesktop.PolicyKit1
 modules:
-  - ./ui/python3-requirements.json
-  - name: wl-clipboard
-    buildsystem: meson 
-    config-opts:
-      - -Dfishcompletiondir=no
-    sources:
-      - type: git
-        url: https://github.com/bugaevc/wl-clipboard.git
-        tag: v2.2.1
+  - ./gui/python3-requirements.json
   - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:
-      - cp -R ./ui/* /app/bin
-      - chmod +x /app/bin/main.py
-      - install -D ./ui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
-      - install -D ./ui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
-      - install -Dm644 ./ui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
+      - mkdir -p /app/bin
+      - cp -R ./gui/* /app/bin
+      - chmod +x /app/bin/goldwarden_ui_main.py
+      - install -D ./gui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
+      - install -D ./gui/goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - install -Dm644 ./gui/com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
     sources:
       - type: dir
         path: ./

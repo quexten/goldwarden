@@ -8,7 +8,7 @@ import (
 	"github.com/twpayne/go-pinentry"
 )
 
-func GetPassword(title string, description string) (string, error) {
+func getPassword(title string, description string) (string, error) {
 	client, err := pinentry.NewClient(
 		pinentry.WithBinaryNameFromGnuPGAgentConf(),
 		pinentry.WithGPGTTY(),
@@ -38,7 +38,7 @@ func GetPassword(title string, description string) (string, error) {
 	}
 }
 
-func GetApproval(title string, description string) (bool, error) {
+func getApproval(title string, description string) (bool, error) {
 	if systemAuthDisabled {
 		return true, nil
 	}

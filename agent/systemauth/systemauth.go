@@ -14,14 +14,15 @@ import (
 
 var log = logging.GetLogger("Goldwarden", "Systemauth")
 
-const tokenExpiry = 10 * time.Minute
+const tokenExpiry = 60 * time.Minute
+const SSHTTL = 60 * time.Minute
 
 type SessionType string
 
 const (
 	AccessVault SessionType = "com.quexten.goldwarden.accessvault"
 	SSHKey      SessionType = "com.quexten.goldwarden.usesshkey"
-	Pin         SessionType = "com.quexten.goldwarden.pin" // this counts as all other permissions
+	Pin         SessionType = "com.quexten.goldwarden.pin"
 )
 
 var sessionStore = SessionStore{
@@ -40,12 +41,12 @@ type SessionStore struct {
 	Store []Session
 }
 
-func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int, sessionType SessionType) Session {
+func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int, sessionType SessionType, ttl time.Duration) Session {
 	var session = Session{
 		Pid:            pid,
 		ParentPid:      parentpid,
 		GrandParentPid: grandparentpid,
-		Expires:        time.Now().Add(tokenExpiry),
+		Expires:        time.Now().Add(ttl),
 		sessionType:    sessionType,
 	}
 	s.Store = append(s.Store, session)
@@ -54,7 +55,7 @@ func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int,
 
 func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType SessionType) bool {
 	for _, session := range s.Store {
-		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && (session.sessionType == sessionType || session.sessionType == Pin) {
+		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && session.sessionType == sessionType {
 			if session.Expires.After(time.Now()) {
 				return true
 			}
@@ -65,6 +66,10 @@ func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType Ses
 
 // with session
 func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *config.Config) (bool, error) {
+	if ctx.Authenticated {
+		return true, nil
+	}
+
 	log.Info("Checking permission for " + ctx.ProcessName + " with session type " + string(sessionType))
 	var actionDescription = ""
 	biometricsApprovalType := biometrics.AccessVault
@@ -81,19 +86,21 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 	if sessionStore.verifySession(ctx, sessionType) {
 		log.Info("Permission granted from cached session")
 	} else {
-		if biometrics.BiometricsWorking() {
-			biometricsApproval := biometrics.CheckBiometrics(biometricsApprovalType)
-			if !biometricsApproval {
-				return false, nil
-			}
-		} else {
-			log.Warn("Biometrics is not available, asking for pin")
-			pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
-			if err != nil {
-				return false, err
-			}
-			if !config.VerifyPin(pin) {
-				return false, nil
+		if !sessionStore.verifySession(ctx, Pin) {
+			if biometrics.BiometricsWorking() {
+				biometricsApproval := biometrics.CheckBiometrics(biometricsApprovalType)
+				if !biometricsApproval {
+					return false, nil
+				}
+			} else {
+				log.Warn("Biometrics is not available, asking for pin")
+				pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
+				if err != nil {
+					return false, err
+				}
+				if !config.VerifyPin(pin) {
+					return false, nil
+				}
 			}
 		}
 
@@ -103,7 +110,7 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 		// }
 
 		log.Info("Permission granted, creating session")
-		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType)
+		sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, sessionType, tokenExpiry)
 	}
 	return true, nil
 }
@@ -124,10 +131,22 @@ func CheckBiometrics(callingContext *sockets.CallingContext, approvalType biomet
 	return approval
 }
 
-func CreatePinSession(ctx sockets.CallingContext) {
-	sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, Pin)
+func CreatePinSession(ctx sockets.CallingContext, ttl time.Duration) Session {
+	return sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, Pin, ttl)
 }
 
 func VerifyPinSession(ctx sockets.CallingContext) bool {
 	return sessionStore.verifySession(ctx, Pin)
+}
+
+func CreateSSHSession(ctx sockets.CallingContext) Session {
+	return sessionStore.CreateSession(ctx.ProcessPid, ctx.ParentProcessPid, ctx.GrandParentProcessPid, SSHKey, SSHTTL)
+}
+
+func GetSSHSession(ctx sockets.CallingContext) bool {
+	return sessionStore.verifySession(ctx, SSHKey)
+}
+
+func WipeSessions() {
+	sessionStore.Store = []Session{}
 }

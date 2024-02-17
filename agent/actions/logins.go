@@ -3,10 +3,7 @@ package actions
 import (
 	"fmt"
 	"runtime/debug"
-	"strings"
-	"time"
 
-	"github.com/pquerna/otp/totp"
 	"github.com/quexten/goldwarden/agent/bitwarden/crypto"
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/agent/sockets"
@@ -72,9 +69,8 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 	if !login.Login.Totp.IsNull() {
 		decryptedTotp, err := crypto.DecryptWith(login.Login.Totp, cipherKey)
 		if err == nil {
-			code, err := totp.GenerateCode(string(strings.ReplaceAll(string(decryptedTotp), " ", "")), time.Now())
 			if err == nil {
-				decryptedLogin.TwoFactorCode = code
+				decryptedLogin.TOTPSeed = string(decryptedTotp)
 			} else {
 				fmt.Println(err)
 			}
@@ -101,16 +97,16 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 }
 
 func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
-	if approved, err := pinentry.GetApproval("Approve List Credentials", fmt.Sprintf("%s on %s>%s>%s is trying access all credentials", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
-		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
-			Success: false,
-			Message: "not approved",
-		})
-		if err != nil {
-			return messages.IPCMessage{}, err
-		}
-		return response, nil
-	}
+	// if approved, err := pinentry.GetApproval("Access Vault", fmt.Sprintf("%s on %s>%s>%s is trying access ALL CREDENTIALS", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
+	// 	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+	// 		Success: false,
+	// 		Message: "not approved",
+	// 	})
+	// 	if err != nil {
+	// 		return messages.IPCMessage{}, err
+	// 	}
+	// 	return response, nil
+	// }
 
 	logins := vault.GetLogins()
 	decryptedLoginCiphers := make([]messages.DecryptedLoginCipher, 0)
@@ -124,6 +120,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 		var decryptedName []byte = []byte{}
 		var decryptedUsername []byte = []byte{}
 		var decryptedPassword []byte = []byte{}
+		var decryptedTotp []byte = []byte{}
+		var decryptedURL []byte = []byte{}
 
 		if !login.Name.IsNull() {
 			decryptedName, err = crypto.DecryptWith(login.Name, key)
@@ -131,6 +129,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedName = []byte{}
 		}
 
 		if !login.Login.Username.IsNull() {
@@ -139,6 +139,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedUsername = []byte{}
 		}
 
 		if !login.Login.Password.IsNull() {
@@ -147,6 +149,28 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 				actionsLog.Warn("Could not decrypt login:" + err.Error())
 				continue
 			}
+		} else {
+			decryptedPassword = []byte{}
+		}
+
+		if !login.Login.Totp.IsNull() {
+			decryptedTotp, err = crypto.DecryptWith(login.Login.Totp, key)
+			if err != nil {
+				actionsLog.Warn("Could not decrypt login:" + err.Error())
+				continue
+			}
+		} else {
+			decryptedTotp = []byte{}
+		}
+
+		if !login.Login.URI.IsNull() {
+			decryptedURL, err = crypto.DecryptWith(login.Login.URI, key)
+			if err != nil {
+				actionsLog.Warn("Could not decrypt login:" + err.Error())
+				continue
+			}
+		} else {
+			decryptedURL = []byte{}
 		}
 
 		decryptedLoginCiphers = append(decryptedLoginCiphers, messages.DecryptedLoginCipher{
@@ -154,6 +178,8 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 			Username: string(decryptedUsername),
 			UUID:     login.ID.String(),
 			Password: string(decryptedPassword),
+			TOTPSeed: string(decryptedTotp),
+			URI:      string(decryptedURL),
 		})
 
 		// prevent deadlock from enclaves

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -16,6 +17,8 @@ import (
 	"github.com/quexten/goldwarden/agent/processsecurity"
 	"github.com/quexten/goldwarden/agent/sockets"
 	"github.com/quexten/goldwarden/agent/ssh"
+	"github.com/quexten/goldwarden/agent/systemauth"
+	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
 	"github.com/quexten/goldwarden/ipc/messages"
 	"github.com/quexten/goldwarden/logging"
@@ -44,7 +47,7 @@ func writeError(c net.Conn, errMsg error) error {
 	return nil
 }
 
-func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg *config.Config) {
+func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 	for {
 		buf := make([]byte, 1024*1024)
 		nr, err := c.Read(buf)
@@ -61,7 +64,213 @@ func serveAgentSession(c net.Conn, ctx context.Context, vault *vault.Vault, cfg 
 			continue
 		}
 
-		responseBytes := []byte{}
+		// todo refactor to other file
+		if msg.Type == messages.MessageTypeForEmptyPayload(messages.SessionAuthRequest{}) {
+			if cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == "" {
+				return
+			}
+
+			req := messages.ParsePayload(msg).(messages.SessionAuthRequest)
+			verified := subtle.ConstantTimeCompare([]byte(cfg.ConfigFile.RuntimeConfig.DaemonAuthToken), []byte(req.Token)) == 1
+
+			payload := messages.SessionAuthResponse{
+				Verified: verified,
+			}
+			log.Info("Verified: %t", verified)
+			callingContext := sockets.GetCallingContext(c)
+			if verified {
+				systemauth.CreatePinSession(callingContext, 365*24*time.Hour) // permanent session
+			}
+
+			responsePayload, err := messages.IPCMessageFromPayload(payload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+			payloadBytes, err := json.Marshal(responsePayload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+
+			_, err = c.Write(payloadBytes)
+			if err != nil {
+				log.Error("Failed writing to socket " + err.Error())
+			}
+			continue
+		}
+
+		// todo refactor to other file
+		if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryRegistrationRequest{}) {
+			// todo lockdown this method better
+			if cfg.ConfigFile.RuntimeConfig.DaemonAuthToken == "" {
+				return
+			}
+
+			log.Info("Received pinentry registration request")
+
+			getPasswordChan := make(chan struct {
+				title       string
+				description string
+			})
+			getPasswordReturnChan := make(chan struct {
+				password string
+				err      error
+			})
+			getApprovalChan := make(chan struct {
+				title       string
+				description string
+			})
+			getApprovalReturnChan := make(chan struct {
+				approved bool
+				err      error
+			})
+
+			pe := pinentry.Pinentry{
+				GetPassword: func(title string, description string) (string, error) {
+					getPasswordChan <- struct {
+						title       string
+						description string
+					}{title, description}
+					returnValue := <-getPasswordReturnChan
+					return returnValue.password, returnValue.err
+				},
+				GetApproval: func(title string, description string) (bool, error) {
+					getApprovalChan <- struct {
+						title       string
+						description string
+					}{title, description}
+					returnValue := <-getApprovalReturnChan
+					return returnValue.approved, returnValue.err
+				},
+			}
+
+			pinnentrySetError := pinentry.SetExternalPinentry(pe)
+			payload := messages.PinentryRegistrationResponse{
+				Success: pinnentrySetError == nil,
+			}
+			log.Info("Pinentry registration success: %t", payload.Success)
+
+			responsePayload, err := messages.IPCMessageFromPayload(payload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+			payloadBytes, err := json.Marshal(responsePayload)
+			if err != nil {
+				writeError(c, err)
+				continue
+			}
+
+			_, err = c.Write(payloadBytes)
+			if err != nil {
+				log.Error("Failed writing to socket " + err.Error())
+			}
+			_, err = c.Write([]byte("\n"))
+			time.Sleep(50 * time.Millisecond) //todo fix properly
+
+			if pinnentrySetError != nil {
+				return
+			}
+
+			for {
+				fmt.Println("Waiting for pinentry request")
+				select {
+				case getPasswordRequest := <-getPasswordChan:
+					log.Info("Received getPassword request")
+					payload := messages.PinentryPinRequest{
+						Message: getPasswordRequest.description,
+					}
+					payloadPayload, err := messages.IPCMessageFromPayload(payload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					payloadBytes, err := json.Marshal(payloadPayload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					_, err = c.Write(payloadBytes)
+					if err != nil {
+						log.Error("Failed writing to socket " + err.Error())
+					}
+
+					buf := make([]byte, 1024*1024)
+					nr, err := c.Read(buf)
+					if err != nil {
+						return
+					}
+
+					data := buf[0:nr]
+
+					var msg messages.IPCMessage
+					err = json.Unmarshal(data, &msg)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryPinResponse{}) {
+						getPasswordResponse := messages.ParsePayload(msg).(messages.PinentryPinResponse)
+						getPasswordReturnChan <- struct {
+							password string
+							err      error
+						}{getPasswordResponse.Pin, nil}
+					}
+				case getApprovalRequest := <-getApprovalChan:
+					log.Info("Received getApproval request")
+					payload := messages.PinentryApprovalRequest{
+						Message: getApprovalRequest.description,
+					}
+					payloadPayload, err := messages.IPCMessageFromPayload(payload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					payloadBytes, err := json.Marshal(payloadPayload)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					_, err = c.Write(payloadBytes)
+					if err != nil {
+						log.Error("Failed writing to socket " + err.Error())
+					}
+
+					buf := make([]byte, 1024*1024)
+					nr, err := c.Read(buf)
+					if err != nil {
+						return
+					}
+
+					data := buf[0:nr]
+
+					var msg messages.IPCMessage
+					err = json.Unmarshal(data, &msg)
+					if err != nil {
+						writeError(c, err)
+						continue
+					}
+
+					if msg.Type == messages.MessageTypeForEmptyPayload(messages.PinentryApprovalResponse{}) {
+						getApprovalResponse := messages.ParsePayload(msg).(messages.PinentryApprovalResponse)
+						getApprovalReturnChan <- struct {
+							approved bool
+							err      error
+						}{getApprovalResponse.Approved, nil}
+					}
+				}
+			}
+
+			continue
+		}
+
+		var responseBytes []byte
 		if action, actionFound := actions.AgentActionsRegistry.Get(msg.Type); actionFound {
 			callingContext := sockets.GetCallingContext(c)
 			payload, err := action(msg, cfg, vault, &callingContext)
@@ -116,15 +325,6 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		cfg.WriteConfig()
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig
-	if cfg.ConfigFile.RuntimeConfig.ApiURI != "" {
-		cfg.ConfigFile.ApiUrl = cfg.ConfigFile.RuntimeConfig.ApiURI
-	}
-	if cfg.ConfigFile.RuntimeConfig.IdentityURI != "" {
-		cfg.ConfigFile.IdentityUrl = cfg.ConfigFile.RuntimeConfig.IdentityURI
-	}
-	if cfg.ConfigFile.RuntimeConfig.NotificationsURI != "" {
-		cfg.ConfigFile.NotificationsUrl = cfg.ConfigFile.RuntimeConfig.NotificationsURI
-	}
 	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
 		cfg.ConfigFile.DeviceUUID = cfg.ConfigFile.RuntimeConfig.DeviceUUID
 	}
@@ -175,6 +375,7 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 			cfg.Lock()
 			vault.Clear()
 			vault.Keyring.Lock()
+			systemauth.WipeSessions()
 		})
 		if err != nil {
 			log.Warn("Could not monitor screensaver: %s", err.Error())
@@ -182,7 +383,10 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	}()
 	go func() {
 		err = processsecurity.MonitorIdle(func() {
-			log.Warn("Idling detected but no action is implemented")
+			cfg.Lock()
+			vault.Clear()
+			vault.Keyring.Lock()
+			systemauth.WipeSessions()
 		})
 		if err != nil {
 			log.Warn("Could not monitor idle: %s", err.Error())
@@ -291,19 +495,20 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 
 	l, err := net.Listen("unix", path)
 	if err != nil {
-		println("listen error", err.Error())
+		fmt.Println("listen error", err.Error())
 		return err
 	}
+	defer l.Close()
 	log.Info("Agent listening on %s...", path)
 
 	go func() {
 		for {
 			fd, err := l.Accept()
 			if err != nil {
-				println("accept error", err.Error())
+				fmt.Println("accept error", err.Error())
 			}
 
-			go serveAgentSession(fd, ctx, vault, &cfg)
+			go serveAgentSession(fd, vault, &cfg)
 		}
 	}()
 

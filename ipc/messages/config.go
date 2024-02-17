@@ -14,6 +14,24 @@ type SetNotificationsURLRequest struct {
 	Value string
 }
 
+type SetVaultURLRequest struct {
+	Value string
+}
+
+type SetURLsAutomaticallyRequest struct {
+	Value string
+}
+
+type GetConfigEnvironmentRequest struct {
+}
+
+type GetConfigEnvironmentResponse struct {
+	ApiURL           string
+	IdentityURL      string
+	NotificationsURL string
+	VaultURL         string
+}
+
 type SetClientIDRequest struct {
 	Value string
 }
@@ -93,4 +111,36 @@ func init() {
 		}
 		return req, nil
 	}, SetClientSecretRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req SetVaultURLRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, SetVaultURLRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req SetURLsAutomaticallyRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, SetURLsAutomaticallyRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req GetConfigEnvironmentRequest
+		return req, nil
+	}, GetConfigEnvironmentRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req GetConfigEnvironmentResponse
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, GetConfigEnvironmentResponse{})
 }

@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 )
@@ -114,7 +113,7 @@ func makeAuthenticatedHTTPRequest(ctx context.Context, req *http.Request, recv i
 		return &errStatusCode{res.StatusCode, body}
 	}
 	if err := json.Unmarshal(body, recv); err != nil {
-		fmt.Fprintln(os.Stderr, string(body))
+		fmt.Println(string(body))
 		return err
 	}
 	return nil

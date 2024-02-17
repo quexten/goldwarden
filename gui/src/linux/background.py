@@ -30,7 +30,7 @@ def request_autostart():
         'handle_token': GLib.Variant('s', f'com/quexten/Goldwarden/{token}'),
         'reason': GLib.Variant('s', ('Autostart Goldwarden in the background.')),
         'autostart': GLib.Variant('b', True),
-        'commandline': GLib.Variant('as', ['main.py', '--hidden']),
+        'commandline': GLib.Variant('as', ['goldwarden_ui_main.py', '--hidden']),
         'dbus-activatable': GLib.Variant('b', False),
     }
 
