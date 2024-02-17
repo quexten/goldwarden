@@ -40,7 +40,7 @@ jobs:
         files: './goldwarden_linux_x86_64'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Validate ArchLinux PKGBUILD
-      uses: hapakaien/archlinux-package-action@v2
+      uses: heyhusen/archlinux-package-action@v2
       with:
         flags: ''
         namcap: true
