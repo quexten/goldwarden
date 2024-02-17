@@ -41,15 +41,18 @@ func main() {
 		panic(err)
 	}
 	if runtimeConfig.SSHAgentSocketPath == "" {
-		runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
+		if _, err := os.Stat(home + "/.ssh-agent-socket"); err == nil {
+			runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
+		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"); err == nil {
+			runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+		}
 	}
 	if runtimeConfig.GoldwardenSocketPath == "" {
-		runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
-	}
-
-	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
-		browserbiometrics.Main(&runtimeConfig)
-		return
+		if _, err := os.Stat(home + "/.goldwarden.sock"); err == nil {
+			runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"); err == nil {
+			runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+		}
 	}
 
 	_, err = os.Stat("/.flatpak-info")
@@ -60,6 +63,11 @@ func main() {
 		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
 		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+	}
+
+	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
+		browserbiometrics.Main(&runtimeConfig)
+		return
 	}
 
 	cmd.Execute(runtimeConfig)
