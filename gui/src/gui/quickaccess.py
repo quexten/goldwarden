@@ -16,6 +16,25 @@ Notify.init("Goldwarden")
 token = sys.stdin.readline()
 goldwarden.create_authenticated_connection(token)
 
+def autotype(text):
+    time.sleep(0.5)
+    goldwarden.autotype(text)
+    os._exit(0)
+
+def set_clipboard(text):
+    print("Setting clipboard")  
+    try:
+        clipboard.write(text)
+    except Exception as e:
+        print(e)
+        pass
+    display = Gdk.Display.get_default()
+    clipboard = Gdk.Display.get_clipboard(display)
+    clipboard.set(text)
+    print("Clipboard set", text)
+    time.sleep(0.5)
+    os._exit(0)
+
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -50,7 +69,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.text_view = Adw.EntryRow()
         self.text_view.set_title("Search")
-        # on type func
+    
         def on_type(entry):
             if len(entry.get_text()) > 1:
                 self.results_list.show()
@@ -94,12 +113,10 @@ class MainWindow(Gtk.ApplicationWindow):
 
         keycont = Gtk.EventControllerKey()
         def handle_keypress(cotroller, keyval, keycode, state, user_data):
-            # if ctrl is pressed
-            if state == 4:
-                print("ctrl")
+            ctrl_pressed = state & Gdk.ModifierType.CONTROL_MASK > 0
+            alt_pressed = state & Gdk.ModifierType.ALT_MASK > 0
 
             if keycode == 9:
-                print("esc")
                 os._exit(0)
 
             if keyval == 65364:
@@ -112,43 +129,39 @@ class MainWindow(Gtk.ApplicationWindow):
                 return False
 
             if keycode == 36:
-                print("enter")
                 self.hide()
-                def do_autotype(username, password):
-                    time.sleep(0.5)
-                    goldwarden.autotype(username, password)
-                    os._exit(0)
-                autotypeThread = Thread(target=do_autotype, args=(self.results_list.get_selected_row().username, self.results_list.get_selected_row().password,))
+                autotypeThread = Thread(target=autotype, args=(f"{self.results_list.get_selected_row().username}\t{self.results_list.get_selected_row().password}",))
                 autotypeThread.start()
-                print(self.results_list.get_selected_row().get_title())
             if keyval == 112:
-                print("copy password")
-                clipboard.write(self.results_list.get_selected_row().password)
-                Notify.Notification.new("Goldwarden", "Password Copied", "dialog-information").show()
+                print("pass", ctrl_pressed, alt_pressed)
+                if ctrl_pressed and not alt_pressed:
+                    set_clipboard(self.results_list.get_selected_row().password)
+                if ctrl_pressed and alt_pressed:
+                    self.hide()
+                    autotype(self.results_list.get_selected_row().password)
             elif keyval == 117:
-                print("copy username")
-                clipboard.write(self.results_list.get_selected_row().username)
-                notification=Notify.Notification.new("Goldwarden", "Username Copied", "dialog-information")
-                notification.set_timeout(5)
-                notification.show()
+                if ctrl_pressed and not alt_pressed:
+                    set_clipboard(self.results_list.get_selected_row().username)
+                if ctrl_pressed and alt_pressed:
+                    self.hide()
+                    autotype(self.results_list.get_selected_row().username)
             elif keyval == 118:
-                print("open web vault")
-                environment = goldwarden.get_environment()
-                if environment == None:
-                    return
-                item_uri = environment["vault"] + "#/vault?itemId=" + self.results_list.get_selected_row().uuid
-                Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
+                if ctrl_pressed and alt_pressed:
+                    environment = goldwarden.get_environment()
+                    if environment == None:
+                        return
+                    item_uri = environment["vault"] + "#/vault?itemId=" + self.results_list.get_selected_row().uuid
+                    Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
             elif keyval == 108:
-                print("launch")
-                print(self.results_list.get_selected_row().uri)
-                Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
+                if ctrl_pressed and alt_pressed:
+                    Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
             elif keyval == 116:
-                print("copy totp")
-                totp_code = totp.totp(self.results_list.get_selected_row().totp)
-                clipboard.write(totp_code)
-                notification=Notify.Notification.new("Goldwarden", "Totp Copied", "dialog-information")
-                notification.set_timeout(5)
-                notification.show()
+                totp_code = totp.totp(self.resuts_list.get_selected_row().totp)
+                if ctrl_pressed and not alt_pressed:
+                    set_clipboard(totp_code)
+                if ctrl_pressed and alt_pressed:
+                    self.hide()
+                    autotype(totp_code)
             elif keyval == 102:
                 # focus search
                 self.text_view.grab_focus()

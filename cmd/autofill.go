@@ -3,6 +3,8 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/hex"
 	"os"
 
 	"github.com/quexten/goldwarden/autotype"
@@ -15,14 +17,13 @@ var autofillCmd = &cobra.Command{
 	Short:  "Autotype credentials",
 	Long:   `Autotype credentials`,
 	Run: func(cmd *cobra.Command, args []string) {
-		username, _ := cmd.Flags().GetString("username")
-		// get pasword from env
-		password := os.Getenv("PASSWORD")
-		autotype.TypeString(username + "\t" + password)
+		reader := bufio.NewReader(os.Stdin)
+		textHex, _ := reader.ReadString('\n')
+		text, _ := hex.DecodeString(textHex)
+		autotype.TypeString(string(text))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(autofillCmd)
-	autofillCmd.PersistentFlags().String("username", "", "")
 }

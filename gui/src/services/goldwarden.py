@@ -131,16 +131,16 @@ def get_runtime_config():
     except Exception as e:
         return None
     
-def autotype(username, password):
-    env = os.environ.copy()
-    # todo convert to stdin
-    env["PASSWORD"] = password
-    goldwarden_cmd = f"{BINARY_PATH} autotype --username {username}"
-    result = subprocess.run(goldwarden_cmd.split(), capture_output=True, text=True, env=env)
-    print(result.stderr)
-    print(result.stdout)
-    if result.returncode != 0:
-        raise Exception("Failed to initialize repository, err", result.stderr)
+def autotype(text):
+    goldwarden_cmd = f"{BINARY_PATH} autotype"
+    process = subprocess.Popen(goldwarden_cmd.split(), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    text_hex = text.encode("utf-8").hex()
+    print("autotyping", text_hex)
+    process.stdin.write(text_hex + "\n")
+    process.stdin.flush()
+    # wait for process to finish
+    process.wait()
+    print("autotype finished")
 
 def is_daemon_running():
     result = send_authenticated_command(f"vault status")
