@@ -32,6 +32,7 @@ modules:
   - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:
+      - mkdir -p /app/bin
       - cp -R ./gui/* /app/bin
       - chmod +x /app/bin/goldwarden_ui_main.py
       - install -D ./gui/com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
