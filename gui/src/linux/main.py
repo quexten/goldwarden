@@ -47,7 +47,8 @@ def main():
     if is_flatpak:
         # to autostart the appes
         try:
-            subprocess.Popen(["python3", f'{source_path}/background.py'], start_new_session=True)
+            print("Enabling autostart...")
+            subprocess.Popen(["python3", "-m", "src.linux.background"], cwd=root_path, start_new_session=True)
         except Exception as e:
             pass
 
