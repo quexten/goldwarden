@@ -31,6 +31,11 @@ def ssh_button_clicked():
     p.stdin.write(f"{token}\n".encode())
     p.stdin.flush()
 
+def browserbiometrics_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.browserbiometrics"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
 def add_action_row(parent, title, subtitle, icon=None):
     row = Adw.ActionRow()
     row.set_title(title)
@@ -154,6 +159,11 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         action.connect("activate", lambda action, parameter: ssh_button_clicked())
         self.add_action(action)
         menu.append("SSH Agent", "win.ssh")
+
+        action = Gio.SimpleAction.new("browserbiometrics", None)
+        action.connect("activate", lambda action, parameter: browserbiometrics_button_clicked())
+        self.add_action(action)
+        menu.append("Browser Biometrics", "win.browserbiometrics")
         
         self.hamburger = Gtk.MenuButton()
         self.hamburger.set_popover(self.popover)
