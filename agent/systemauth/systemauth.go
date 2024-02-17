@@ -86,19 +86,21 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 	if sessionStore.verifySession(ctx, sessionType) {
 		log.Info("Permission granted from cached session")
 	} else {
-		if biometrics.BiometricsWorking() {
-			biometricsApproval := biometrics.CheckBiometrics(biometricsApprovalType)
-			if !biometricsApproval {
-				return false, nil
-			}
-		} else {
-			log.Warn("Biometrics is not available, asking for pin")
-			pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
-			if err != nil {
-				return false, err
-			}
-			if !config.VerifyPin(pin) {
-				return false, nil
+		if !sessionStore.verifySession(ctx, Pin) {
+			if biometrics.BiometricsWorking() {
+				biometricsApproval := biometrics.CheckBiometrics(biometricsApprovalType)
+				if !biometricsApproval {
+					return false, nil
+				}
+			} else {
+				log.Warn("Biometrics is not available, asking for pin")
+				pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
+				if err != nil {
+					return false, err
+				}
+				if !config.VerifyPin(pin) {
+					return false, nil
+				}
 			}
 		}
 
