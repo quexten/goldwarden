@@ -5,7 +5,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 import gc
 
-from gi.repository import Gtk, Adw, GLib, Gdk
+from gi.repository import Gtk, Adw, GLib, Gdk, Gio
 from ..services import goldwarden
 from threading import Thread
 import subprocess
@@ -15,6 +15,30 @@ import os
 root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
 token = sys.stdin.readline()
 goldwarden.create_authenticated_connection(None)
+
+def quickaccess_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def shortcuts_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.shortcuts"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def ssh_button_clicked():
+    p = subprocess.Popen(["python3", "-m", "src.gui.ssh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+    p.stdin.write(f"{token}\n".encode())
+    p.stdin.flush()
+
+def add_action_row(parent, title, subtitle, icon=None):
+    row = Adw.ActionRow()
+    row.set_title(title)
+    row.set_subtitle(subtitle)
+    if icon != None:
+        row.set_icon_name(icon)
+    parent.add(row)
+    return row
 
 class SettingsWinvdow(Gtk.ApplicationWindow):
     def __init__(self, *args, **kwargs):
@@ -50,10 +74,7 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.autotype_button = Gtk.Button()
         self.autotype_button.set_label("Quick Access")
         self.autotype_button.set_margin_top(10)
-        def quickaccess_button_clicked():
-            p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
-            p.stdin.write(f"{token}\n".encode())
-            p.stdin.flush()
+ 
         self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
         self.autotype_button.get_style_context().add_class("suggested-action")
         self.action_preferences_group.add(self.autotype_button)
@@ -98,120 +119,48 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
         self.wiki_button.set_margin_top(10)
         self.action_preferences_group.add(self.wiki_button)
 
-        self.shortcut_preferences_group = Adw.PreferencesGroup()
-        self.shortcut_preferences_group.set_title("Shortcuts")
-        self.preferences_page.add(self.shortcut_preferences_group)
-
-        self.autofill_row = Adw.ActionRow()
-        self.autofill_row.set_title("Autofill Shortcut")
-        self.autofill_row.set_subtitle("Unavailable, please set up a shortcut in your desktop environment (README)")
-        self.shortcut_preferences_group.add(self.autofill_row)
-
-        self.autofill_icon = components.StatusIcon()
-        self.autofill_icon.set_icon("dialog-warning", "warning")
-        self.autofill_row.add_prefix(self.autofill_icon)
-
-        self.copy_username_shortcut_row = Adw.ActionRow()
-        self.copy_username_shortcut_row.set_title("Copy Username Shortcut")
-        self.copy_username_shortcut_row.set_subtitle("U")
-        self.shortcut_preferences_group.add(self.copy_username_shortcut_row)
-
-        self.copy_password_shortcut_row = Adw.ActionRow()
-        self.copy_password_shortcut_row.set_title("Copy Password Shortcut")
-        self.copy_password_shortcut_row.set_subtitle("P")
-        self.shortcut_preferences_group.add(self.copy_password_shortcut_row)
-
-        self.copy_totp_shortcut_row = Adw.ActionRow()
-        self.copy_totp_shortcut_row.set_title("Copy TOTP Shortcut")
-        self.copy_totp_shortcut_row.set_subtitle("T")
-        self.shortcut_preferences_group.add(self.copy_totp_shortcut_row)
-
-        self.launch_uri_shortcut_row = Adw.ActionRow()
-        self.launch_uri_shortcut_row.set_title("Launch URI Shortcut")
-        self.launch_uri_shortcut_row.set_subtitle("L")
-        self.shortcut_preferences_group.add(self.launch_uri_shortcut_row)
-
-        self.launch_web_vault_shortcut_row = Adw.ActionRow()
-        self.launch_web_vault_shortcut_row.set_title("Launch Web Vault Shortcut")
-        self.launch_web_vault_shortcut_row.set_subtitle("V")
-        self.shortcut_preferences_group.add(self.launch_web_vault_shortcut_row)
-
-        self.focus_search_shortcut_row = Adw.ActionRow()
-        self.focus_search_shortcut_row.set_title("Focus Search Shortcut")
-        self.focus_search_shortcut_row.set_subtitle("F")
-        self.shortcut_preferences_group.add(self.focus_search_shortcut_row)
-
-        self.quit_shortcut_row = Adw.ActionRow()
-        self.quit_shortcut_row.set_title("Quit Shortcut")
-        self.quit_shortcut_row.set_subtitle("Esc")
-        self.shortcut_preferences_group.add(self.quit_shortcut_row)
-
         self.vault_status_preferences_group = Adw.PreferencesGroup()
         self.vault_status_preferences_group.set_title("Vault Status")
         self.preferences_page.add(self.vault_status_preferences_group)
         
-        self.status_row = Adw.ActionRow()
-        self.status_row.set_title("Vault Status")
-        self.status_row.set_subtitle("Locked")
-        self.vault_status_preferences_group.add(self.status_row)
+        self.status_row = add_action_row(self.vault_status_preferences_group, "Vault Status", "Locked")
 
         self.vault_status_icon = components.StatusIcon()
         self.vault_status_icon.set_icon("dialog-error", "error")
         self.status_row.add_prefix(self.vault_status_icon)
 
-        self.last_sync_row = Adw.ActionRow()
-        self.last_sync_row.set_title("Last Sync")
-        self.last_sync_row.set_subtitle("Never")
-        self.last_sync_row.set_icon_name("emblem-synchronizing-symbolic")
-        self.vault_status_preferences_group.add(self.last_sync_row)
-
-        self.websocket_connected_row = Adw.ActionRow()
-        self.websocket_connected_row.set_title("Websocket Connected")
-        self.websocket_connected_row.set_subtitle("False")
-        self.vault_status_preferences_group.add(self.websocket_connected_row)
+        self.last_sync_row = add_action_row(self.vault_status_preferences_group, "Last Sync", "Never", "emblem-synchronizing-symbolic")
+        self.websocket_connected_row = add_action_row(self.vault_status_preferences_group, "Websocket Connected", "False")
 
         self.websocket_connected_status_icon = components.StatusIcon()
         self.websocket_connected_status_icon.set_icon("dialog-error", "error")
         self.websocket_connected_row.add_prefix(self.websocket_connected_status_icon)
+
+        self.login_row = add_action_row(self.vault_status_preferences_group, "Vault Login Entries", "0", "dialog-password-symbolic")
+        self.notes_row = add_action_row(self.vault_status_preferences_group, "Vault Notes", "0", "emblem-documents-symbolic")
+ 
+        self.header = Gtk.HeaderBar()
+        self.set_titlebar(self.header)
+
+        action = Gio.SimpleAction.new("shortcuts", None)
+        action.connect("activate", lambda action, parameter: shortcuts_button_clicked())
+        self.add_action(action)
+        menu = Gio.Menu.new()
+        menu.append("Keyboard Shortcuts", "win.shortcuts") 
+        self.popover = Gtk.PopoverMenu() 
+        self.popover.set_menu_model(menu)
+
+        action = Gio.SimpleAction.new("ssh", None)
+        action.connect("activate", lambda action, parameter: ssh_button_clicked())
+        self.add_action(action)
+        menu.append("SSH Agent", "win.ssh")
         
-        self.login_row = Adw.ActionRow()
-        self.login_row.set_title("Vault Login Entries")
-        self.login_row.set_subtitle("0")
-        self.login_row.set_icon_name("dialog-password-symbolic")
-        self.vault_status_preferences_group.add(self.login_row)
+        self.hamburger = Gtk.MenuButton()
+        self.hamburger.set_popover(self.popover)
+        self.hamburger.set_icon_name("open-menu-symbolic")
+        self.header.pack_start(self.hamburger)
 
-        self.notes_row = Adw.ActionRow()
-        self.notes_row.set_title("Vault Notes")
-        self.notes_row.set_subtitle("0")
-        self.notes_row.set_icon_name("emblem-documents-symbolic")
-        self.vault_status_preferences_group.add(self.notes_row)
 
-        self.preferences_group = Adw.PreferencesGroup()
-        self.preferences_group.set_title("Services")
-        self.preferences_page.add(self.preferences_group)
-
-        self.ssh_row = Adw.ActionRow()
-        self.ssh_row.set_title("SSH Daemon")
-        self.ssh_row.set_subtitle("Getting status...")
-        self.ssh_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.ssh_row)
-
-        self.goldwarden_daemon_row = Adw.ActionRow()
-        self.goldwarden_daemon_row.set_title("Goldwarden Daemon")
-        self.goldwarden_daemon_row.set_subtitle("Getting status...")
-        self.goldwarden_daemon_row.set_icon_name("emblem-default")
-        self.preferences_group.add(self.goldwarden_daemon_row)
-
-        self.login_with_device = Adw.ActionRow()
-        self.login_with_device.set_title("Login with device")
-        self.login_with_device.set_subtitle("Waiting for requests...")
-        self.preferences_group.add(self.login_with_device)
-
-        self.status_row = Adw.ActionRow()
-        self.status_row.set_title("DBUS Service")
-        self.status_row.set_subtitle("Listening")
-        self.preferences_group.add(self.status_row)
-        
         def update_labels():
             pin_set = goldwarden.is_pin_enabled()
             status = goldwarden.get_vault_status()
@@ -276,15 +225,9 @@ class SettingsWinvdow(Gtk.ApplicationWindow):
             
             GLib.timeout_add(5000, update_labels)
 
-
         GLib.timeout_add(1000, update_labels)
         self.set_default_size(400, 700)
         self.set_title("Goldwarden")
-
-
-        #add title buttons
-        self.title_bar = Gtk.HeaderBar()
-        self.set_titlebar(self.title_bar)
 
 class MyApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -371,7 +314,6 @@ Gtk.StyleContext.add_provider_for_display(
     css_provider,
     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
 )
-
 
 app = MyApp(application_id="com.quexten.Goldwarden.settings")
 app.run(sys.argv)
