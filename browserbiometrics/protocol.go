@@ -105,7 +105,26 @@ func handlePayloadMessage(msg PayloadMessage, appID string) {
 	case "biometricUnlock":
 		logging.Debugf("Biometric unlock requested")
 		// logging.Debugf("Biometrics authorized: %t", isAuthorized)
+
+		home, err := os.UserHomeDir()
+		if err != nil {
+			panic(err)
+		}
+
+		if runtimeConfig.GoldwardenSocketPath == "" {
+			if _, err := os.Stat(home + "/.goldwarden.sock"); err == nil {
+				runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+			} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"); err == nil {
+				runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+			}
+
+			if _, err = os.Stat("/.flatpak-info"); err == nil {
+				runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+			}
+		}
+
 		logging.Debugf("Connecting to agent at path %s", runtimeConfig.GoldwardenSocketPath)
+
 		result, err := client.NewUnixSocketClient(runtimeConfig).SendToAgent(messages.GetBiometricsKeyRequest{})
 		if err != nil {
 			logging.Errorf("Unable to send message to agent: %s", err.Error())

@@ -309,6 +309,22 @@ type AgentState struct {
 func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 	ctx := context.Background()
 
+	home, _ := os.UserHomeDir()
+	_, err := os.Stat("/.flatpak-info")
+	isFlatpak := err == nil
+	if runtimeConfig.GoldwardenSocketPath == "" {
+		runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+		if isFlatpak {
+			runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+		}
+	}
+	if runtimeConfig.SSHAgentSocketPath == "" {
+		runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
+		if isFlatpak {
+			runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+		}
+	}
+
 	var keyring crypto.Keyring
 	if runtimeConfig.UseMemguard {
 		keyring = crypto.NewMemguardKeyring(nil)
