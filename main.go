@@ -36,33 +36,12 @@ func main() {
 		ConfigDirectory: configPath,
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
-	if runtimeConfig.SSHAgentSocketPath == "" {
-		if _, err := os.Stat(home + "/.ssh-agent-socket"); err == nil {
-			runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
-		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"); err == nil {
-			runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
-		}
-	}
-	if runtimeConfig.GoldwardenSocketPath == "" {
-		if _, err := os.Stat(home + "/.goldwarden.sock"); err == nil {
-			runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
-		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"); err == nil {
-			runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
-		}
-	}
-
-	_, err = os.Stat("/.flatpak-info")
+	_, err := os.Stat("/.flatpak-info")
 	isFlatpak := err == nil
 	if isFlatpak {
 		userHome, _ := os.UserHomeDir()
 		runtimeConfig.ConfigDirectory = userHome + "/.var/app/com.quexten.Goldwarden/config/goldwarden.json"
 		runtimeConfig.ConfigDirectory = strings.ReplaceAll(runtimeConfig.ConfigDirectory, "~", userHome)
-		runtimeConfig.SSHAgentSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
-		runtimeConfig.GoldwardenSocketPath = userHome + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
 	}
 
 	if len(os.Args) > 1 && (strings.Contains(os.Args[1], "com.8bit.bitwarden.json") || strings.Contains(os.Args[1], "chrome-extension://")) {
