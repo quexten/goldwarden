@@ -47,13 +47,13 @@ func (s *EncString) UnmarshalText(data []byte) error {
 
 	i := bytes.IndexByte(data, '.')
 	if i < 0 {
-		return errors.New("invalid cipher string format")
+		return errors.New("invalid cipher string format, missign type. total length: " + strconv.Itoa(len(data)))
 	}
 
 	typStr := string(data[:i])
 	var err error
 	if t, err := strconv.Atoi(typStr); err != nil {
-		return errors.New("invalid cipher string type")
+		return errors.New("invalid cipher string type, could not parse, length: " + strconv.Itoa(len(data)))
 	} else {
 		s.Type = EncStringType(t)
 	}
@@ -61,13 +61,13 @@ func (s *EncString) UnmarshalText(data []byte) error {
 	switch s.Type {
 	case AesCbc128_HmacSha256_B64, AesCbc256_HmacSha256_B64, AesCbc256_B64:
 	default:
-		return errors.New("invalid cipher string type")
+		return errors.New("invalid cipher string type, unknown type: " + strconv.Itoa(int(s.Type)))
 	}
 
 	data = data[i+1:]
 	parts := bytes.Split(data, []byte("|"))
 	if len(parts) != 3 {
-		return errors.New("invalid cipher string format")
+		return errors.New("invalid cipher string format, missing parts, length: " + strconv.Itoa(len(data)) + "type: " + strconv.Itoa(int(s.Type)))
 	}
 
 	if s.IV, err = b64decode(parts[0]); err != nil {
