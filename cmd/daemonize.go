@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"syscall"
 
 	"github.com/awnumar/memguard"
@@ -42,7 +43,23 @@ var daemonizeCmd = &cobra.Command{
 			memguard.SafeExit(0)
 		}
 
-		err := agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
+		home, _ := os.UserHomeDir()
+		_, err := os.Stat("/.flatpak-info")
+		isFlatpak := err == nil
+		if runtimeConfig.GoldwardenSocketPath == "" {
+			runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+			if isFlatpak {
+				runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+			}
+		}
+		if runtimeConfig.SSHAgentSocketPath == "" {
+			runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
+			if isFlatpak {
+				runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+			}
+		}
+
+		err = agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
 		if err != nil {
 			panic(err)
 		}
