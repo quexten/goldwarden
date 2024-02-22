@@ -1,4 +1,6 @@
-## Goldwarden
+<img src="https://raw.githubusercontent.com/quexten/goldwarden/main/gui/goldwarden.svg" width=200>
+
+# Goldwarden
 
 Goldwarden is a Bitwarden compatible desktop client. It focuses on providing useful desktop features that the official tools 
 do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
