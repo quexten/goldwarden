@@ -26,7 +26,7 @@
      inkscape:document-units="mm"
      inkscape:zoom="3.3585158"
      inkscape:cx="193.53787"
-     inkscape:cy="151.55504"
+     inkscape:cy="151.70392"
      inkscape:window-width="3840"
      inkscape:window-height="2083"
      inkscape:window-x="0"
@@ -105,13 +105,5 @@
          ry="2.0560377"
          transform="rotate(-120.06752)" />
     </g>
-    <rect
-       style="fill:#ffffff;stroke-width:4.07501;stroke-linejoin:bevel;stroke-miterlimit:1;stroke-dasharray:4.07501, 4.07501;stroke-dashoffset:48.9"
-       id="rect5"
-       width="0.3855904"
-       height="0.6074664"
-       x="5.2597852"
-       y="7.142808"
-       ry="0.1927952" />
   </g>
 </svg>
