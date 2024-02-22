@@ -53,7 +53,7 @@ var daemonizeCmd = &cobra.Command{
 			}
 		}
 		if runtimeConfig.SSHAgentSocketPath == "" {
-			runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
+			runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
 			if isFlatpak {
 				runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 			}

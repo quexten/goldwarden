@@ -59,8 +59,8 @@ func (client UnixSocketClient) Connect() (UnixSocketConnection, error) {
 		panic(err)
 	}
 	if runtimeConfig.SSHAgentSocketPath == "" {
-		if _, err := os.Stat(home + "/.ssh-agent-socket"); err == nil {
-			runtimeConfig.SSHAgentSocketPath = home + "/.ssh-agent-socket"
+		if _, err := os.Stat(home + "/.goldwarden-ssh-agent.sock"); err == nil {
+			runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
 		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"); err == nil {
 			runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
 		}
