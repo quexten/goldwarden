@@ -47,15 +47,21 @@ var daemonizeCmd = &cobra.Command{
 		_, err := os.Stat("/.flatpak-info")
 		isFlatpak := err == nil
 		if runtimeConfig.GoldwardenSocketPath == "" {
-			runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
 			if isFlatpak {
+				fmt.Println("Socket path is empty, overwriting with flatpak path.")
 				runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+			} else {
+				fmt.Println("Socket path is empty, overwriting with default path.")
+				runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
 			}
 		}
 		if runtimeConfig.SSHAgentSocketPath == "" {
-			runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
 			if isFlatpak {
+				fmt.Println("SSH Agent socket path is empty, overwriting with flatpak path.")
 				runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+			} else {
+				fmt.Println("SSH Agent socket path is empty, overwriting with default path.")
+				runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
 			}
 		}
 
