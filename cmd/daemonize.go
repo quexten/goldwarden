@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"syscall"
 
 	"github.com/awnumar/memguard"
@@ -42,7 +43,29 @@ var daemonizeCmd = &cobra.Command{
 			memguard.SafeExit(0)
 		}
 
-		err := agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
+		home, _ := os.UserHomeDir()
+		_, err := os.Stat("/.flatpak-info")
+		isFlatpak := err == nil
+		if runtimeConfig.GoldwardenSocketPath == "" {
+			if isFlatpak {
+				fmt.Println("Socket path is empty, overwriting with flatpak path.")
+				runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+			} else {
+				fmt.Println("Socket path is empty, overwriting with default path.")
+				runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+			}
+		}
+		if runtimeConfig.SSHAgentSocketPath == "" {
+			if isFlatpak {
+				fmt.Println("SSH Agent socket path is empty, overwriting with flatpak path.")
+				runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+			} else {
+				fmt.Println("SSH Agent socket path is empty, overwriting with default path.")
+				runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
+			}
+		}
+
+		err = agent.StartUnixAgent(runtimeConfig.GoldwardenSocketPath, runtimeConfig)
 		if err != nil {
 			panic(err)
 		}

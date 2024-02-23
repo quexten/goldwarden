@@ -24,11 +24,11 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="1.6792579"
-     inkscape:cx="142.62253"
-     inkscape:cy="292.09332"
+     inkscape:zoom="3.3585158"
+     inkscape:cx="193.53787"
+     inkscape:cy="151.70392"
      inkscape:window-width="3840"
-     inkscape:window-height="2091"
+     inkscape:window-height="2083"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -39,45 +39,39 @@
        id="linearGradient17"
        inkscape:collect="always">
       <stop
-         style="stop-color:#ffeb28;stop-opacity:1;"
+         style="stop-color:#ffeb52;stop-opacity:1;"
          offset="0"
          id="stop17" />
       <stop
-         style="stop-color:#ffb608;stop-opacity:1;"
-         offset="0.76853603"
-         id="stop18" />
-      <stop
-         style="stop-color:#ffa21f;stop-opacity:1;"
+         style="stop-color:#ff774b;stop-opacity:1;"
          offset="1"
          id="stop19" />
     </linearGradient>
-    <radialGradient
+    <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient17"
-       id="radialGradient18"
-       cx="66.050179"
-       cy="50.758305"
-       fx="66.050179"
-       fy="50.758305"
-       r="45"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.1205298,9.6606045e-4,-7.5884389e-4,0.88018377,-7.9225014,6.0178603)" />
+       id="linearGradient1"
+       x1="-11.825131"
+       y1="23.294865"
+       x2="107.26698"
+       y2="86.020233"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:url(#radialGradient18);fill-opacity:1;stroke-width:0.262037;fill-rule:nonzero"
+       style="fill:url(#linearGradient1);fill-opacity:1;fill-rule:nonzero;stroke-width:0.244568"
        id="rect1"
-       width="90"
-       height="90"
-       x="5.0169253"
-       y="4.8409019"
-       ry="12.342399" />
+       width="84"
+       height="84"
+       x="8"
+       y="8"
+       ry="11.519571" />
     <g
        id="g17"
-       transform="matrix(1.0914831,0,0,1.0914831,-10.347732,-4.5673979)">
+       transform="matrix(1.3540167,0,0,1.3477391,-44.781168,-16.956296)">
       <circle
          style="fill:#ffffff;fill-opacity:1;stroke-width:0.279194"
          id="path1"

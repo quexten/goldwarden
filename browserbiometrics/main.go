@@ -111,16 +111,20 @@ func detectAndInstallBrowsers(startPath string) error {
 		if info.IsDir() && info.Name() == "native-messaging-hosts" {
 			fmt.Printf("Found mozilla-like browser: %s\n", path)
 
+			fmt.Println("Removing old manifest and proxy script")
 			os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
 			os.Remove(path + "/com.8bit.bitwarden.json")
 			os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
 			os.Remove(path + "/goldwarden-proxy.sh")
 
+			fmt.Println("Writing new manifest")
 			manifest := strings.Replace(templateMozilla, "PATH", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err
 			}
+
+			fmt.Println("Writing new proxy script")
 			err = os.WriteFile(path+"/goldwarden-proxy.sh", []byte(proxyScript), 0755)
 			if err != nil {
 				return err
@@ -128,16 +132,20 @@ func detectAndInstallBrowsers(startPath string) error {
 		} else if info.IsDir() && info.Name() == "NativeMessagingHosts" {
 			fmt.Printf("Found chrome-like browser: %s\n", path)
 
+			fmt.Println("Removing old manifest and proxy script")
 			os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
 			os.Remove(path + "/com.8bit.bitwarden.json")
 			os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
 			os.Remove(path + "/goldwarden-proxy.sh")
 
+			fmt.Println("Writing new manifest")
 			manifest := strings.Replace(templateChrome, "PATH", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err
 			}
+
+			fmt.Println("Writing new proxy script")
 			err = os.WriteFile(path+"/goldwarden-proxy.sh", []byte(proxyScript), 0755)
 			if err != nil {
 				return err

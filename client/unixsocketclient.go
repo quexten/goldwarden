@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net"
+	"os"
 
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/ipc/messages"
@@ -52,6 +53,26 @@ func (client UnixSocketClient) SendToAgent(request interface{}) (interface{}, er
 }
 
 func (client UnixSocketClient) Connect() (UnixSocketConnection, error) {
+	runtimeConfig := client.runtimeConfig
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	if runtimeConfig.SSHAgentSocketPath == "" {
+		if _, err := os.Stat(home + "/.goldwarden-ssh-agent.sock"); err == nil {
+			runtimeConfig.SSHAgentSocketPath = home + "/.goldwarden-ssh-agent.sock"
+		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"); err == nil {
+			runtimeConfig.SSHAgentSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+		}
+	}
+	if runtimeConfig.GoldwardenSocketPath == "" {
+		if _, err := os.Stat(home + "/.goldwarden.sock"); err == nil {
+			runtimeConfig.GoldwardenSocketPath = home + "/.goldwarden.sock"
+		} else if _, err := os.Stat(home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"); err == nil {
+			runtimeConfig.GoldwardenSocketPath = home + "/.var/app/com.quexten.Goldwarden/data/goldwarden.sock"
+		}
+	}
+
 	c, err := net.Dial("unix", client.runtimeConfig.GoldwardenSocketPath)
 	if err != nil {
 		return UnixSocketConnection{}, err
