@@ -1,5 +1,5 @@
 pkgname=goldwarden
-pkgver=0.2.12
+pkgver=0.2.13
 pkgrel=1
 pkgdesc='A feature-packed Bitwarden compatible desktop integration'
 arch=('x86_64' 'aarch64')
