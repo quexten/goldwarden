@@ -36,6 +36,7 @@
   <developer_name>Bernd Schoolmann</developer_name>
   <update_contact>mail@quexten.com</update_contact>
   <releases>
+    <release version="0.2.13" date="2024-02-23"/>
     <release version="0.2.12" date="2024-02-17"/>
     <release version="0.2.9" date="2024-01-04"/>
     <release version="0.2.7" date="2023-12-30"/>
