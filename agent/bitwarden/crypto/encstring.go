@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/rand"
-	cryptorand "crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -196,7 +195,7 @@ func EncryptWith(data []byte, encType EncStringType, key SymmetricEncryptionKey)
 		return s, err
 	}
 	s.IV = make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(cryptorand.Reader, s.IV); err != nil {
+	if _, err := io.ReadFull(rand.Reader, s.IV); err != nil {
 		return s, err
 	}
 	s.CT = make([]byte, len(data))
