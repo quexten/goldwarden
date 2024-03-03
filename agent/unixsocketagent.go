@@ -145,9 +145,9 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 				},
 			}
 
-			pinnentrySetError := pinentry.SetExternalPinentry(pe)
+			pinentrySetError := pinentry.SetExternalPinentry(pe)
 			payload := messages.PinentryRegistrationResponse{
-				Success: pinnentrySetError == nil,
+				Success: pinentrySetError == nil,
 			}
 			log.Info("Pinentry registration success: %t", payload.Success)
 
@@ -169,7 +169,7 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 			_, err = c.Write([]byte("\n"))
 			time.Sleep(50 * time.Millisecond) //todo fix properly
 
-			if pinnentrySetError != nil {
+			if pinentrySetError != nil {
 				return
 			}
 
@@ -348,14 +348,14 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						time.Sleep(60 * time.Second)
 						continue
 					}
-					var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+					var protectedUserSymmetricKey crypto.SymmetricEncryptionKey
 					if vault.Keyring.IsMemguard {
-						protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+						protectedUserSymmetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
 					} else {
-						protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+						protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
 					}
 
-					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
+					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymmetricKey, true)
 					if err != nil {
 						log.Error("Could not sync: %s", err.Error())
 						notify.Notify("Goldwarden", "Could not perform initial sync", "", 0, func() {})
@@ -435,14 +435,14 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						if err != nil {
 							log.Error("Could not get user symmetric key: %s", err.Error())
 						}
-						var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+						var protectedUserSymmetricKey crypto.SymmetricEncryptionKey
 						if vault.Keyring.IsMemguard {
-							protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+							protectedUserSymmetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
 						} else {
-							protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+							protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
 						}
 
-						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymetricKey, true)
+						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymmetricKey, true)
 						if err != nil {
 							log.Error("Could not sync: %s", err.Error())
 							notify.Notify("Goldwarden", "Could not perform initial sync on ssh unlock", "", 0, func() {})
