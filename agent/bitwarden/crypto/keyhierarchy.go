@@ -90,9 +90,15 @@ func stretchKey(masterKey MasterKey, useMemguard bool) (SymmetricEncryptionKey, 
 
 	var r io.Reader
 	r = hkdf.Expand(sha256.New, buffer.Data(), []byte("enc"))
-	r.Read(key)
+	_, err = r.Read(key)
+	if err != nil {
+		return nil, err
+	}
 	r = hkdf.Expand(sha256.New, buffer.Data(), []byte("mac"))
-	r.Read(macKey)
+	_, err = r.Read(macKey)
+	if err != nil {
+		return nil, err
+	}
 
 	if useMemguard {
 		return MemguardSymmetricEncryptionKey{memguard.NewEnclave(key), memguard.NewEnclave(macKey)}, nil

@@ -31,20 +31,20 @@ const (
 
 var log = logging.GetLogger("Goldwarden", "Agent")
 
-func writeError(c net.Conn, errMsg error) error {
+func writeError(c net.Conn, errMsg error) {
 	payload := messages.ActionResponse{
 		Success: false,
 		Message: errMsg.Error(),
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		log.Warn("Could not json marshall: %s", err.Error())
+		return
 	}
 	_, err = c.Write(payloadBytes)
 	if err != nil {
-		return err
+		log.Warn("Could not write payload: %s", err.Error())
 	}
-	return nil
 }
 
 func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
@@ -167,6 +167,9 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 				log.Error("Failed writing to socket " + err.Error())
 			}
 			_, err = c.Write([]byte("\n"))
+			if err != nil {
+				log.Error("Failed writing to socket " + err.Error())
+			}
 			time.Sleep(50 * time.Millisecond) //todo fix properly
 
 			if pinentrySetError != nil {
@@ -266,8 +269,6 @@ func serveAgentSession(c net.Conn, vault *vault.Vault, cfg *config.Config) {
 					}
 				}
 			}
-
-			continue
 		}
 
 		var responseBytes []byte
@@ -322,7 +323,10 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		log.Warn("Could not read config: %s", err.Error())
 		cfg = config.DefaultConfig(runtimeConfig.UseMemguard)
 		cfg.ConfigFile.RuntimeConfig = runtimeConfig
-		cfg.WriteConfig()
+		err = cfg.WriteConfig()
+		if err != nil {
+			log.Warn("Could not write config: %s", err.Error())
+		}
 	}
 	cfg.ConfigFile.RuntimeConfig = runtimeConfig
 	if cfg.ConfigFile.RuntimeConfig.DeviceUUID != "" {
@@ -354,6 +358,9 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 					} else {
 						protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
 					}
+					if err != nil {
+						log.Error("could not get encryption key from bytes: %s", err.Error())
+					}
 
 					err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymmetricKey, true)
 					if err != nil {
@@ -369,7 +376,11 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 		}
 	}
 
-	processsecurity.DisableDumpable()
+	err = processsecurity.DisableDumpable()
+	if err != nil {
+		log.Warn("Could not disable dumpable: %s", err.Error())
+	}
+
 	go func() {
 		err = processsecurity.MonitorLocks(func() {
 			cfg.Lock()
@@ -441,6 +452,9 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 						} else {
 							protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
 						}
+						if err != nil {
+							log.Error("could not get encryption key from bytes: %s", err.Error())
+						}
 
 						err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, &protectedUserSymmetricKey, true)
 						if err != nil {
@@ -482,7 +496,11 @@ func StartUnixAgent(path string, runtimeConfig config.RuntimeConfig) error {
 					continue
 				}
 
-				bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, nil, false)
+				err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, &cfg, nil, false)
+				if err != nil {
+					log.Warn("Could not do full sync: %s", err.Error())
+					continue
+				}
 			}
 		}
 	}()

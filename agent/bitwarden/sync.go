@@ -25,7 +25,11 @@ func Sync(ctx context.Context, config *config.Config) (models.SyncData, error) {
 	}
 
 	home, _ := os.UserHomeDir()
-	WriteVault(sync, home+path)
+	err := WriteVault(sync, home+path)
+	if err != nil {
+		return sync, err
+	}
+
 	return sync, nil
 }
 
@@ -55,7 +59,10 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 	}
 	if userSymmetricKey != nil {
 		log.Info("Initializing keyring from user symmetric key...")
-		crypto.InitKeyringFromUserSymmetricKey(vault.Keyring, *userSymmetricKey, sync.Profile.PrivateKey, orgKeys)
+		err = crypto.InitKeyringFromUserSymmetricKey(vault.Keyring, *userSymmetricKey, sync.Profile.PrivateKey, orgKeys)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Info("Clearing vault...")
