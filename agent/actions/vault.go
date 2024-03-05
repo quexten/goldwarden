@@ -146,7 +146,10 @@ func handleLockVault(request messages.IPCMessage, cfg *config.Config, vault *vau
 
 func handleWipeVault(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	cfg.Purge()
-	cfg.WriteConfig()
+	err = cfg.WriteConfig()
+	if err != nil {
+		panic(err)
+	}
 	vault.Clear()
 
 	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{

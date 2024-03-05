@@ -208,7 +208,15 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 			}
 			if authRequestData.RequestApproved {
 				masterKey, err := crypto.DecryptWithAsymmetric([]byte(authRequestData.Key), publicKey)
+				if err != nil {
+					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not decrypt key with asymmetric key: %s", err.Error())
+				}
+
 				masterPasswordHash, err := crypto.DecryptWithAsymmetric([]byte(authRequestData.MasterPasswordHash), publicKey)
+				if err != nil {
+					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not decrypt master password hash with asymmetric key: %s", err.Error())
+				}
+
 				values := urlValues(
 					"grant_type", "password",
 					"username", email,
@@ -233,7 +241,7 @@ func LoginWithDevice(ctx context.Context, email string, cfg *config.Config, vaul
 					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
 
 				} else if err != nil {
-					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %v", err)
+					return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %s", err.Error())
 				}
 				return loginResponseToken, crypto.MasterKeyFromBytes(masterKey), string(masterPasswordHash), nil
 			}
@@ -282,13 +290,17 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 				return false
 			}
 
-			cfg.SetToken(config.LoginToken{
+			err = cfg.SetToken(config.LoginToken{
 				AccessToken:  loginResponseToken.AccessToken,
 				RefreshToken: "",
 				Key:          loginResponseToken.Key,
 				TokenType:    loginResponseToken.TokenType,
 				ExpiresIn:    loginResponseToken.ExpiresIn,
 			})
+			if err != nil {
+				authLog.Error("Could not set token: %s", err.Error())
+				return false
+			}
 		} else {
 			authLog.Info("No api credentials set")
 		}
@@ -306,13 +318,17 @@ func RefreshToken(ctx context.Context, cfg *config.Config) bool {
 			notify.Notify("Goldwarden", fmt.Sprintf("Could not refresh token: %v", err), "", 0, func() {})
 			return false
 		}
-		cfg.SetToken(config.LoginToken{
+		err = cfg.SetToken(config.LoginToken{
 			AccessToken:  loginResponseToken.AccessToken,
 			RefreshToken: loginResponseToken.RefreshToken,
 			Key:          loginResponseToken.Key,
 			TokenType:    loginResponseToken.TokenType,
 			ExpiresIn:    loginResponseToken.ExpiresIn,
 		})
+		if err != nil {
+			authLog.Error("Could not set token: %s", err.Error())
+			return false
+		}
 	}
 
 	authLog.Info("Token refreshed")

@@ -57,7 +57,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		return
 	}
 
-	cfg.SetToken(config.LoginToken{
+	_ = cfg.SetToken(config.LoginToken{
 		AccessToken:  token.AccessToken,
 		ExpiresIn:    token.ExpiresIn,
 		TokenType:    token.TokenType,
@@ -88,7 +88,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	if err != nil {
 		defer func() {
 			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
-			cfg.SetToken(config.LoginToken{})
+			_ = cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()
 
@@ -103,9 +103,9 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		return
 	}
 
-	cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
-	cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
-	cfg.SetMasterKey([]byte(masterKey.GetBytes()))
+	err = cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
+	err = cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
+	err = cfg.SetMasterKey([]byte(masterKey.GetBytes()))
 	var protectedUserSymetricKey crypto.SymmetricEncryptionKey
 	if vault.Keyring.IsMemguard {
 		protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
@@ -115,7 +115,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	if err != nil {
 		defer func() {
 			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
-			cfg.SetToken(config.LoginToken{})
+			_ = cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()
 

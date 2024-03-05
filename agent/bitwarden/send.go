@@ -71,7 +71,10 @@ func CreateSend(ctx context.Context, cfg *config.Config, vault *vault.Vault, nam
 	}
 
 	sendUseKeyPairBytes := make([]byte, 64)
-	hkdf.New(sha256.New, sendSourceKey, []byte("bitwarden-send"), []byte("send")).Read(sendUseKeyPairBytes)
+	_, err = hkdf.New(sha256.New, sendSourceKey, []byte("bitwarden-send"), []byte("send")).Read(sendUseKeyPairBytes)
+	if err != nil {
+		return "", err
+	}
 
 	sendUseKeyPair, err := crypto.MemorySymmetricEncryptionKeyFromBytes(sendUseKeyPairBytes)
 	if err != nil {

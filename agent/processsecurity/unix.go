@@ -37,30 +37,26 @@ func MonitorLocks(onlock func()) error {
 	signals := make(chan *dbus.Signal, 10)
 	bus.Signal(signals)
 	for {
-		select {
-		case message := <-signals:
-			if message.Name == "org.gnome.ScreenSaver.ActiveChanged" {
-				if len(message.Body) == 0 {
-					continue
-				}
-				locked, err := message.Body[0].(bool)
-				if err || locked {
-					onlock()
-				}
+		message := <-signals
+		if message.Name == "org.gnome.ScreenSaver.ActiveChanged" {
+			if len(message.Body) == 0 {
+				continue
 			}
-			if message.Name == "org.freedesktop.ScreenSaver.ActiveChanged" {
-				if len(message.Body) == 0 {
-					continue
-				}
-				locked, err := message.Body[0].(bool)
-				if err || locked {
-					onlock()
-				}
+			locked, err := message.Body[0].(bool)
+			if err || locked {
+				onlock()
+			}
+		}
+		if message.Name == "org.freedesktop.ScreenSaver.ActiveChanged" {
+			if len(message.Body) == 0 {
+				continue
+			}
+			locked, err := message.Body[0].(bool)
+			if err || locked {
+				onlock()
 			}
 		}
 	}
-
-	return nil
 }
 
 func MonitorIdle(onidle func()) error {
@@ -88,6 +84,4 @@ func MonitorIdle(onidle func()) error {
 
 		time.Sleep(1 * time.Second)
 	}
-
-	return nil
 }

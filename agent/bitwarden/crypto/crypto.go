@@ -123,6 +123,9 @@ func MemguardAssymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEn
 
 func (key MemoryAsymmetricEncryptionKey) PublicBytes() []byte {
 	privateKey, err := x509.ParsePKCS8PrivateKey(key.encKey)
+	if err != nil {
+		panic(err)
+	}
 	pub := (privateKey.(*rsa.PrivateKey)).Public()
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
@@ -137,6 +140,9 @@ func (key MemguardAsymmetricEncryptionKey) PublicBytes() []byte {
 		panic(err)
 	}
 	privateKey, err := x509.ParsePKCS8PrivateKey(buffer.Bytes())
+	if err != nil {
+		panic(err)
+	}
 	pub := (privateKey.(*rsa.PrivateKey)).Public()
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
