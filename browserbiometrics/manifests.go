@@ -22,7 +22,7 @@ const templateChrome = `{
 	]
   }`
 
-const proxyScript = `#!/bin/bash
+const proxyScript = `#!/usr/bin/env bash
 
 # Check if the "com.quexten.Goldwarden" Flatpak is installed
 if flatpak list | grep -q "com.quexten.Goldwarden"; then
