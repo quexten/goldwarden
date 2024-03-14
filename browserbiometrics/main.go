@@ -104,7 +104,7 @@ func detectAndInstallBrowsers(startPath string) error {
 		} else {
 			tempPath = strings.TrimPrefix(path, home)
 		}
-		if strings.Count(tempPath, "/") > 3 {
+		if strings.Count(tempPath, "/") > 5 {
 			return nil
 		}
 
