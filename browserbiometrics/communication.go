@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"os"
 	"unsafe"
 
@@ -25,44 +26,50 @@ func setupCommunication() {
 	}
 }
 
-func dataToBytes(msg SendMessage) []byte {
+func dataToBytes(msg SendMessage) ([]byte, error) {
 	byteMsg, err := json.Marshal(msg)
 	if err != nil {
-		logging.Panicf("Unable to marshal OutgoingMessage struct to slice of bytes: " + err.Error())
+		return nil, fmt.Errorf("unable to marshal OutgoingMessage struct to slice of bytes: %w", err)
 	}
-	return byteMsg
+	return byteMsg, nil
 }
 
-func writeMessageLength(msg []byte) {
+func writeMessageLength(msg []byte) error {
 	err := binary.Write(os.Stdout, nativeEndian, uint32(len(msg)))
 	if err != nil {
-		logging.Panicf("Unable to write message length to Stdout: " + err.Error())
+		return fmt.Errorf("unable to write message length to stdout: %w", err)
 	}
+	return nil
 }
 
-func readMessageLength(msg []byte) int {
-	var length uint32
+func readMessageLength(msg []byte) (int, error) {
+	var length int
 	buf := bytes.NewBuffer(msg)
 	err := binary.Read(buf, nativeEndian, &length)
 	if err != nil {
-		logging.Panicf("Unable to read bytes representing message length:" + err.Error())
+		return 0, fmt.Errorf("Unable to read bytes representing message length: %w", err)
 	}
-	return int(length)
+	return length, nil
 }
 
-func send(msg SendMessage) {
-	byteMsg := dataToBytes(msg)
+func send(msg SendMessage) error {
+	byteMsg, err := dataToBytes(msg)
+	if err != nil {
+		return err
+	}
+
 	logging.Debugf("[SENSITIVE] Sending message: " + string(byteMsg))
-	writeMessageLength(byteMsg)
+	err = writeMessageLength(byteMsg)
+	if err != nil {
+		return err
+	}
 
 	var msgBuf bytes.Buffer
-	_, err := msgBuf.Write(byteMsg)
+	_, err = msgBuf.Write(byteMsg)
 	if err != nil {
-		logging.Panicf(err.Error())
+		return err
 	}
 
 	_, err = msgBuf.WriteTo(os.Stdout)
-	if err != nil {
-		logging.Panicf(err.Error())
-	}
+	return err
 }

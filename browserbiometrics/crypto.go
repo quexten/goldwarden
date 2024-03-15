@@ -23,7 +23,7 @@ func pkcs7Pad(b []byte, blocksize int) ([]byte, error) {
 	if blocksize <= 0 {
 		return nil, ErrInvalidBlockSize
 	}
-	if b == nil || len(b) == 0 {
+	if len(b) == 0 {
 		return nil, ErrInvalidPKCS7Data
 	}
 	n := blocksize - (len(b) % blocksize)
@@ -37,7 +37,7 @@ func pkcs7Unpad(b []byte, blocksize int) ([]byte, error) {
 	if blocksize <= 0 {
 		return nil, ErrInvalidBlockSize
 	}
-	if b == nil || len(b) == 0 {
+	if len(b) == 0 {
 		return nil, ErrInvalidPKCS7Data
 	}
 	if len(b)%blocksize != 0 {
@@ -56,10 +56,10 @@ func pkcs7Unpad(b []byte, blocksize int) ([]byte, error) {
 	return b[:len(b)-n], nil
 }
 
-func decryptStringSymmetric(key []byte, ivb64 string, data string) string {
+func decryptStringSymmetric(key []byte, ivb64 string, data string) (string, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	iv, _ := base64.StdEncoding.DecodeString(ivb64)
 	ciphertext, _ := base64.StdEncoding.DecodeString(data)
@@ -67,19 +67,19 @@ func decryptStringSymmetric(key []byte, ivb64 string, data string) string {
 	bm.CryptBlocks(ciphertext, ciphertext)
 	ciphertext, _ = pkcs7Unpad(ciphertext, aes.BlockSize)
 
-	return string(ciphertext)
+	return string(ciphertext), nil
 }
 
-func encryptStringSymmetric(key []byte, data []byte) EncryptedString {
+func encryptStringSymmetric(key []byte, data []byte) (EncryptedString, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err)
+		return EncryptedString{}, err
 	}
 	data, _ = pkcs7Pad(data, block.BlockSize())
 	ciphertext := make([]byte, aes.BlockSize+len(data))
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
+		return EncryptedString{}, err
 	}
 	bm := cipher.NewCBCEncrypter(block, iv)
 	bm.CryptBlocks(ciphertext[aes.BlockSize:], data)
@@ -88,15 +88,15 @@ func encryptStringSymmetric(key []byte, data []byte) EncryptedString {
 		IV:      base64.StdEncoding.EncodeToString(ciphertext[:aes.BlockSize]),
 		Data:    base64.StdEncoding.EncodeToString(ciphertext[aes.BlockSize:]),
 		EncType: 0,
-	}
+	}, nil
 }
 
-func generateTransportKey() []byte {
+func generateTransportKey() ([]byte, error) {
 	key := make([]byte, 32)
 	if _, err := io.ReadFull(rand.Reader, key); err != nil {
-		panic(err)
+		return nil, err
 	}
-	return key
+	return key, nil
 }
 
 func rsaEncrypt(keyB64 string, message []byte) (string, error) {
