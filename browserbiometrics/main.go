@@ -1,6 +1,7 @@
 package browserbiometrics
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,15 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics/logging"
 )
+
+//go:embed mozilla-com.8bit.bitwarden.json
+var templateMozilla string
+
+//go:embed chrome-com.8bit.bitwarden.json
+var templateChrome string
+
+//go:embed goldwarden-proxy.sh
+var proxyScript string
 
 var chromiumPaths = []string{
 	"~/.config/google-chrome/",
