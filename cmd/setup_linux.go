@@ -107,7 +107,10 @@ func setupSystemd() {
 		panic(err)
 	}
 
-	file.WriteString(strings.ReplaceAll(SYSTEMD_SERVICE, "BINARY_PATH", path))
+	_, err = file.WriteString(strings.ReplaceAll(SYSTEMD_SERVICE, "BINARY_PATH", path))
+	if err != nil {
+		panic(err)
+	}
 	file.Close()
 
 	userDirectory := os.Getenv("HOME")

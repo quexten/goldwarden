@@ -64,6 +64,9 @@ var pinentry = &cobra.Command{
 			case messages.PinentryApprovalRequest:
 				err = conn.WriteMessage(messages.PinentryApprovalResponse{Approved: text == "true"})
 			}
+			if err != nil {
+				panic(err)
+			}
 		}
 	},
 }

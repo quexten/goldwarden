@@ -25,6 +25,9 @@ func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vaul
 	}
 
 	token, err := cfg.GetToken()
+	if err != nil {
+		actionsLog.Warn(err.Error())
+	}
 	ctx := context.WithValue(context.TODO(), bitwarden.AuthToken{}, token.AccessToken)
 	ciph, err := bitwarden.PostCipher(ctx, cipher, cfg)
 	if err == nil {

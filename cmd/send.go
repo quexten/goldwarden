@@ -21,7 +21,12 @@ var sendCreateCmd = &cobra.Command{
 	Short: "Uploads a Bitwarden send.",
 	Long:  `Uploads a Bitwarden send.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
 		name, _ := cmd.Flags().GetString("name")
 		text, _ := cmd.Flags().GetString("text")
 

@@ -24,7 +24,11 @@ var sshAddCmd = &cobra.Command{
 	Long: `Runs a command with environment variables from your vault.
 	The variables are stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		name, _ := cmd.Flags().GetString("name")
 		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
@@ -43,7 +47,10 @@ var sshAddCmd = &cobra.Command{
 			fmt.Println(response.Digest)
 
 			if copyToClipboard {
-				clipboard.WriteAll(string(response.Digest))
+				err := clipboard.WriteAll(string(response.Digest))
+				if err != nil {
+					panic(err)
+				}
 			}
 			break
 		case messages.ActionResponse:
@@ -58,7 +65,11 @@ var listSSHCmd = &cobra.Command{
 	Short: "Lists all SSH keys in your vault",
 	Long:  `Lists all SSH keys in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		result, err := commandClient.SendToAgent(messages.GetSSHKeysRequest{})
 		if err != nil {
