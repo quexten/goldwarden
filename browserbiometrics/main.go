@@ -130,7 +130,7 @@ func detectAndInstallBrowsers(startPath string) error {
 			}
 
 			fmt.Println("Writing new manifest")
-			manifest := strings.Replace(templateMozilla, "PATH", path+"/goldwarden-proxy.sh", 1)
+			manifest := strings.Replace(templateMozilla, "@PATH@", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err
@@ -163,7 +163,7 @@ func detectAndInstallBrowsers(startPath string) error {
 			}
 
 			fmt.Println("Writing new manifest")
-			manifest := strings.Replace(templateChrome, "PATH", path+"/goldwarden-proxy.sh", 1)
+			manifest := strings.Replace(templateChrome, "@PATH@", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err
