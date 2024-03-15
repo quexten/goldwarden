@@ -23,7 +23,7 @@ var sessionCmd = &cobra.Command{
 			text = strings.TrimSuffix(text, "\n")
 			args := strings.Split(text, " ")
 			rootCmd.SetArgs(args)
-			rootCmd.Execute()
+			_ = rootCmd.Execute()
 		}
 	},
 }

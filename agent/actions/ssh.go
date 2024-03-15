@@ -17,7 +17,7 @@ func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vaul
 	req := messages.ParsePayload(msg).(messages.CreateSSHKeyRequest)
 
 	cipher, publicKey := ssh.NewSSHKeyCipher(req.Name, vault.Keyring)
-	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+	_, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {

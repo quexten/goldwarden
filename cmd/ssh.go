@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/atotto/clipboard"
 	"github.com/quexten/goldwarden/ipc/messages"
@@ -13,7 +14,7 @@ var sshCmd = &cobra.Command{
 	Short: "Commands for managing SSH keys",
 	Long:  `Commands for managing SSH keys.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -52,7 +53,7 @@ var sshAddCmd = &cobra.Command{
 					panic(err)
 				}
 			}
-			break
+			return
 		case messages.ActionResponse:
 			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
@@ -83,7 +84,7 @@ var listSSHCmd = &cobra.Command{
 			for _, key := range response.Keys {
 				fmt.Println(key)
 			}
-			break
+			return
 		case messages.ActionResponse:
 			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
@@ -95,7 +96,7 @@ func init() {
 	rootCmd.AddCommand(sshCmd)
 	sshCmd.AddCommand(sshAddCmd)
 	sshAddCmd.PersistentFlags().String("name", "", "")
-	sshAddCmd.MarkFlagRequired("name")
+	_ = sshAddCmd.MarkFlagRequired("name")
 	sshAddCmd.PersistentFlags().Bool("clipboard", false, "Copy the public key to the clipboard")
 	sshCmd.AddCommand(listSSHCmd)
 }

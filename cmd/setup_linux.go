@@ -181,7 +181,7 @@ var setupCmd = &cobra.Command{
 	Short: "Sets up Goldwarden integrations",
 	Long:  "Sets up Goldwarden integrations",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 

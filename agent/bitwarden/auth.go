@@ -162,10 +162,10 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 			return LoginResponseToken{}, crypto.MasterKey{}, "", err
 		}
 	} else if err != nil && strings.Contains(err.Error(), "Captcha required.") {
-		notify.Notify("Goldwarden", fmt.Sprintf("Captcha required"), "", 0, func() {})
+		notify.Notify("Goldwarden", "Captcha required", "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("captcha required, please login via the web interface")
 	} else if err != nil {
-		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via password: %v", err), "", 0, func() {})
+		notify.Notify("Goldwarden", fmt.Sprintf("Could not login via password: %s", err.Error()), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via password: %v", err)
 	}
 
