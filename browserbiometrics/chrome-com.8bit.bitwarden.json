@@ -1,0 +1,11 @@
+{
+	"name": "com.8bit.bitwarden",
+	"description": "Bitwarden desktop <-> browser bridge",
+	"path": "@PATH@",
+	"type": "stdio",
+	"allowed_origins": [
+    "chrome-extension://nngceckbapebfimnlniiiahkandclblb/",
+    "chrome-extension://jbkfoedolllekgbhcbcoahefnbanhhlh/",
+    "chrome-extension://ccnckbpmaceehanjmeomladnmlffdjgn/"
+	]
+}
