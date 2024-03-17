@@ -1,0 +1,9 @@
+[Unit]
+Description="Goldwarden daemon"
+After=graphical-session.target
+
+[Service]
+ExecStart=@BINARY_PATH@ daemonize
+
+[Install]
+WantedBy=graphical-session.target
