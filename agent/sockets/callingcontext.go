@@ -5,7 +5,7 @@ import (
 	"os/user"
 
 	gops "github.com/mitchellh/go-ps"
-	"inet.af/peercred"
+	"github.com/tailscale/peercred"
 )
 
 type CallingContext struct {

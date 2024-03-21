@@ -18,6 +18,7 @@ require (
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/spf13/cobra v1.8.0
+	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.1.0
 	github.com/twpayne/go-pinentry v0.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
@@ -53,5 +54,4 @@ require (
 	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	inet.af/peercred v0.0.0-20210906144145-0893ea02156a
 )
