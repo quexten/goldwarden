@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/atotto/clipboard"
 	"github.com/quexten/goldwarden/ipc/messages"
@@ -13,7 +14,7 @@ var sshCmd = &cobra.Command{
 	Short: "Commands for managing SSH keys",
 	Long:  `Commands for managing SSH keys.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -24,7 +25,11 @@ var sshAddCmd = &cobra.Command{
 	Long: `Runs a command with environment variables from your vault.
 	The variables are stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		name, _ := cmd.Flags().GetString("name")
 		copyToClipboard, _ := cmd.Flags().GetBool("clipboard")
@@ -43,9 +48,12 @@ var sshAddCmd = &cobra.Command{
 			fmt.Println(response.Digest)
 
 			if copyToClipboard {
-				clipboard.WriteAll(string(response.Digest))
+				err := clipboard.WriteAll(string(response.Digest))
+				if err != nil {
+					panic(err)
+				}
 			}
-			break
+			return
 		case messages.ActionResponse:
 			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
@@ -58,7 +66,11 @@ var listSSHCmd = &cobra.Command{
 	Short: "Lists all SSH keys in your vault",
 	Long:  `Lists all SSH keys in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		result, err := commandClient.SendToAgent(messages.GetSSHKeysRequest{})
 		if err != nil {
@@ -72,7 +84,7 @@ var listSSHCmd = &cobra.Command{
 			for _, key := range response.Keys {
 				fmt.Println(key)
 			}
-			break
+			return
 		case messages.ActionResponse:
 			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
 			return
@@ -84,7 +96,7 @@ func init() {
 	rootCmd.AddCommand(sshCmd)
 	sshCmd.AddCommand(sshAddCmd)
 	sshAddCmd.PersistentFlags().String("name", "", "")
-	sshAddCmd.MarkFlagRequired("name")
+	_ = sshAddCmd.MarkFlagRequired("name")
 	sshAddCmd.PersistentFlags().Bool("clipboard", false, "Copy the public key to the clipboard")
 	sshCmd.AddCommand(listSSHCmd)
 }

@@ -101,7 +101,10 @@ func setupSystemd() {
 		panic(err)
 	}
 
-	file.WriteString(strings.ReplaceAll(systemdService, "@BINARY_PATH@", path))
+	_, err = file.WriteString(strings.ReplaceAll(systemdService, "@BINARY_PATH@", path))
+	if err != nil {
+		panic(err)
+	}
 	file.Close()
 
 	userDirectory := os.Getenv("HOME")
@@ -172,7 +175,7 @@ var setupCmd = &cobra.Command{
 	Short: "Sets up Goldwarden integrations",
 	Long:  "Sets up Goldwarden integrations",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 

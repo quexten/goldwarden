@@ -76,6 +76,10 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	}
 
 	token, err := cfg.GetToken()
+	if err != nil {
+		return err
+	}
+
 	var websocketURL = "wss://" + url.Host + url.Path + "/hub?access_token=" + token.AccessToken
 	c, _, err := websocket.DefaultDialer.Dial(websocketURL, nil)
 	if err != nil {

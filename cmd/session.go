@@ -23,7 +23,7 @@ var sessionCmd = &cobra.Command{
 			text = strings.TrimSuffix(text, "\n")
 			args := strings.Split(text, " ")
 			rootCmd.SetArgs(args)
-			rootCmd.Execute()
+			_ = rootCmd.Execute()
 		}
 	},
 }
@@ -63,6 +63,9 @@ var pinentry = &cobra.Command{
 				err = conn.WriteMessage(messages.PinentryPinResponse{Pin: text})
 			case messages.PinentryApprovalRequest:
 				err = conn.WriteMessage(messages.PinentryApprovalResponse{Approved: text == "true"})
+			}
+			if err != nil {
+				panic(err)
 			}
 		}
 	},

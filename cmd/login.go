@@ -13,7 +13,7 @@ import (
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Starts the login process for Bitwarden",
-	Long: `Starts the login process for Bitwarden. 
+	Long: `Starts the login process for Bitwarden.
 	You will be prompted to enter your password, and confirm your second factor if you have one.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		request := messages.DoLoginRequest{}
@@ -49,6 +49,6 @@ var loginCmd = &cobra.Command{
 func init() {
 	vaultCmd.AddCommand(loginCmd)
 	loginCmd.PersistentFlags().String("email", "", "")
-	loginCmd.MarkFlagRequired("email")
+	_ = loginCmd.MarkFlagRequired("email")
 	loginCmd.PersistentFlags().Bool("passwordless", false, "")
 }

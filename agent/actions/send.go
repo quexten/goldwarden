@@ -20,6 +20,9 @@ func handleCreateSend(msg messages.IPCMessage, cfg *config.Config, vault *vault.
 
 	ctx := context.WithValue(context.TODO(), bitwarden.AuthToken{}, token.AccessToken)
 	url, err := bitwarden.CreateSend(ctx, cfg, vault, parsedMsg.Name, parsedMsg.Text)
+	if err != nil {
+		actionsLog.Warn(err.Error())
+	}
 
 	response, err = messages.IPCMessageFromPayload(messages.CreateSendResponse{
 		URL: url,

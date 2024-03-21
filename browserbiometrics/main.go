@@ -36,13 +36,17 @@ const appID = "com.quexten.bw-bio-handler"
 
 var transportKey []byte
 
-func Main(rtCfg *config.RuntimeConfig) {
+func Main(rtCfg *config.RuntimeConfig) error {
 	logging.Debugf("Starting browserbiometrics")
-	transportKey = generateTransportKey()
+	var err error
+	transportKey, err = generateTransportKey()
+	if err != nil {
+		return err
+	}
 	logging.Debugf("Generated transport key")
 
 	setupCommunication()
-	readLoop(rtCfg)
+	return readLoop(rtCfg)
 }
 
 func DetectAndInstallBrowsers() error {
