@@ -155,7 +155,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 if ctrl_pressed and alt_pressed:
                     Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
             elif keyval == 116:
-                totp_code = totp.totp(self.resuts_list.get_selected_row().totp)
+                totp_code = totp.totp(self.results_list.get_selected_row().totp)
                 if ctrl_pressed and not alt_pressed:
                     set_clipboard(totp_code)
                 if ctrl_pressed and alt_pressed:
