@@ -110,6 +110,10 @@ func (vaultAgent vaultAgent) SignWithFlags(key ssh.PublicKey, data []byte, flags
 		}
 	}
 
+	if sshKey == nil {
+		return nil, errors.New("key not found")
+	}
+
 	isGit := false
 	magicHeader := []byte("SSHSIG\x00\x00\x00\x03git")
 	if bytes.HasPrefix(data, magicHeader) {
