@@ -279,10 +279,10 @@ def show_login():
             def handle_res():
                 if res == "ok":
                     dialog.close()
-                elif res == "badpass":
-                    bad_pass_diag = Gtk.MessageDialog(transient_for=dialog, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Bad password")
-                    bad_pass_diag.connect("response", lambda dialog, response: bad_pass_diag.close())
-                    bad_pass_diag.present()
+                # elif res == "badpass":
+                #     bad_pass_diag = Gtk.MessageDialog(transient_for=dialog, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Bad password")
+                #     bad_pass_diag.connect("response", lambda dialog, response: bad_pass_diag.close())
+                #     bad_pass_diag.present()
             GLib.idle_add(handle_res)
 
         login_thread = Thread(target=login)
