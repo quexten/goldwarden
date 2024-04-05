@@ -16,18 +16,10 @@ import (
 
 var log = logging.GetLogger("Goldwarden", "Bitwarden API")
 
-const path = "/.cache/goldwarden-vault.json"
-
 func Sync(ctx context.Context, config *config.Config) (models.SyncData, error) {
 	var sync models.SyncData
 	if err := authenticatedHTTPGet(ctx, config.ConfigFile.ApiUrl+"/sync", &sync); err != nil {
 		return models.SyncData{}, fmt.Errorf("could not sync: %v", err)
-	}
-
-	home, _ := os.UserHomeDir()
-	err := WriteVault(sync, home+path)
-	if err != nil {
-		return sync, err
 	}
 
 	return sync, nil
@@ -38,15 +30,7 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 	sync, err := Sync(ctx, config)
 	if err != nil {
 		log.Error("Could not sync: %v", err)
-		if allowCache {
-			home, _ := os.UserHomeDir()
-			sync, err = ReadVault(home + path)
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
+		return err
 	} else {
 		log.Info("Sync successful, initializing keyring and vault...")
 	}
