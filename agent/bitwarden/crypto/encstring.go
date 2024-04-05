@@ -46,7 +46,7 @@ func (s *EncString) UnmarshalText(data []byte) error {
 
 	i := bytes.IndexByte(data, '.')
 	if i < 0 {
-		return errors.New("invalid cipher string format, missign type. total length: " + strconv.Itoa(len(data)))
+		return errors.New("invalid cipher string format, missing type. total length: " + strconv.Itoa(len(data)))
 	}
 
 	typStr := string(data[:i])

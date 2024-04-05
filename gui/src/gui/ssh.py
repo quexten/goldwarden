@@ -47,7 +47,7 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.ssh_socket_path_group = Adw.PreferencesGroup()
         self.ssh_socket_path_group.set_title("SSH Socket Path")
-        self.ssh_socket_path_group.set_description("Add this to your your enviorment variables")
+        self.ssh_socket_path_group.set_description("Add this to your environment variables")
         self.preferences_page.add(self.ssh_socket_path_group)
 
         self.ssh_socket_path_row = Adw.ActionRow()
