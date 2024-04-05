@@ -1,17 +1,16 @@
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-import gc
-from gi.repository import Gtk, Adw, GLib, Gio
+from gi.repository import GLib, Gio
 from random import randint
-import time
-import os
+import sys
 from threading import Timer
+
 
 def receive_autostart(self, *args):
     print("autostart enabled..!?")
     print(args)
-    os._exit(0)
+    sys.exit(0)
 
 def request_autostart():
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)

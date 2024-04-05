@@ -4,6 +4,7 @@ import subprocess
 from tendo import singleton
 from .monitors import dbus_autofill_monitor
 from .monitors import dbus_monitor
+from .monitors import locked_monitor
 import sys
 from src.services import goldwarden
 from src.services import pinentry
@@ -12,6 +13,7 @@ import os
 import secrets
 import time
 import os
+import src.linux.flatpak.api as flatpak_api
 
 root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
 is_flatpak = os.path.exists("/.flatpak-info")
@@ -37,6 +39,7 @@ def main():
     # start daemons
     dbus_autofill_monitor.run_daemon(token) # todo: remove after migration
     dbus_monitor.run_daemon(token)
+    locked_monitor.run_daemon(token)
     pinentry.daemonize()
 
     if not "--hidden" in sys.argv:
@@ -44,13 +47,7 @@ def main():
         p.stdin.write(f"{token}\n".encode())
         p.stdin.flush()
 
-    if is_flatpak:
-        # to autostart the appes
-        try:
-            print("Enabling autostart...")
-            subprocess.Popen(["python3", "-m", "src.linux.background"], cwd=root_path, start_new_session=True)
-        except Exception as e:
-            pass
+    flatpak_api.register_autostart(True)
 
     while True:
         time.sleep(60)
