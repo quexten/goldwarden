@@ -2,8 +2,6 @@ package crypto
 
 import (
 	"bytes"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/rsa"
@@ -12,11 +10,13 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"io"
 	"strconv"
 
 	"github.com/awnumar/memguard"
+	"github.com/quexten/goldwarden/logging"
 )
+
+var cryptoLog = logging.GetLogger("Goldwarden", "Crypto")
 
 type EncString struct {
 	Type        EncStringType
@@ -131,11 +131,6 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 		return nil, err
 	}
 
-	block, err := aes.NewCipher(encKeyData)
-	if err != nil {
-		return nil, err
-	}
-
 	switch s.Type {
 	case AesCbc256_B64, AesCbc256_HmacSha256_B64:
 		break
@@ -161,13 +156,11 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 		return nil, fmt.Errorf("decrypt: invalid IV length, expected %d, got %d", block.BlockSize(), len(s.IV))
 	}
 
-	mode := cipher.NewCBCDecrypter(block, s.IV)
-	dst := make([]byte, len(s.CT))
-	mode.CryptBlocks(dst, s.CT)
-	dst, err = unpadPKCS7(dst, aes.BlockSize)
+	dst, err := decryptAESCBC256(s.IV, s.CT, encKeyData)
 	if err != nil {
 		return nil, err
 	}
+
 	return dst, nil
 }
 
@@ -188,19 +181,13 @@ func EncryptWith(data []byte, encType EncStringType, key SymmetricEncryptionKey)
 		return s, fmt.Errorf("encrypt: unsupported cipher type %q", s.Type)
 	}
 	s.Type = encType
-	data = padPKCS7(data, aes.BlockSize)
 
-	block, err := aes.NewCipher(encKeyData)
+	iv, ciphertext, err := encryptAESCBC256(data, encKeyData)
 	if err != nil {
 		return s, err
 	}
-	s.IV = make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(rand.Reader, s.IV); err != nil {
-		return s, err
-	}
-	s.CT = make([]byte, len(data))
-	mode := cipher.NewCBCEncrypter(block, s.IV)
-	mode.CryptBlocks(s.CT, data)
+	s.CT = ciphertext
+	s.IV = iv
 
 	if encType == AesCbc256_HmacSha256_B64 {
 		if len(macKeyData) == 0 {
