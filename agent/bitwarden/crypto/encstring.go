@@ -152,10 +152,6 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 		return nil, fmt.Errorf("decrypt: cipher of unsupported type %q", s.Type)
 	}
 
-	if len(s.IV) != block.BlockSize() {
-		return nil, fmt.Errorf("decrypt: invalid IV length, expected %d, got %d", block.BlockSize(), len(s.IV))
-	}
-
 	dst, err := decryptAESCBC256(s.IV, s.CT, encKeyData)
 	if err != nil {
 		return nil, err
