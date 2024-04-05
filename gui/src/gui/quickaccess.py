@@ -109,7 +109,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.results_list.hide()
 
         keycont = Gtk.EventControllerKey()
-        def handle_keypress(cotroller, keyval, keycode, state, user_data):
+        def handle_keypress(controller, keyval, keycode, state, user_data):
             ctrl_pressed = state & Gdk.ModifierType.CONTROL_MASK > 0
             alt_pressed = state & Gdk.ModifierType.ALT_MASK > 0
 

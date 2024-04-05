@@ -16,7 +16,7 @@ const bufferSize = 8192 * 8
 var nativeEndian binary.ByteOrder
 
 func setupCommunication() {
-	// determine native endianess
+	// determine native endianness
 	var one int16 = 1
 	b := (*byte)(unsafe.Pointer(&one))
 	if *b == 0 {
