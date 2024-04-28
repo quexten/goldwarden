@@ -7,7 +7,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1
 	github.com/amenzhinsky/go-polkit v0.0.0-20210519083301-ee6a51849123
 	github.com/atotto/clipboard v0.1.4
-	github.com/awnumar/memguard v0.22.4
+	github.com/awnumar/memguard v0.22.5
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/google/uuid v1.5.0
