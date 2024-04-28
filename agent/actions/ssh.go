@@ -29,9 +29,9 @@ func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vaul
 		actionsLog.Warn(err.Error())
 	}
 	ctx := context.WithValue(context.TODO(), bitwarden.AuthToken{}, token.AccessToken)
-	ciph, err := bitwarden.PostCipher(ctx, cipher, cfg)
+	postedCipher, err := bitwarden.PostCipher(ctx, cipher, cfg)
 	if err == nil {
-		vault.AddOrUpdateSecureNote(ciph)
+		vault.AddOrUpdateSecureNote(postedCipher)
 	} else {
 		actionsLog.Warn("Error posting ssh key cipher: " + err.Error())
 	}

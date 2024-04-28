@@ -16,11 +16,11 @@ func SetPin(useMemguard bool, pin []byte) {
 func GetPin() ([]byte, error) {
 	approved := biometrics.CheckBiometrics(biometrics.SSHKey)
 	if approved {
-		bufer, err := cachedPin.Open()
+		buffer, err := cachedPin.Open()
 		if err != nil {
 			return nil, err
 		}
-		return bufer.Bytes(), nil
+		return buffer.Bytes(), nil
 	} else {
 		return nil, errors.New("biometrics not approved")
 	}

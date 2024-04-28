@@ -113,11 +113,11 @@ func (key MemguardSymmetricEncryptionKey) MacKeyBytes() ([]byte, error) {
 	return keyBytes, nil
 }
 
-func MemoryAssymmetricEncryptionKeyFromBytes(key []byte) (MemoryAsymmetricEncryptionKey, error) {
+func MemoryAsymmetricEncryptionKeyFromBytes(key []byte) (MemoryAsymmetricEncryptionKey, error) {
 	return MemoryAsymmetricEncryptionKey{key}, nil
 }
 
-func MemguardAssymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEncryptionKey, error) {
+func MemguardAsymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEncryptionKey, error) {
 	k := memguard.NewEnclave(key)
 	return MemguardAsymmetricEncryptionKey{k}, nil
 }

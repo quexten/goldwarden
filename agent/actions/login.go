@@ -106,11 +106,11 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	err = cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
 	err = cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
 	err = cfg.SetMasterKey([]byte(masterKey.GetBytes()))
-	var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+	var protectedUserSymmetricKey crypto.SymmetricEncryptionKey
 	if vault.Keyring.IsMemguard {
-		protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
+		protectedUserSymmetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	} else {
-		protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
+		protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	}
 	if err != nil {
 		defer func() {
@@ -129,7 +129,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		}
 		return
 	}
-	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey, false)
+	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymmetricKey, false)
 
 	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
