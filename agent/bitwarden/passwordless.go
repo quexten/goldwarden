@@ -72,7 +72,7 @@ func CreateAuthResponse(ctx context.Context, authRequest AuthRequestData, keyrin
 	if err != nil {
 		return AuthRequestResponseData{}, err
 	}
-	requesterKey, err := crypto.MemoryAssymmetricEncryptionKeyFromBytes(publicKey)
+	requesterKey, err := crypto.MemoryAsymmetricEncryptionKeyFromBytes(publicKey)
 	if err != nil {
 		return AuthRequestResponseData{}, err
 	}
