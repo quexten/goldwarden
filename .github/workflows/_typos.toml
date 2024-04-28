@@ -1,2 +1,8 @@
+[default]
+extend-ignore-identifiers-re = [
+    # upstream go library issue
+    "*Encrypter",
+]
+
 [files]
 extend-exclude = ["go.mod"]
