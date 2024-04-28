@@ -22,9 +22,9 @@ require (
 	github.com/tink-crypto/tink-go/v2 v2.1.0
 	github.com/twpayne/go-pinentry v0.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	golang.org/x/crypto v0.17.0
+	golang.org/x/crypto v0.21.0
 	golang.org/x/exp v0.0.0-20231219180239-dc181d75b848
-	golang.org/x/sys v0.16.0
+	golang.org/x/sys v0.18.0
 )
 
 require (
@@ -39,7 +39,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/tools v0.16.1 // indirect
 )
 
