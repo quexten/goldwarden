@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"runtime/debug"
 	"strings"
@@ -19,6 +20,7 @@ import (
 	"github.com/quexten/goldwarden/agent/pincache"
 	"github.com/quexten/goldwarden/agent/systemauth/pinentry"
 	"github.com/quexten/goldwarden/agent/vault"
+	"github.com/quexten/goldwarden/logging"
 	"github.com/tink-crypto/tink-go/v2/aead/subtle"
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/sha3"
@@ -77,6 +79,8 @@ type Config struct {
 	ConfigFile  ConfigFile
 	mu          sync.Mutex
 }
+
+var log = logging.GetLogger("Goldwarden", "Config")
 
 func DefaultConfig(useMemguard bool) Config {
 	deviceUUID, _ := uuid.NewUUID()
@@ -188,37 +192,65 @@ func (c *Config) UpdatePin(password string, write bool) {
 	c.ConfigFile.ConfigKeyHash = configKeyHash
 
 	plaintextToken, err1 := c.decryptString(c.ConfigFile.EncryptedToken)
-	plaintextUserSymmetricKey, err3 := c.decryptString(c.ConfigFile.EncryptedUserSymmetricKey)
-	plaintextEncryptedMasterPasswordHash, err4 := c.decryptString(c.ConfigFile.EncryptedMasterPasswordHash)
-	plaintextMasterKey, err5 := c.decryptString(c.ConfigFile.EncryptedMasterKey)
-	plaintextClientID, err6 := c.decryptString(c.ConfigFile.EncryptedClientID)
-	plaintextClientSecret, err7 := c.decryptString(c.ConfigFile.EncryptedClientSecret)
+	plaintextUserSymmetricKey, err2 := c.decryptString(c.ConfigFile.EncryptedUserSymmetricKey)
+	plaintextEncryptedMasterPasswordHash, err3 := c.decryptString(c.ConfigFile.EncryptedMasterPasswordHash)
+	plaintextMasterKey, err4 := c.decryptString(c.ConfigFile.EncryptedMasterKey)
+	plaintextClientID, err5 := c.decryptString(c.ConfigFile.EncryptedClientID)
+	plaintextClientSecret, err6 := c.decryptString(c.ConfigFile.EncryptedClientSecret)
 
 	key := NewBufferFromBytes(newKey, c.useMemguard)
 	c.key = &key
 
 	if err1 == nil {
 		c.ConfigFile.EncryptedToken, err1 = c.encryptString(plaintextToken)
+		if err1 != nil {
+			log.Error("could not encrypt token: %s", err1.Error())
+			return
+		}
+	}
+	if err2 == nil {
+		c.ConfigFile.EncryptedUserSymmetricKey, err2 = c.encryptString(plaintextUserSymmetricKey)
+		if err2 != nil {
+			log.Error("could not encrypt user symmetric key: %s", err2.Error())
+			return
+		}
 	}
 	if err3 == nil {
-		c.ConfigFile.EncryptedUserSymmetricKey, err3 = c.encryptString(plaintextUserSymmetricKey)
+		c.ConfigFile.EncryptedMasterPasswordHash, err3 = c.encryptString(plaintextEncryptedMasterPasswordHash)
+		if err3 != nil {
+			log.Error("could not encrypt master password hash: %s", err3.Error())
+			return
+		}
 	}
 	if err4 == nil {
-		c.ConfigFile.EncryptedMasterPasswordHash, err4 = c.encryptString(plaintextEncryptedMasterPasswordHash)
+		c.ConfigFile.EncryptedMasterKey, err4 = c.encryptString(plaintextMasterKey)
+		if err4 != nil {
+			log.Error("could not encrypt master key: %s", err4.Error())
+			return
+		}
 	}
 	if err5 == nil {
-		c.ConfigFile.EncryptedMasterKey, err5 = c.encryptString(plaintextMasterKey)
+		c.ConfigFile.EncryptedClientID, err5 = c.encryptString(plaintextClientID)
+		if err5 != nil {
+			log.Error("could not encrypt client id: %s", err5.Error())
+			return
+		}
 	}
 	if err6 == nil {
-		c.ConfigFile.EncryptedClientID, err6 = c.encryptString(plaintextClientID)
-	}
-	if err7 == nil {
-		c.ConfigFile.EncryptedClientSecret, err7 = c.encryptString(plaintextClientSecret)
+		c.ConfigFile.EncryptedClientSecret, err6 = c.encryptString(plaintextClientSecret)
+		if err6 != nil {
+			log.Error("could not encrypt client secret: %s", err6.Error())
+			return
+		}
 	}
 	c.mu.Unlock()
 
 	if write {
-		c.WriteConfig()
+		err := c.WriteConfig()
+		if err != nil {
+			log.Error("could not write config: %s", err.Error())
+			return
+		}
 	}
 
 	pincache.SetPin(c.useMemguard, []byte(password))
@@ -247,6 +279,9 @@ func (c *Config) SetToken(token LoginToken) error {
 	}
 
 	tokenJson, err := json.Marshal(token)
+	if err != nil {
+		return fmt.Errorf("could not marshall json: %s", err.Error())
+	}
 	encryptedToken, err := c.encryptString(string(tokenJson))
 	if err != nil {
 		return err
@@ -254,8 +289,7 @@ func (c *Config) SetToken(token LoginToken) error {
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedToken = encryptedToken
 	// c.mu.Unlock()
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) GetClientID() (string, error) {
@@ -281,8 +315,7 @@ func (c *Config) SetClientID(clientID string) error {
 
 	if clientID == "" {
 		c.ConfigFile.EncryptedClientID = ""
-		c.WriteConfig()
-		return nil
+		return c.WriteConfig()
 	}
 
 	encryptedClientID, err := c.encryptString(clientID)
@@ -292,8 +325,7 @@ func (c *Config) SetClientID(clientID string) error {
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedClientID = encryptedClientID
 	// c.mu.Unlock()
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) GetClientSecret() (string, error) {
@@ -319,8 +351,7 @@ func (c *Config) SetClientSecret(clientSecret string) error {
 
 	if clientSecret == "" {
 		c.ConfigFile.EncryptedClientSecret = ""
-		c.WriteConfig()
-		return nil
+		return c.WriteConfig()
 	}
 
 	encryptedClientSecret, err := c.encryptString(clientSecret)
@@ -330,8 +361,7 @@ func (c *Config) SetClientSecret(clientSecret string) error {
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedClientSecret = encryptedClientSecret
 	// c.mu.Unlock()
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) GetUserSymmetricKey() ([]byte, error) {
@@ -356,8 +386,7 @@ func (c *Config) SetUserSymmetricKey(key []byte) error {
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedUserSymmetricKey = encryptedKey
 	// c.mu.Unlock()
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) GetMasterPasswordHash() ([]byte, error) {
@@ -372,7 +401,6 @@ func (c *Config) GetMasterPasswordHash() ([]byte, error) {
 }
 
 func (c *Config) SetMasterPasswordHash(hash []byte) error {
-
 	if c.IsLocked() {
 		return errors.New("config is locked")
 	}
@@ -386,8 +414,7 @@ func (c *Config) SetMasterPasswordHash(hash []byte) error {
 	c.ConfigFile.EncryptedMasterPasswordHash = encryptedHash
 	// c.mu.Unlock()
 
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) GetMasterKey() ([]byte, error) {
@@ -412,8 +439,7 @@ func (c *Config) SetMasterKey(key []byte) error {
 	// c.mu.Lock()
 	c.ConfigFile.EncryptedMasterKey = encryptedKey
 	// c.mu.Unlock()
-	c.WriteConfig()
-	return nil
+	return c.WriteConfig()
 }
 
 func (c *Config) encryptString(data string) (string, error) {
@@ -499,9 +525,11 @@ func ReadConfig(rtCfg RuntimeConfig) (Config, error) {
 	if _, err := os.Stat(oldPath); err == nil {
 		if _, err := os.Stat(newPath); err != nil {
 			if _, err := os.Stat(newPathParent); os.IsNotExist(err) {
-				os.Mkdir(newPathParent, 0700)
+				err = os.Mkdir(newPathParent, 0700)
+				return Config{}, err
 			}
-			os.Rename(oldPath, newPath)
+			err = os.Rename(oldPath, newPath)
+			return Config{}, err
 		}
 	}
 

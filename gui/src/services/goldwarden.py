@@ -37,6 +37,7 @@ if BINARY_PATH is None:
 authenticated_connection = None
 
 def create_authenticated_connection(token):
+    print("create authenticated connection")
     global authenticated_connection
     authenticated_connection = subprocess.Popen([f"{BINARY_PATH}", "session"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if not token == None:

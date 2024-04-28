@@ -144,7 +144,7 @@ var setVaultURLCmd = &cobra.Command{
 var setURLsAutomaticallyCmd = &cobra.Command{
 	Use:   "set-server",
 	Short: "Set the urls automatically",
-	Long:  `Set the api/identity/vault/notification urls automaticall from a base url.`,
+	Long:  `Set the api/identity/vault/notification urls automatically from a base url.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			return

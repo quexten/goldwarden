@@ -1,6 +1,7 @@
 package browserbiometrics
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,15 @@ import (
 	"github.com/quexten/goldwarden/agent/config"
 	"github.com/quexten/goldwarden/browserbiometrics/logging"
 )
+
+//go:embed mozilla-com.8bit.bitwarden.json
+var templateMozilla string
+
+//go:embed chrome-com.8bit.bitwarden.json
+var templateChrome string
+
+//go:embed goldwarden-proxy.sh
+var proxyScript string
 
 var chromiumPaths = []string{
 	"~/.config/google-chrome/",
@@ -26,13 +36,17 @@ const appID = "com.quexten.bw-bio-handler"
 
 var transportKey []byte
 
-func Main(rtCfg *config.RuntimeConfig) {
+func Main(rtCfg *config.RuntimeConfig) error {
 	logging.Debugf("Starting browserbiometrics")
-	transportKey = generateTransportKey()
+	var err error
+	transportKey, err = generateTransportKey()
+	if err != nil {
+		return err
+	}
 	logging.Debugf("Generated transport key")
 
 	setupCommunication()
-	readLoop(rtCfg)
+	return readLoop(rtCfg)
 }
 
 func DetectAndInstallBrowsers() error {
@@ -104,7 +118,7 @@ func detectAndInstallBrowsers(startPath string) error {
 		} else {
 			tempPath = strings.TrimPrefix(path, home)
 		}
-		if strings.Count(tempPath, "/") > 3 {
+		if strings.Count(tempPath, "/") > 5 {
 			return nil
 		}
 
@@ -112,13 +126,25 @@ func detectAndInstallBrowsers(startPath string) error {
 			fmt.Printf("Found mozilla-like browser: %s\n", path)
 
 			fmt.Println("Removing old manifest and proxy script")
-			os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
-			os.Remove(path + "/com.8bit.bitwarden.json")
-			os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
-			os.Remove(path + "/goldwarden-proxy.sh")
+			err = os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
+			if err != nil {
+				return err
+			}
+			err = os.Remove(path + "/com.8bit.bitwarden.json")
+			if err != nil {
+				return err
+			}
+			err = os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
+			if err != nil {
+				return err
+			}
+			err = os.Remove(path + "/goldwarden-proxy.sh")
+			if err != nil {
+				return err
+			}
 
 			fmt.Println("Writing new manifest")
-			manifest := strings.Replace(templateMozilla, "PATH", path+"/goldwarden-proxy.sh", 1)
+			manifest := strings.Replace(templateMozilla, "@PATH@", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err
@@ -133,13 +159,25 @@ func detectAndInstallBrowsers(startPath string) error {
 			fmt.Printf("Found chrome-like browser: %s\n", path)
 
 			fmt.Println("Removing old manifest and proxy script")
-			os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
-			os.Remove(path + "/com.8bit.bitwarden.json")
-			os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
-			os.Remove(path + "/goldwarden-proxy.sh")
+			err = os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
+			if err != nil {
+				return err
+			}
+			err = os.Remove(path + "/com.8bit.bitwarden.json")
+			if err != nil {
+				return err
+			}
+			err = os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
+			if err != nil {
+				return err
+			}
+			err = os.Remove(path + "/goldwarden-proxy.sh")
+			if err != nil {
+				return err
+			}
 
 			fmt.Println("Writing new manifest")
-			manifest := strings.Replace(templateChrome, "PATH", path+"/goldwarden-proxy.sh", 1)
+			manifest := strings.Replace(templateChrome, "@PATH@", path+"/goldwarden-proxy.sh", 1)
 			err = os.WriteFile(path+"/com.8bit.bitwarden.json", []byte(manifest), 0444)
 			if err != nil {
 				return err

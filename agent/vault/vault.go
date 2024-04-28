@@ -149,9 +149,9 @@ func (vault *Vault) isSSHKey(cipher models.Cipher) bool {
 			cipherID := cipher.ID.String()
 			if cipher.OrganizationID != nil {
 				orgID := cipher.OrganizationID.String()
-				vaultLog.Error("Failed to decrypt field name with on cipher "+cipherID+" in organization "+orgID, err.Error())
+				vaultLog.Error("Failed to decrypt field name with on cipher %s in organization %s: %s", cipherID, orgID, err.Error())
 			} else {
-				vaultLog.Error("Failed to decrypt field name with on cipher "+cipherID, err.Error())
+				vaultLog.Error("Failed to decrypt field name with on cipher %s: %s", cipherID, err.Error())
 			}
 			continue
 		}

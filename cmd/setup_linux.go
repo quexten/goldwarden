@@ -3,6 +3,7 @@
 package cmd
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -81,15 +82,8 @@ var polkitCmd = &cobra.Command{
 	},
 }
 
-const SYSTEMD_SERVICE = `[Unit]
-Description="Goldwarden daemon"
-After=graphical-session.target
-
-[Service]
-ExecStart=BINARY_PATH daemonize
-
-[Install]
-WantedBy=graphical-session.target`
+//go:embed goldwarden.service
+var systemdService string
 
 func setupSystemd() {
 	if isRoot() {
@@ -107,7 +101,10 @@ func setupSystemd() {
 		panic(err)
 	}
 
-	file.WriteString(strings.ReplaceAll(SYSTEMD_SERVICE, "BINARY_PATH", path))
+	_, err = file.WriteString(strings.ReplaceAll(systemdService, "@BINARY_PATH@", path))
+	if err != nil {
+		panic(err)
+	}
 	file.Close()
 
 	userDirectory := os.Getenv("HOME")
@@ -178,7 +175,7 @@ var setupCmd = &cobra.Command{
 	Short: "Sets up Goldwarden integrations",
 	Long:  "Sets up Goldwarden integrations",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 

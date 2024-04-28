@@ -109,7 +109,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.results_list.hide()
 
         keycont = Gtk.EventControllerKey()
-        def handle_keypress(cotroller, keyval, keycode, state, user_data):
+        def handle_keypress(controller, keyval, keycode, state, user_data):
             ctrl_pressed = state & Gdk.ModifierType.CONTROL_MASK > 0
             alt_pressed = state & Gdk.ModifierType.ALT_MASK > 0
 
@@ -155,7 +155,7 @@ class MainWindow(Gtk.ApplicationWindow):
                 if ctrl_pressed and alt_pressed:
                     Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
             elif keyval == 116:
-                totp_code = totp.totp(self.resuts_list.get_selected_row().totp)
+                totp_code = totp.totp(self.results_list.get_selected_row().totp)
                 if ctrl_pressed and not alt_pressed:
                     set_clipboard(totp_code)
                 if ctrl_pressed and alt_pressed:

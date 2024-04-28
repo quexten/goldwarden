@@ -42,8 +42,7 @@ func GetPassword(title string, description string) (string, error) {
 		return externalPinentry.GetPassword(title, description)
 	}
 
-	// return "", errors.New("Not implemented")
-	return password, nil
+	return password, err
 }
 
 func GetApproval(title string, description string) (bool, error) {
@@ -56,6 +55,5 @@ func GetApproval(title string, description string) (bool, error) {
 		return externalPinentry.GetApproval(title, description)
 	}
 
-	// return true, errors.New("Not implemented")
-	return approval, nil
+	return approval, err
 }

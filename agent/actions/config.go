@@ -144,7 +144,14 @@ func handleGetConfigEnvironment(request messages.IPCMessage, cfg *config.Config,
 
 func handleSetClientID(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	clientID := messages.ParsePayload(request).(messages.SetClientIDRequest).Value
-	cfg.SetClientID(clientID)
+	err = cfg.SetClientID(clientID)
+	if err != nil {
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
 	err = cfg.WriteConfig()
 	if err != nil {
 		return messages.IPCMessageFromPayload(messages.ActionResponse{
@@ -160,7 +167,14 @@ func handleSetClientID(request messages.IPCMessage, cfg *config.Config, vault *v
 
 func handleSetClientSecret(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	clientSecret := messages.ParsePayload(request).(messages.SetClientSecretRequest).Value
-	cfg.SetClientSecret(clientSecret)
+	err = cfg.SetClientSecret(clientSecret)
+	if err != nil {
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
 	err = cfg.WriteConfig()
 	if err != nil {
 		return messages.IPCMessageFromPayload(messages.ActionResponse{

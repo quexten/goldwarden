@@ -9,6 +9,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -112,17 +113,20 @@ func (key MemguardSymmetricEncryptionKey) MacKeyBytes() ([]byte, error) {
 	return keyBytes, nil
 }
 
-func MemoryAssymmetricEncryptionKeyFromBytes(key []byte) (MemoryAsymmetricEncryptionKey, error) {
+func MemoryAsymmetricEncryptionKeyFromBytes(key []byte) (MemoryAsymmetricEncryptionKey, error) {
 	return MemoryAsymmetricEncryptionKey{key}, nil
 }
 
-func MemguardAssymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEncryptionKey, error) {
+func MemguardAsymmetricEncryptionKeyFromBytes(key []byte) (MemguardAsymmetricEncryptionKey, error) {
 	k := memguard.NewEnclave(key)
 	return MemguardAsymmetricEncryptionKey{k}, nil
 }
 
 func (key MemoryAsymmetricEncryptionKey) PublicBytes() []byte {
 	privateKey, err := x509.ParsePKCS8PrivateKey(key.encKey)
+	if err != nil {
+		panic(err)
+	}
 	pub := (privateKey.(*rsa.PrivateKey)).Public()
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
@@ -137,6 +141,9 @@ func (key MemguardAsymmetricEncryptionKey) PublicBytes() []byte {
 		panic(err)
 	}
 	privateKey, err := x509.ParsePKCS8PrivateKey(buffer.Bytes())
+	if err != nil {
+		panic(err)
+	}
 	pub := (privateKey.(*rsa.PrivateKey)).Public()
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
@@ -164,7 +171,7 @@ func isMacValid(message, messageMAC, key []byte) bool {
 	return hmac.Equal(messageMAC, expectedMAC)
 }
 
-func encryptAESCBC256(data, key []byte) (iv, ciphertext []byte, _ error) {
+func encryptAESCBC256(data, key []byte) (iv, ciphertext []byte, err error) {
 	data = padPKCS7(data, aes.BlockSize)
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -176,12 +183,28 @@ func encryptAESCBC256(data, key []byte) (iv, ciphertext []byte, _ error) {
 	if _, err := io.ReadFull(cryptorand.Reader, iv); err != nil {
 		return nil, nil, err
 	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				iv = nil
+				ciphertext = nil
+				err = errors.New("error encrypting AES CBC 256 data")
+			}
+		}
+	}()
+
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext, data)
 	return iv, ciphertext, nil
 }
 
-func decryptAESCBC256(iv, ciphertext, key []byte) ([]byte, error) {
+func decryptAESCBC256(iv, ciphertext, key []byte) (decryptedData []byte, err error) {
+	ciphertextCopy := make([]byte, len(ciphertext))
+	copy(ciphertextCopy, ciphertext)
+
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -189,28 +212,50 @@ func decryptAESCBC256(iv, ciphertext, key []byte) ([]byte, error) {
 	if len(iv) != aes.BlockSize {
 		return nil, fmt.Errorf("iv length does not match AES block size")
 	}
-	if len(ciphertext)%aes.BlockSize != 0 {
+	if len(ciphertextCopy)%aes.BlockSize != 0 {
 		return nil, fmt.Errorf("ciphertext is not a multiple of AES block size")
 	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				decryptedData = nil
+				err = errors.New("error decrypting AES CBC 256 data")
+			}
+		}
+	}()
+
 	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(ciphertext, ciphertext) // decrypt in-place
-	data, err := unpadPKCS7(ciphertext, aes.BlockSize)
+	mode.CryptBlocks(ciphertextCopy, ciphertextCopy) // decrypt in-place
+	data, err := unpadPKCS7(ciphertextCopy, aes.BlockSize)
 	if err != nil {
 		return nil, err
 	}
-	return data, nil
+
+	resultBuffer := make([]byte, len(data))
+	copy(resultBuffer, data)
+	return resultBuffer, nil
 }
 
 func unpadPKCS7(src []byte, size int) ([]byte, error) {
-	n := src[len(src)-1]
-	if len(src)%size != 0 {
-		return nil, fmt.Errorf("expected PKCS7 padding for block size %d, but have %d bytes", size, len(src))
+	srcCopy := make([]byte, len(src))
+	copy(srcCopy, src)
+
+	n := srcCopy[len(srcCopy)-1]
+	if len(srcCopy)%size != 0 {
+		return nil, fmt.Errorf("expected PKCS7 padding for block size %d, but have %d bytes", size, len(srcCopy))
 	}
-	if len(src) <= int(n) {
-		return nil, fmt.Errorf("cannot unpad %d bytes out of a total of %d", n, len(src))
+	if len(srcCopy) <= int(n) {
+		return nil, fmt.Errorf("cannot unpad %d bytes out of a total of %d", n, len(srcCopy))
 	}
-	src = src[:len(src)-int(n)]
-	return src, nil
+	srcCopy = srcCopy[:len(srcCopy)-int(n)]
+
+	resultCopy := make([]byte, len(srcCopy))
+	copy(resultCopy, srcCopy)
+
+	return resultCopy, nil
 }
 
 func padPKCS7(src []byte, size int) []byte {

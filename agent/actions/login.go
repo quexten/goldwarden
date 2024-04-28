@@ -34,7 +34,8 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	var masterKey crypto.MasterKey
 	var masterpasswordHash string
 
-	if secret, err := cfg.GetClientSecret(); err == nil && secret != "" {
+	var secret string // don't shadow err in the next line
+	if secret, err = cfg.GetClientSecret(); err == nil && secret != "" {
 		actionsLog.Info("Logging in with client secret")
 		token, masterKey, masterpasswordHash, err = bitwarden.LoginWithApiKey(ctx, req.Email, cfg, vault)
 	} else if req.Passwordless {
@@ -56,7 +57,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		return
 	}
 
-	cfg.SetToken(config.LoginToken{
+	_ = cfg.SetToken(config.LoginToken{
 		AccessToken:  token.AccessToken,
 		ExpiresIn:    token.ExpiresIn,
 		TokenType:    token.TokenType,
@@ -87,7 +88,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 	if err != nil {
 		defer func() {
 			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
-			cfg.SetToken(config.LoginToken{})
+			_ = cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()
 
@@ -102,19 +103,19 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		return
 	}
 
-	cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
-	cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
-	cfg.SetMasterKey([]byte(masterKey.GetBytes()))
-	var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+	err = cfg.SetUserSymmetricKey(vault.Keyring.GetAccountKey().Bytes())
+	err = cfg.SetMasterPasswordHash([]byte(masterpasswordHash))
+	err = cfg.SetMasterKey([]byte(masterKey.GetBytes()))
+	var protectedUserSymmetricKey crypto.SymmetricEncryptionKey
 	if vault.Keyring.IsMemguard {
-		protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
+		protectedUserSymmetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	} else {
-		protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
+		protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(vault.Keyring.GetAccountKey().Bytes())
 	}
 	if err != nil {
 		defer func() {
 			notify.Notify("Goldwarden", "Could not decrypt. Wrong password?", "", 10*time.Second, func() {})
-			cfg.SetToken(config.LoginToken{})
+			_ = cfg.SetToken(config.LoginToken{})
 			vault.Clear()
 		}()
 
@@ -128,7 +129,7 @@ func handleLogin(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault
 		}
 		return
 	}
-	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey, false)
+	err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymmetricKey, false)
 
 	response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,

@@ -81,6 +81,10 @@ func Eq(a, b ssh.PublicKey) bool {
 }
 
 func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signature, error) {
+	return vaultAgent.SignWithFlags(key, data, agent.SignatureFlagReserved)
+}
+
+func (vaultAgent vaultAgent) SignWithFlags(key ssh.PublicKey, data []byte, flags agent.SignatureFlags) (*ssh.Signature, error) {
 	log.Info("Sign Request for key: %s", ssh.FingerprintSHA256(key))
 	if vaultAgent.vault.Keyring.IsLocked() {
 		if !vaultAgent.unlockRequestAction() {
@@ -104,6 +108,10 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 			sshKey = &vaultSSHKey
 			break
 		}
+	}
+
+	if sshKey == nil {
+		return nil, errors.New("key not found")
 	}
 
 	isGit := false
@@ -156,7 +164,30 @@ func (vaultAgent vaultAgent) Sign(key ssh.PublicKey, data []byte) (*ssh.Signatur
 	} else {
 		notify.Notify("Goldwarden", fmt.Sprintf("SSH Signing Request Approved for %s", sshKey.Name), "", 10*time.Second, func() {})
 	}
-	return signer.Sign(rand, data)
+
+	algo := ""
+
+	switch flags {
+	case agent.SignatureFlagRsaSha256:
+		algo = ssh.KeyAlgoRSASHA256
+	case agent.SignatureFlagRsaSha512:
+		algo = ssh.KeyAlgoRSASHA512
+	default:
+		return signer.Sign(rand, data)
+	}
+
+	log.Info("%s algorithm requested", algo)
+
+	algoSigner, err := ssh.NewSignerWithAlgorithms(signer.(ssh.AlgorithmSigner), []string{algo})
+	if err != nil {
+		return nil, err
+	}
+
+	return algoSigner.SignWithAlgorithm(rand, data, algo)
+}
+
+func (vaultAgent) Extension(extensionType string, contents []byte) ([]byte, error) {
+	return nil, agent.ErrExtensionUnsupported
 }
 
 func (vaultAgent) Signers() ([]ssh.Signer, error) {

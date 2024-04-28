@@ -69,11 +69,7 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 	if !login.Login.Totp.IsNull() {
 		decryptedTotp, err := crypto.DecryptWith(login.Login.Totp, cipherKey)
 		if err == nil {
-			if err == nil {
-				decryptedLogin.TOTPSeed = string(decryptedTotp)
-			} else {
-				fmt.Println(err)
-			}
+			decryptedLogin.TOTPSeed = string(decryptedTotp)
 		} else {
 			fmt.Println(string(decryptedTotp))
 		}
@@ -117,11 +113,7 @@ func handleListLoginsRequest(request messages.IPCMessage, cfg *config.Config, va
 			continue
 		}
 
-		var decryptedName []byte = []byte{}
-		var decryptedUsername []byte = []byte{}
-		var decryptedPassword []byte = []byte{}
-		var decryptedTotp []byte = []byte{}
-		var decryptedURL []byte = []byte{}
+		var decryptedName, decryptedUsername, decryptedPassword, decryptedTotp, decryptedURL []byte
 
 		if !login.Name.IsNull() {
 			decryptedName, err = crypto.DecryptWith(login.Name, key)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/icza/gox/stringsx"
@@ -17,7 +18,7 @@ var baseLoginCmd = &cobra.Command{
 	Short: "Commands for managing logins.",
 	Long:  `Commands for managing logins.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		_ = cmd.Help()
 	},
 }
 
@@ -26,7 +27,11 @@ var getLoginCmd = &cobra.Command{
 	Short: "Gets a login in your vault",
 	Long:  `Gets a login in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		uuid, _ := cmd.Flags().GetString("uuid")
 		name, _ := cmd.Flags().GetString("name")
@@ -51,7 +56,7 @@ var getLoginCmd = &cobra.Command{
 			} else {
 				fmt.Println(response.Result.Password)
 			}
-			break
+			return
 		case messages.ActionResponse:
 			fmt.Println("Error: " + resp.(messages.ActionResponse).Message)
 			return
@@ -64,7 +69,11 @@ var listLoginsCmd = &cobra.Command{
 	Short: "Lists all logins in your vault",
 	Long:  `Lists all logins in your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		loginIfRequired()
+		err := loginIfRequired()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		logins, err := ListLogins(commandClient)
 		if err != nil {

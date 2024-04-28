@@ -76,6 +76,10 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 	}
 
 	token, err := cfg.GetToken()
+	if err != nil {
+		return err
+	}
+
 	var websocketURL = "wss://" + url.Host + url.Path + "/hub?access_token=" + token.AccessToken
 	c, _, err := websocket.DefaultDialer.Dial(websocketURL, nil)
 	if err != nil {
@@ -88,7 +92,10 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 
 	done := make(chan struct{})
 	//handshake required for official bitwarden implementation
-	c.WriteMessage(1, []byte(`{"protocol":"messagepack","version":1}`))
+	err = c.WriteMessage(1, []byte(`{"protocol":"messagepack","version":1}`))
+	if err != nil {
+		return err
+	}
 
 	go func() {
 		for {
@@ -123,12 +130,14 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 						websocketLog.Error("Error getting token %s", err)
 						break
 					}
-					DoFullSync(context.WithValue(ctx, AuthToken{}, token.AccessToken), vault, cfg, nil, false)
-					break
+					err = DoFullSync(context.WithValue(ctx, AuthToken{}, token.AccessToken), vault, cfg, nil, false)
+					if err != nil {
+						log.Error("could not perform full sync: %s", err.Error())
+						return
+					}
 				case SyncCipherDelete:
 					websocketLog.Warn("Delete requested for cipher " + cipherid)
 					vault.DeleteCipher(cipherid)
-					break
 				case SyncCipherUpdate:
 					websocketLog.Warn("Update requested for cipher " + cipherid)
 					token, err := cfg.GetToken()
@@ -154,8 +163,6 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 						vault.AddOrUpdateLogin(cipher)
 					}
 					vault.SetLastSynced(time.Now().Unix())
-
-					break
 				case SyncCipherCreate:
 					websocketLog.Warn("Create requested for cipher " + cipherid)
 					token, err := cfg.GetToken()
@@ -176,11 +183,8 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 						vault.AddOrUpdateLogin(cipher)
 					}
 					vault.SetLastSynced(time.Now().Unix())
-
-					break
 				case SyncSendCreate, SyncSendUpdate, SyncSendDelete:
 					websocketLog.Warn("SyncSend requested: sends are not supported")
-					break
 				case LogOut:
 					websocketLog.Info("LogOut received. Wiping vault and exiting...")
 					if vault.Keyring.IsMemguard {
@@ -213,17 +217,12 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 							websocketLog.Error("Error creating auth response %s", err)
 						}
 					})
-
-					break
 				case AuthRequestResponse:
 					websocketLog.Info("AuthRequestResponse received")
-					break
 				case SyncFolderDelete, SyncFolderCreate, SyncFolderUpdate:
 					websocketLog.Warn("SyncFolder requested: folders are not supported")
-					break
 				case SyncOrgKeys, SyncSettings:
 					websocketLog.Warn("SyncOrgKeys requested: orgs / settings are not supported")
-					break
 				default:
 					websocketLog.Warn("Unknown message type received %d", mt1)
 				}

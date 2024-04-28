@@ -54,7 +54,7 @@ var runCmd = &cobra.Command{
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
 		command.Stdin = os.Stdin
-		command.Run()
+		_ = command.Run()
 	},
 }
 

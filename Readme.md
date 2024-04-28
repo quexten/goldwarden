@@ -3,7 +3,8 @@
 # Goldwarden
 
 Goldwarden is a Bitwarden compatible desktop client. It focuses on providing useful desktop features that the official tools 
-do not (yet) have or are not willing to add, and enhanced security measures that other tools do not provide, such as:
+do not (yet) have or are not willing to add (for example, because the integrations are not mature enough for a broad userbase),
+and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
 - System wide autotype (Linux - Gnome, KDE only for now)
