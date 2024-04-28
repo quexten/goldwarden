@@ -1,7 +1,7 @@
 [default]
 extend-ignore-identifiers-re = [
     # upstream go library issue
-    "*Encrypter",
+    ".*Encrypter",
 ]
 
 [files]
