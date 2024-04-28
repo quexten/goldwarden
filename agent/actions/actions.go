@@ -64,17 +64,17 @@ func sync(ctx context.Context, vault *vault.Vault, cfg *config.Config) bool {
 				return false
 			}
 
-			var protectedUserSymetricKey crypto.SymmetricEncryptionKey
+			var protectedUserSymmetricKey crypto.SymmetricEncryptionKey
 			if vault.Keyring.IsMemguard {
-				protectedUserSymetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				protectedUserSymmetricKey, err = crypto.MemguardSymmetricEncryptionKeyFromBytes(userSymmetricKey)
 			} else {
-				protectedUserSymetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
+				protectedUserSymmetricKey, err = crypto.MemorySymmetricEncryptionKeyFromBytes(userSymmetricKey)
 			}
 			if err != nil {
 				return false
 			}
 
-			err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymetricKey, true)
+			err = bitwarden.DoFullSync(context.WithValue(ctx, bitwarden.AuthToken{}, token.AccessToken), vault, cfg, &protectedUserSymmetricKey, true)
 			if err != nil {
 				return false
 			}
