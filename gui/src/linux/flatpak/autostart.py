@@ -55,7 +55,7 @@ def request_autostart():
 
 request_autostart()
 
-thread = Timer(10, os._exit, [0])
+thread = Timer(10, sys.exit, [0])
 thread.start()
 
 loop = GLib.MainLoop()
