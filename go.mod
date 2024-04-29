@@ -19,6 +19,7 @@ require (
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
+	github.com/rymdport/portal v0.2.2
 	github.com/spf13/cobra v1.8.0
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.1.0
@@ -39,7 +40,6 @@ require (
 	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
 	github.com/keybase/msgpackzip v0.0.0-20231213201432-ee2f464d1f46 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
-	github.com/rymdport/portal v0.2.2 // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
 	golang.org/x/net v0.24.0 // indirect
 )
@@ -56,3 +56,5 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 )
+
+replace github.com/rymdport/portal => github.com/quexten/portal v0.0.0-20240429200240-156297fa11c5
