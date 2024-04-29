@@ -43,13 +43,13 @@ func writeMessageLength(msg []byte) error {
 }
 
 func readMessageLength(msg []byte) (int, error) {
-	var length int
+	var length int32
 	buf := bytes.NewBuffer(msg)
 	err := binary.Read(buf, nativeEndian, &length)
 	if err != nil {
 		return 0, fmt.Errorf("Unable to read bytes representing message length: %w", err)
 	}
-	return length, nil
+	return int(length), nil
 }
 
 func send(msg SendMessage) error {
