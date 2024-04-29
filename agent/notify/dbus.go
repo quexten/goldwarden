@@ -6,18 +6,15 @@ import (
 	"time"
 
 	"github.com/godbus/dbus/v5"
-	"github.com/quexten/goldwarden/logging"
 )
 
 var closeListenerMap = make(map[uint32]func())
-var notificationID uint32 = 1000000
-var log = logging.GetLogger("Goldwarden", "Dbus")
 
-func Notify(title string, body string, actionName string, timeout time.Duration, onclose func()) {
+func notifyDBus(title string, body string, actionName string, timeout time.Duration, onclose func()) error {
 	bus, err := dbus.SessionBus()
 	if err != nil {
 		log.Error("could not get a dbus session: %s", err.Error())
-		return
+		return err
 	}
 	obj := bus.Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications")
 	actions := []string{}
@@ -30,16 +27,16 @@ func Notify(title string, body string, actionName string, timeout time.Duration,
 	call := obj.Call("org.freedesktop.Notifications.Notify", 0, "goldwarden", uint32(notificationID), "", title, body, actions, map[string]dbus.Variant{}, int32(60000))
 	if call.Err != nil {
 		log.Error("could not call dbus object: %s", call.Err.Error())
-		return
+		return err
 	}
 	if len(call.Body) < 1 {
-		return
+		return err
 	}
 	id := call.Body[0].(uint32)
 	closeListenerMap[id] = onclose
 
 	if timeout == 0 {
-		return
+		return err
 	} else {
 		go func(id uint32) {
 			time.Sleep(timeout)
@@ -49,9 +46,11 @@ func Notify(title string, body string, actionName string, timeout time.Duration,
 			}
 		}(id)
 	}
+
+	return nil
 }
 
-func ListenForNotifications() error {
+func listenForNotificationsDBus() error {
 	bus, err := dbus.SessionBus()
 	if err != nil {
 		return err

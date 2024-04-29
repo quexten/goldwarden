@@ -20,9 +20,6 @@ finish-args:
   #  Lock on idle
   - --talk-name=org.gnome.Mutter.IdleMonitor
 
-  # Notifications
-  - --talk-name=org.freedesktop.Notifications
-
   # pinentry & approval
   - --talk-name=org.gnome.keyring.SystemPrompter
   # biometric / user password auth
