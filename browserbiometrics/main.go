@@ -126,21 +126,26 @@ func detectAndInstallBrowsers(startPath string) error {
 			fmt.Printf("Found mozilla-like browser: %s\n", path)
 
 			fmt.Println("Removing old manifest and proxy script")
-			err = os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
-			if err != nil {
-				return err
+			if _, err := os.Stat(path + "/com.8bit.bitwarden.json"); err == nil {
+				err = os.Chmod(path+"/com.8bit.bitwarden.json", 755)
+				if err != nil {
+					return err
+				}
+				err = os.Remove(path + "/com.8bit.bitwarden.json")
+				if err != nil {
+					return err
+				}
 			}
-			err = os.Remove(path + "/com.8bit.bitwarden.json")
-			if err != nil {
-				return err
-			}
-			err = os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
-			if err != nil {
-				return err
-			}
-			err = os.Remove(path + "/goldwarden-proxy.sh")
-			if err != nil {
-				return err
+
+			if _, err := os.Stat(path + "/goldwarden-proxy.sh"); err == nil {
+				err = os.Chmod(path+"/goldwarden-proxy.sh", 755)
+				if err != nil {
+					return err
+				}
+				err = os.Remove(path + "/goldwarden-proxy.sh")
+				if err != nil {
+					return err
+				}
 			}
 
 			fmt.Println("Writing new manifest")
@@ -159,21 +164,26 @@ func detectAndInstallBrowsers(startPath string) error {
 			fmt.Printf("Found chrome-like browser: %s\n", path)
 
 			fmt.Println("Removing old manifest and proxy script")
-			err = os.Chown(path+"/com.8bit.bitwarden.json", 7, 7)
-			if err != nil {
-				return err
+			if _, err := os.Stat(path + "/com.8bit.bitwarden.json"); err == nil {
+				err = os.Chmod(path+"/com.8bit.bitwarden.json", 755)
+				if err != nil {
+					return err
+				}
+				err = os.Remove(path + "/com.8bit.bitwarden.json")
+				if err != nil {
+					return err
+				}
 			}
-			err = os.Remove(path + "/com.8bit.bitwarden.json")
-			if err != nil {
-				return err
-			}
-			err = os.Chown(path+"/goldwarden-proxy.sh", 7, 7)
-			if err != nil {
-				return err
-			}
-			err = os.Remove(path + "/goldwarden-proxy.sh")
-			if err != nil {
-				return err
+
+			if _, err := os.Stat(path + "/goldwarden-proxy.sh"); err == nil {
+				err = os.Chmod(path+"/goldwarden-proxy.sh", 755)
+				if err != nil {
+					return err
+				}
+				err = os.Remove(path + "/goldwarden-proxy.sh")
+				if err != nil {
+					return err
+				}
 			}
 
 			fmt.Println("Writing new manifest")
