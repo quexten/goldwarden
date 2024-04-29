@@ -58,7 +58,9 @@ func (s *EncString) UnmarshalText(data []byte) error {
 	}
 
 	switch s.Type {
-	case AesCbc128_HmacSha256_B64, AesCbc256_HmacSha256_B64, AesCbc256_B64:
+	case AesCbc256_HmacSha256_B64:
+	case AesCbc128_HmacSha256_B64, AesCbc256_B64:
+		return errors.New("outdated cipher of type: " + strconv.Itoa(int(s.Type)) + " detected. PLEASE ROTATE YOU VAULT KEYS")
 	default:
 		return errors.New("invalid cipher string type, unknown type: " + strconv.Itoa(int(s.Type)))
 	}
