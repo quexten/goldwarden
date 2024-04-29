@@ -57,29 +57,37 @@ func (s *EncString) UnmarshalText(data []byte) error {
 		s.Type = EncStringType(t)
 	}
 
+	data = data[i+1:]
+	parts := bytes.Split(data, []byte("|"))
 	switch s.Type {
-	case AesCbc128_HmacSha256_B64, AesCbc256_HmacSha256_B64, AesCbc256_B64:
+	case AesCbc256_HmacSha256_B64, AesCbc128_HmacSha256_B64:
+		if len(parts) != 3 {
+			return errors.New("invalid cipher string format, missing parts, length: " + strconv.Itoa(len(data)) + "type: " + strconv.Itoa(int(s.Type)))
+		}
+
+		if s.IV, err = b64decode(parts[0]); err != nil {
+			return err
+		}
+		if s.CT, err = b64decode(parts[1]); err != nil {
+			return err
+		}
+		if s.MAC, err = b64decode(parts[2]); err != nil {
+			return err
+		}
+	case AesCbc256_B64:
+		if len(parts) != 2 {
+			return errors.New("invalid cipher string format, missing parts, length: " + strconv.Itoa(len(data)) + "type: " + strconv.Itoa(int(s.Type)))
+		}
+		if s.IV, err = b64decode(parts[0]); err != nil {
+			return err
+		}
+		if s.CT, err = b64decode(parts[1]); err != nil {
+			return err
+		}
 	default:
 		return errors.New("invalid cipher string type, unknown type: " + strconv.Itoa(int(s.Type)))
 	}
 
-	data = data[i+1:]
-	parts := bytes.Split(data, []byte("|"))
-	if len(parts) != 3 {
-		return errors.New("invalid cipher string format, missing parts, length: " + strconv.Itoa(len(data)) + "type: " + strconv.Itoa(int(s.Type)))
-	}
-
-	if s.IV, err = b64decode(parts[0]); err != nil {
-		return err
-	}
-	if s.CT, err = b64decode(parts[1]); err != nil {
-		return err
-	}
-	if s.Type.HasMAC() {
-		if s.MAC, err = b64decode(parts[2]); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -149,7 +157,7 @@ func DecryptWith(s EncString, key SymmetricEncryptionKey) ([]byte, error) {
 			return nil, fmt.Errorf("decrypt: MAC mismatch")
 		}
 	} else if s.Type == AesCbc256_B64 {
-		return nil, fmt.Errorf("decrypt: cipher of unsupported type %q", s.Type)
+		cryptoLog.Warn("WARNING: VAULT CONTAINS	INSECURE AesCbc256_B64 CIPHER, PLEASE ROTATE YOUR VAULT	KEYS IN	THE	WEB	VAULT")
 	}
 
 	dst, err := decryptAESCBC256(s.IV, s.CT, encKeyData)
