@@ -39,6 +39,7 @@ require (
 	github.com/keybase/go-logging v0.0.0-20231213204715-4b3ff33ba5b6 // indirect
 	github.com/keybase/msgpackzip v0.0.0-20231213201432-ee2f464d1f46 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
+	github.com/rymdport/portal v0.2.2 // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
 	golang.org/x/net v0.24.0 // indirect
 )
