@@ -1,0 +1,84 @@
+using Gtk 4.0;
+using Adw 1;
+
+Box content {
+  orientation: vertical;
+  Adw.Banner paused_banner {
+    title: 'No pin set, please set it now';
+    button-label: 'Set Pin';
+    revealed: false;
+  }
+  Adw.PreferencesPage preferences_page {
+    title: "General";
+    Adw.PreferencesGroup {
+      title: "Actions";
+      Button quick_access_button {
+        label: "Quick Access";
+        margin-top: 20;
+        styles [
+          "suggested-action"
+        ]
+      }
+      Button login_button {
+        label: "Login";
+        margin-top: 20;
+        styles [
+          "suggested-action"
+        ]
+      }
+      Button pin_button {
+        label: "Set pin";
+        margin-top: 20;
+        styles [
+          "suggested-action"
+        ]
+      }
+      Button unlock_button {
+        label: "Unlock";
+        sensitive: false;
+        margin-top: 20;
+        styles [
+          "suggested-action"
+        ]
+      }
+      Button logout_button {
+        label: "Logout";
+        margin-top: 20;
+        styles [
+          "destructive-action"
+        ]
+      }
+      LinkButton {
+        uri: "https://github.com/quexten/goldwarden/wiki/Flatpak-Configuration";
+        label: "Help & Wiki";
+
+      }
+    }
+    Adw.PreferencesGroup {
+      title: "Vault Status";
+      Adw.ActionRow {
+        title: "Vault Status";
+        subtitle: "Locked";
+      }
+      Adw.ActionRow {
+        title: "Last Sync";
+        subtitle: "Never";
+        icon-name: "emblem-synchronizing-symbolic";
+      }
+      Adw.ActionRow {
+        title: "Websocked Connected";
+        subtitle: "False";
+      }
+      Adw.ActionRow {
+        title: "Vault Login Entries";
+        subtitle: "0";
+        icon-name: "dialog-password-symbolic";
+      }
+      Adw.ActionRow {
+        title: "Vault Notes";
+        subtitle: "0";
+        icon-name: "emblem-documents-symbolic";
+      }
+    }
+  }
+}
