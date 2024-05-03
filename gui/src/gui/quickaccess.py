@@ -6,6 +6,7 @@ import gc
 import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
 from ..services import goldwarden
+from ..services.autotype import autotype
 from threading import Thread
 from .resource_loader import load_template
 import sys
@@ -71,19 +72,19 @@ class GoldwardenQuickAccessApp(Adw.Application):
         # totp code
         if keyval == Gdk.KEY_t or keyval == Gdk.KEY_T:
             if auto_type_combo:
-                self.autotype(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
+                self.run_autotype(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
             if copy_combo:
                 self.set_clipboard(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
 
         if keyval == Gdk.KEY_u or keyval == Gdk.KEY_U:
             if auto_type_combo:
-                self.autotype(self.filtered_logins[self.selected_index]["username"])
+                self.run_autotype(self.filtered_logins[self.selected_index]["username"])
             if copy_combo:
                 self.set_clipboard(self.filtered_logins[self.selected_index]["username"])
         
         if keyval == Gdk.KEY_p or keyval == Gdk.KEY_P:
             if auto_type_combo:
-                self.autotype(self.filtered_logins[self.selected_index]["password"])
+                self.run_autotype(self.filtered_logins[self.selected_index]["password"])
             if copy_combo:
                 self.set_clipboard(self.filtered_logins[self.selected_index]["password"])
 
@@ -100,18 +101,18 @@ class GoldwardenQuickAccessApp(Adw.Application):
 
         if keyval == Gdk.KEY_Return:
             if auto_type_combo:
-                self.autotype(f"{self.filtered_logins[self.selected_index]['username']}\t{self.filtered_logins[self.selected_index]['password']}")
+                self.run_autotype(f"{self.filtered_logins[self.selected_index]['username']}\t{self.filtered_logins[self.selected_index]['password']}")
 
     def update(self):
         self.update_list()
         self.render_list()
         return True
 
-    def autotype(self, text):
+    def run_autotype(self, text):
         def perform_autotype(text):
             self.window.hide()
             time.sleep(0.1)
-            goldwarden.autotype(text)
+            autotype.autotype(text)
             time.sleep(0.1)
             os._exit(0)
         thread = Thread(target=perform_autotype, args=(text,))
