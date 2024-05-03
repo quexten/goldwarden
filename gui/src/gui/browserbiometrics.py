@@ -8,7 +8,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, GLib, Gdk, Gio
 from ..services import goldwarden
 from threading import Thread
-from .template_loader import load_template
+from .resource_loader import load_template, load_json
 import subprocess
 from . import components
 import os
@@ -26,6 +26,9 @@ class GoldwardenBrowserBiometricsSetupGuideApp(Adw.Application):
         builder = load_template("browserbiometrics.ui")
         self.window = builder.get_object("window")
         self.window.set_application(self)
+        commands = load_json("commands")
+        self.setup_command_row = builder.get_object("setup_command_row")
+        self.setup_command_row.set_subtitle(commands["browserbiometric-setup"])
 
 if __name__ == "__main__":
     app = GoldwardenBrowserBiometricsSetupGuideApp(application_id="com.quexten.Goldwarden.browserbiometrics")

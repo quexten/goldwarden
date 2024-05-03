@@ -7,7 +7,7 @@ import time
 from gi.repository import Gtk, Adw, GLib, Notify, Gdk
 from ..services import goldwarden
 from threading import Thread
-from .template_loader import load_template
+from .resource_loader import load_template
 import sys
 import os
 from ..services import totp
