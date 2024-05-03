@@ -26,6 +26,7 @@ class GoldwardenSettingsApp(Adw.Application):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
 
+
     def on_activate(self, app):
         self.load()
         self.update()
@@ -63,6 +64,32 @@ class GoldwardenSettingsApp(Adw.Application):
         self.websocket_connected_row = builder.get_object("websocket_connected_row")
         self.logins_row = builder.get_object("logins_row")
         self.notes_row = builder.get_object("notes_row")
+
+        self.menu_button = builder.get_object("menu_button")
+        menu = Gio.Menu.new()
+        self.popover = Gtk.PopoverMenu() 
+        self.popover.set_menu_model(menu)
+        self.menu_button.set_popover(self.popover)
+
+        action = Gio.SimpleAction.new("shortcuts", None)
+        action.connect("activate", lambda action, parameter: run_window("shortcuts", "Test"))
+        self.window.add_action(action)
+        menu.append("Keyboard Shortcuts", "win.shortcuts") 
+
+        action = Gio.SimpleAction.new("ssh", None)
+        action.connect("activate", lambda action, parameter: run_window("ssh", "Test"))
+        self.window.add_action(action)
+        menu.append("SSH Agent", "win.ssh")
+
+        action = Gio.SimpleAction.new("browserbiometrics", None)
+        action.connect("activate", lambda action, parameter: run_window("browserbiometrics", "Test"))
+        self.window.add_action(action)
+        menu.append("Browser Biometrics", "win.browserbiometrics")
+
+        action = Gio.SimpleAction.new("about", None)
+        action.connect("activate", lambda action, parameter: self.show_about())
+        self.window.add_action(action)
+        menu.append("About", "win.about")
     
     def update(self):
         self.render()
@@ -96,6 +123,21 @@ class GoldwardenSettingsApp(Adw.Application):
         self.websocket_connected_row.set_subtitle("Yes" if status["websocketConnected"] else "No")
         self.logins_row.set_subtitle(str(status["loginEntries"]))
         self.notes_row.set_subtitle(str(status["noteEntries"]))
+
+    def show_about(self):
+        dialog = Adw.AboutWindow(transient_for=app.get_active_window()) 
+        dialog.set_application_name("Goldwarden") 
+        dialog.set_version("dev")
+        dialog.set_developer_name("Bernd Schoolmann (Quexten)") 
+        dialog.set_license_type(Gtk.License(Gtk.License.MIT_X11)) 
+        dialog.set_comments("A Bitwarden compatible password manager") 
+        dialog.set_website("https://github.com/quexten/goldwarden") 
+        dialog.set_issue_url("https://github.com/quexten/goldwarden/issues") 
+        dialog.add_credit_section("Contributors", ["Bernd Schoolmann"]) 
+        dialog.set_copyright("© 2024 Bernd Schoolmann") 
+        dialog.set_developers(["Bernd Schoolmann"]) 
+        dialog.set_application_icon("com.quexten.Goldwarden")
+        dialog.set_visible(True)
 
 if __name__ == "__main__":
     goldwarden.create_authenticated_connection(None)

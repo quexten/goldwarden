@@ -2,7 +2,7 @@ using Gtk 4.0;
 using Adw 1;
 
 
-Adw.Window window {
+Adw.ApplicationWindow window {
   default-width: 400;
   default-height: 700;
 
@@ -137,6 +137,11 @@ Adw.Window window {
       title-widget: Adw.WindowTitle {
         title: 'Goldwarden';
       };
+
+      [end]
+      MenuButton menu_button {
+        icon-name: "open-menu-symbolic";
+      }
 
       valign: start;
     }
