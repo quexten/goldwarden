@@ -1,0 +1,5 @@
+{
+    "browserbiometric-setup": "flatpak run --filesystem=home --command=goldwarden com.quexten.Goldwarden setup browserbiometrics",
+    "add-ssh-key": "flatpak run --command=goldwarden com.quexten.Goldwarden ssh add --name MY_KEY_NAME",
+    "ssh-socket-path": "export SSH_AUTH_SOCK=/home/$USER/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock"
+}
