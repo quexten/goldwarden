@@ -140,6 +140,10 @@ def autotype(text):
     process.stdin.flush()
     process.wait()
 
+def version():
+    result = send_authenticated_command(f"version")
+    return result
+
 def is_daemon_running():
     result = send_authenticated_command(f"vault status")
     daemon_not_running = ("daemon running" in result)

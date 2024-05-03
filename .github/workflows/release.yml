@@ -26,11 +26,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
+    - name: Write version
+      run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
     - name: Install libfido2-dev
       run: sudo apt-get install -y libfido2-dev
     - name: Build
@@ -39,17 +40,6 @@ jobs:
       with:
         files: './goldwarden_linux_x86_64'
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Publish AUR package
-      uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
-      with:
-        pkgname: goldwarden
-        updpkgsums: true
-        pkgbuild: ./PKGBUILD
-        commit_username: ${{ secrets.AUR_USERNAME }}
-        commit_email: ${{ secrets.AUR_EMAIL }}
-        ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-        commit_message: Update AUR package from GitHub Actions automation
-        ssh_keyscan_types: ed25519
     - name: Move binaries to directories
       run: |
         mkdir -p .debpkg/usr/bin
@@ -93,7 +83,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
+    - name: Write version
+      run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -109,6 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Write version
+      run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -125,6 +118,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Write version
+        run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -146,6 +141,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Write version
+        run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -167,6 +164,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Write version
+        run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -188,6 +187,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+      - name: Write version
+        run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -198,3 +199,24 @@ jobs:
         with:
           files: './goldwarden_windows_aarch64.exe'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish_to_aur:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Write version
+        run: echo "${GITHUB_REF#refs/tags/}" > ./cmd/version.txt
+      - name: Replace version in PKGBUILD
+        run: sed -i "s/pkgver=.*/pkgver=${GITHUB_REF#refs\/tags\//}/" ./.github/workflows/PKGBUILD
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        with:
+          pkgname: goldwarden
+          updpkgsums: true
+          pkgbuild: ./.github/workflows/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: Update AUR package from GitHub Actions automation
+          ssh_keyscan_types: ed25519

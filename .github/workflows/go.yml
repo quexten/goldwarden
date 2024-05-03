@@ -18,6 +18,8 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
+    - name: Write version
+      run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
     - name: Install libfido2-dev
       run: sudo apt-get install -y libfido2-dev
     - name: Build Debug
@@ -35,6 +37,8 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
+    - name: Write version
+      run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
     - name: Install libfido2-dev
       run: sudo apt-get install -y libfido2-dev
     - name: Build
@@ -52,6 +56,8 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
+    - name: Write version
+      run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
     - name: Install libfido2-dev
       run: sudo apt-get install -y libfido2-dev
     - name: Build
@@ -69,6 +75,8 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: ${{ env.GO_VERSION }}
+    - name: Write version
+      run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
     - name: Build
       run: GOARCH=386 go build -tags nofido2 -o goldwarden_linux_x86 -v .
     - uses: actions/upload-artifact@v3
@@ -85,6 +93,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Write version
+        run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
@@ -106,6 +116,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Write version
+        run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
@@ -127,6 +139,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Write version
+        run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
       - uses: MinoruSekine/setup-scoop@v2
       - name: Fido2
         run: |
@@ -148,6 +162,8 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ env.GO_VERSION }}
+      - name: Write version
+        run: echo "$(git rev-parse --short HEAD)" > ./cmd/version.txt
       - name: Build
         run: set GOARCH=arm64 && go build -tags nofido2 -o "goldwarden_windows_aarch64.exe" -v .
       - uses: actions/upload-artifact@v3

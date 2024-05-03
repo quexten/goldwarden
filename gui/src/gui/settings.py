@@ -126,7 +126,7 @@ class GoldwardenSettingsApp(Adw.Application):
     def show_about(self):
         dialog = Adw.AboutWindow(transient_for=app.get_active_window()) 
         dialog.set_application_name("Goldwarden") 
-        dialog.set_version("dev")
+        dialog.set_version(goldwarden.version())
         dialog.set_developer_name("Bernd Schoolmann (Quexten)") 
         dialog.set_license_type(Gtk.License(Gtk.License.MIT_X11)) 
         dialog.set_comments("A Bitwarden compatible password manager") 
