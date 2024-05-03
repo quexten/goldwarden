@@ -43,8 +43,6 @@ class GoldwardenQuickAccessApp(Adw.Application):
         self.window.add_controller(evk)  
 
     def key_press(self, event, keyval, keycode, state):
-        print(keyval, keycode)
-
         if keyval == Gdk.KEY_Escape:
             os._exit(0)
 
@@ -73,27 +71,32 @@ class GoldwardenQuickAccessApp(Adw.Application):
         # totp code
         if keyval == Gdk.KEY_t or keyval == Gdk.KEY_T:
             if auto_type_combo:
-                print("TOTP type")
                 self.autotype(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
             if copy_combo:
-                print("TOTP copy")
                 self.set_clipboard(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
 
         if keyval == Gdk.KEY_u or keyval == Gdk.KEY_U:
             if auto_type_combo:
-                print("Username type")
                 self.autotype(self.filtered_logins[self.selected_index]["username"])
             if copy_combo:
-                print("Username copy")
                 self.set_clipboard(self.filtered_logins[self.selected_index]["username"])
         
         if keyval == Gdk.KEY_p or keyval == Gdk.KEY_P:
             if auto_type_combo:
-                print("Password type")
                 self.autotype(self.filtered_logins[self.selected_index]["password"])
             if copy_combo:
-                print("Password copy")
                 self.set_clipboard(self.filtered_logins[self.selected_index]["password"])
+
+        if (keyval == Gdk.KEY_l or keyval == Gdk.KEY_L) and auto_type_combo:
+            Gtk.show_uri(None, self.results_list.get_selected_row().uri, Gdk.CURRENT_TIME)
+
+        if (keyval == Gdk.KEY_v or keyval == Gdk.KEY_V) and auto_type_combo:
+            self.set_clipboard(self.filtered_logins[self.selected_index]["uri"])
+            environment = goldwarden.get_environment()
+            if environment == None:
+                return
+            item_uri = environment["vault"] + "#/vault?itemId=" + self.results_list.get_selected_row().uuid
+            Gtk.show_uri(None, item_uri, Gdk.CURRENT_TIME)
 
         if keyval == Gdk.KEY_Return:
             if auto_type_combo:
