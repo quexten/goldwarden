@@ -28,6 +28,7 @@ class GoldwardenSettingsApp(Adw.Application):
 
     def on_activate(self, app):
         self.load()
+        self.update()
         self.window.present()
         GLib.timeout_add(100, self.update)
 
@@ -44,7 +45,10 @@ class GoldwardenSettingsApp(Adw.Application):
         self.unlock_status_box = builder.get_object("unlock_status")
         self.unlock_button = builder.get_object("unlock_button")
         self.unlock_button.connect("clicked", lambda x: goldwarden.unlock())
+        
         self.login_status_box = builder.get_object("login_status")
+        self.login_button = builder.get_object("login_button")
+        self.login_button.connect("clicked", lambda x: run_window("login", "Test"))
 
         self.settings_view = builder.get_object("settings_view")
         self.lock_button = builder.get_object("lock_button")

@@ -13,7 +13,6 @@ Adw.Window window {
       Stack stack {
         Box set_pin_status  {
           orientation: vertical;
-          visible: false;
           Adw.StatusPage {
             margin-top: 100;
             title: "Pin required";
@@ -55,7 +54,7 @@ Adw.Window window {
             title: "Logged out";
             icon-name: "system-users-symbolic";
           }
-          Button {
+          Button login_button {
             label: "Log in";
             margin-start: 20;
             margin-end: 20;
