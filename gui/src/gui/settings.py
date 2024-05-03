@@ -10,7 +10,6 @@ from ..services import goldwarden
 from threading import Thread
 from .template_loader import load_template
 import subprocess
-from . import components
 import os
 
 def run_window(name, token):
@@ -20,12 +19,10 @@ def run_window(name, token):
     p = subprocess.Popen(["python3", "-m", "src.gui." + name], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, start_new_session=True)
     p.stdin.write(f"{token}\n".encode())
     p.stdin.flush()
-
 class GoldwardenSettingsApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
-
 
     def on_activate(self, app):
         self.load()
@@ -49,7 +46,7 @@ class GoldwardenSettingsApp(Adw.Application):
         
         self.login_status_box = builder.get_object("login_status")
         self.login_button = builder.get_object("login_button")
-        self.login_button.connect("clicked", lambda x: run_window("login", "Test"))
+        self.login_button.connect("clicked", lambda x: run_window("login", self.token))
 
         self.settings_view = builder.get_object("settings_view")
         self.lock_button = builder.get_object("lock_button")
@@ -59,7 +56,7 @@ class GoldwardenSettingsApp(Adw.Application):
         self.update_pin_button = builder.get_object("update_pin_button")
         self.update_pin_button.connect("clicked", lambda x: goldwarden.enable_pin())
         self.quickaccess_button = builder.get_object("quickaccess_button")
-        self.quickaccess_button.connect("clicked", lambda x: run_window("quickaccess", "Test"))
+        self.quickaccess_button.connect("clicked", lambda x: run_window("quickaccess", self.token))
         self.last_sync_row = builder.get_object("last_sync_row")
         self.websocket_connected_row = builder.get_object("websocket_connected_row")
         self.logins_row = builder.get_object("logins_row")
@@ -72,17 +69,17 @@ class GoldwardenSettingsApp(Adw.Application):
         self.menu_button.set_popover(self.popover)
 
         action = Gio.SimpleAction.new("shortcuts", None)
-        action.connect("activate", lambda action, parameter: run_window("shortcuts", "Test"))
+        action.connect("activate", lambda action, parameter: run_window("shortcuts", self.token))
         self.window.add_action(action)
         menu.append("Keyboard Shortcuts", "win.shortcuts") 
 
         action = Gio.SimpleAction.new("ssh", None)
-        action.connect("activate", lambda action, parameter: run_window("ssh", "Test"))
+        action.connect("activate", lambda action, parameter: run_window("ssh", self.token))
         self.window.add_action(action)
         menu.append("SSH Agent", "win.ssh")
 
         action = Gio.SimpleAction.new("browserbiometrics", None)
-        action.connect("activate", lambda action, parameter: run_window("browserbiometrics", "Test"))
+        action.connect("activate", lambda action, parameter: run_window("browserbiometrics", self.token))
         self.window.add_action(action)
         menu.append("Browser Biometrics", "win.browserbiometrics")
 
@@ -140,6 +137,10 @@ class GoldwardenSettingsApp(Adw.Application):
         dialog.set_visible(True)
 
 if __name__ == "__main__":
+    # read from stdin
+    token = sys.stdin.readline().strip()
+
     goldwarden.create_authenticated_connection(None)
     app = GoldwardenSettingsApp(application_id="com.quexten.Goldwarden.settings")
+    app.token = token
     app.run(sys.argv)
