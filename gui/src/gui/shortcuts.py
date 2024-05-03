@@ -8,7 +8,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, GLib, Gdk, Gio
 from ..services import goldwarden
 from threading import Thread
-from .template_loader import load_template
+from .resource_loader import load_template
 import subprocess
 from . import components
 import os
