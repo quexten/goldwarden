@@ -101,7 +101,6 @@ class GoldwardenQuickAccessApp(Adw.Application):
     
     def update_logins(self):
         logins = goldwarden.get_vault_logins()
-        print(logins)
         if logins == None:
             os._exit(0)
             return
@@ -109,9 +108,7 @@ class GoldwardenQuickAccessApp(Adw.Application):
         self.update()
     
 if __name__ == "__main__":
-    # todo add proper method to debug this
-    # token = sys.stdin.readline()
-    token = "Test"
+    token = sys.stdin.readline()
     goldwarden.create_authenticated_connection(token)
     app = GoldwardenQuickAccessApp(application_id="com.quexten.Goldwarden.quickaccess")
     app.run(sys.argv)

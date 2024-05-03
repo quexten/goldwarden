@@ -19,6 +19,8 @@ def run_window(name, token):
     p = subprocess.Popen(["python3", "-m", "src.gui." + name], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, start_new_session=True)
     p.stdin.write(f"{token}\n".encode())
     p.stdin.flush()
+
+
 class GoldwardenSettingsApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
