@@ -45,5 +45,8 @@ class GoldwardenLoginApp(Adw.Application):
         goldwarden.login_with_password(email, "")
 
 if __name__ == "__main__":
+    settings = Gtk.Settings.get_default()
+    settings.set_property("gtk-error-bell", False)
+
     app = GoldwardenLoginApp(application_id="com.quexten.Goldwarden.login")
     app.run(sys.argv)

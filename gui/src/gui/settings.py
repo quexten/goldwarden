@@ -139,7 +139,9 @@ class GoldwardenSettingsApp(Adw.Application):
         dialog.set_visible(True)
 
 if __name__ == "__main__":
-    # read from stdin
+    settings = Gtk.Settings.get_default()
+    settings.set_property("gtk-error-bell", False)
+
     token = sys.stdin.readline().strip()
 
     goldwarden.create_authenticated_connection(None)

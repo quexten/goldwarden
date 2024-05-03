@@ -108,6 +108,9 @@ class GoldwardenQuickAccessApp(Adw.Application):
         self.update()
     
 if __name__ == "__main__":
+    settings = Gtk.Settings.get_default()
+    settings.set_property("gtk-error-bell", False)
+
     token = sys.stdin.readline()
     goldwarden.create_authenticated_connection(token)
     app = GoldwardenQuickAccessApp(application_id="com.quexten.Goldwarden.quickaccess")
