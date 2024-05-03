@@ -1,322 +1,150 @@
 #!/usr/bin/env python3
 import sys
 import gi
+
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-import gc
 
 from gi.repository import Gtk, Adw, GLib, Gdk, Gio
 from ..services import goldwarden
 from threading import Thread
+from .template_loader import load_template
 import subprocess
-from . import components
 import os
 
-root_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir, os.pardir))
-token = sys.stdin.readline()
-goldwarden.create_authenticated_connection(None)
-
-def quickaccess_button_clicked():
-    p = subprocess.Popen(["python3", "-m", "src.gui.quickaccess"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
+def run_window(name, token):
+    gui_path = os.path.dirname(os.path.realpath(__file__))
+    cwd = os.path.abspath(os.path.join(gui_path, os.pardir, os.pardir))
+    print(f"Running window {name} with path {cwd}")
+    p = subprocess.Popen(["python3", "-m", "src.gui." + name], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwd, start_new_session=True)
     p.stdin.write(f"{token}\n".encode())
     p.stdin.flush()
 
-def shortcuts_button_clicked():
-    p = subprocess.Popen(["python3", "-m", "src.gui.shortcuts"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
-    p.stdin.write(f"{token}\n".encode())
-    p.stdin.flush()
 
-def ssh_button_clicked():
-    p = subprocess.Popen(["python3", "-m", "src.gui.ssh"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
-    p.stdin.write(f"{token}\n".encode())
-    p.stdin.flush()
-
-def browserbiometrics_button_clicked():
-    p = subprocess.Popen(["python3", "-m", "src.gui.browserbiometrics"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, cwd=root_path, start_new_session=True)
-    p.stdin.write(f"{token}\n".encode())
-    p.stdin.flush()
-
-def add_action_row(parent, title, subtitle, icon=None):
-    row = Adw.ActionRow()
-    row.set_title(title)
-    row.set_subtitle(subtitle)
-    if icon != None:
-        row.set_icon_name(icon)
-    parent.add(row)
-    return row
-
-class SettingsWinvdow(Gtk.ApplicationWindow):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # vertical box
-        self.box = Gtk.Box()
-        self.box.set_orientation(Gtk.Orientation.VERTICAL)
-        self.set_child(self.box)
-        
-        def set_pin():
-            set_pin_thread = Thread(target=goldwarden.enable_pin)
-            set_pin_thread.start()
-
-        self.banner = Adw.Banner()
-        self.banner.set_title("No pin set, please set it now")
-        self.banner.set_button_label("Set Pin")
-        self.banner.connect("button-clicked", lambda banner: set_pin())
-        self.box.append(self.banner)
-
-        self.stack = Gtk.Stack()
-        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
-        self.box.append(self.stack)
-
-        self.preferences_page = Adw.PreferencesPage()
-        self.preferences_page.set_title("General")
-        self.stack.add_named(self.preferences_page, "preferences_page")
-
-        self.action_preferences_group = Adw.PreferencesGroup()
-        self.action_preferences_group.set_title("Actions")
-        self.preferences_page.add(self.action_preferences_group)
-        
-        self.autotype_button = Gtk.Button()
-        self.autotype_button.set_label("Quick Access")
-        self.autotype_button.set_margin_top(10)
- 
-        self.autotype_button.connect("clicked", lambda button: quickaccess_button_clicked())
-        self.autotype_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.autotype_button)
-
-        self.login_button = Gtk.Button()
-        self.login_button.set_label("Login")
-        self.login_button.connect("clicked", lambda button: show_login())
-        self.login_button.set_sensitive(False)
-        self.login_button.set_margin_top(10)
-        self.login_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.login_button)
-    
-        self.set_pin_button = Gtk.Button()
-        self.set_pin_button.set_label("Set Pin")
-        self.set_pin_button.connect("clicked", lambda button: set_pin())
-        self.set_pin_button.set_margin_top(10)
-        self.set_pin_button.set_sensitive(False)
-        self.set_pin_button.get_style_context().add_class("suggested-action")
-        self.action_preferences_group.add(self.set_pin_button)
-
-        self.unlock_button = Gtk.Button()
-        self.unlock_button.set_label("Unlock")
-        self.unlock_button.set_margin_top(10)
-        def unlock_button_clicked():
-            action = goldwarden.unlock if self.unlock_button.get_label() == "Unlock" else goldwarden.lock
-            unlock_thread = Thread(target=action)
-            unlock_thread.start()
-        self.unlock_button.connect("clicked", lambda button: unlock_button_clicked())
-        # set disabled
-        self.unlock_button.set_sensitive(False)
-        self.action_preferences_group.add(self.unlock_button)
-
-        self.logout_button = Gtk.Button()
-        self.logout_button.set_label("Logout")
-        self.logout_button.set_margin_top(10)
-        self.logout_button.connect("clicked", lambda button: goldwarden.purge())
-        self.logout_button.get_style_context().add_class("destructive-action")
-        self.action_preferences_group.add(self.logout_button)
-
-        self.wiki_button = Gtk.LinkButton(uri="https://github.com/quexten/goldwarden/wiki/Flatpak-Configuration")
-        self.wiki_button.set_label("Help & Wiki")
-        self.wiki_button.set_margin_top(10)
-        self.action_preferences_group.add(self.wiki_button)
-
-        self.vault_status_preferences_group = Adw.PreferencesGroup()
-        self.vault_status_preferences_group.set_title("Vault Status")
-        self.preferences_page.add(self.vault_status_preferences_group)
-        
-        self.status_row = add_action_row(self.vault_status_preferences_group, "Vault Status", "Locked")
-
-        self.vault_status_icon = components.StatusIcon()
-        self.vault_status_icon.set_icon("dialog-error", "error")
-        self.status_row.add_prefix(self.vault_status_icon)
-
-        self.last_sync_row = add_action_row(self.vault_status_preferences_group, "Last Sync", "Never", "emblem-synchronizing-symbolic")
-        self.websocket_connected_row = add_action_row(self.vault_status_preferences_group, "Websocket Connected", "False")
-
-        self.websocket_connected_status_icon = components.StatusIcon()
-        self.websocket_connected_status_icon.set_icon("dialog-error", "error")
-        self.websocket_connected_row.add_prefix(self.websocket_connected_status_icon)
-
-        self.login_row = add_action_row(self.vault_status_preferences_group, "Vault Login Entries", "0", "dialog-password-symbolic")
-        self.notes_row = add_action_row(self.vault_status_preferences_group, "Vault Notes", "0", "emblem-documents-symbolic")
- 
-        self.header = Gtk.HeaderBar()
-        self.set_titlebar(self.header)
-
-        action = Gio.SimpleAction.new("shortcuts", None)
-        action.connect("activate", lambda action, parameter: shortcuts_button_clicked())
-        self.add_action(action)
-        menu = Gio.Menu.new()
-        menu.append("Keyboard Shortcuts", "win.shortcuts") 
-        self.popover = Gtk.PopoverMenu() 
-        self.popover.set_menu_model(menu)
-
-        action = Gio.SimpleAction.new("ssh", None)
-        action.connect("activate", lambda action, parameter: ssh_button_clicked())
-        self.add_action(action)
-        menu.append("SSH Agent", "win.ssh")
-
-        action = Gio.SimpleAction.new("browserbiometrics", None)
-        action.connect("activate", lambda action, parameter: browserbiometrics_button_clicked())
-        self.add_action(action)
-        menu.append("Browser Biometrics", "win.browserbiometrics")
-        
-        self.hamburger = Gtk.MenuButton()
-        self.hamburger.set_popover(self.popover)
-        self.hamburger.set_icon_name("open-menu-symbolic")
-        self.header.pack_start(self.hamburger)
-
-
-        def update_labels():
-            pin_set = goldwarden.is_pin_enabled()
-            status = goldwarden.get_vault_status()
-            print("status", status)
-            runtimeCfg = goldwarden.get_runtime_config()
-
-            if status != None:
-                if pin_set:
-                    self.unlock_button.set_sensitive(True)
-                    self.banner.set_revealed(False)
-                else:
-                    self.unlock_button.set_sensitive(False)
-                    self.banner.set_revealed(True)
-                logged_in = status["loggedIn"]
-                if logged_in and not status["locked"]:
-                    self.autotype_button.set_visible(True)
-                    self.login_row.set_sensitive(True)
-                    self.notes_row.set_sensitive(True)
-                    self.websocket_connected_row.set_sensitive(True)
-                else:
-                    self.autotype_button.set_visible(False)
-                    self.websocket_connected_row.set_sensitive(False)
-                    self.login_row.set_sensitive(False)
-                    self.notes_row.set_sensitive(False)
-
-                locked = status["locked"]
-                self.login_button.set_sensitive(pin_set and not locked)
-                self.set_pin_button.set_sensitive(not pin_set or not locked)
-                self.autotype_button.set_sensitive(not locked)
-                self.status_row.set_subtitle(str("Logged in" if (logged_in and not locked) else "Logged out") if not locked else "Locked")
-                if locked or not logged_in:
-                    self.vault_status_icon.set_icon("dialog-warning", "warning")
-                else:
-                    self.vault_status_icon.set_icon("emblem-default", "ok")
-                if not logged_in:
-                    self.logout_button.set_sensitive(False)
-                else:
-                    self.logout_button.set_sensitive(True)
-                self.login_row.set_subtitle(str(status["loginEntries"]))
-                self.notes_row.set_subtitle(str(status["noteEntries"]))
-                self.websocket_connected_row.set_subtitle("Connected" if status["websocketConnected"] else "Disconnected")
-                if status["websocketConnected"]:
-                    self.websocket_connected_status_icon.set_icon("emblem-default", "ok")
-                else:
-                    self.websocket_connected_status_icon.set_icon("dialog-error", "error")
-                self.last_sync_row.set_subtitle(str(status["lastSynced"]))
-                if status["lastSynced"].startswith("1970") or status["lastSynced"].startswith("1969"):
-                    self.last_sync_row.set_subtitle("Never")
-                self.unlock_button.set_label("Unlock" if locked else "Lock")
-            else:
-                is_daemon_running = goldwarden.is_daemon_running()
-                if not is_daemon_running:
-                    self.status_row.set_subtitle("Daemon not running")
-                    self.vault_status_icon.set_icon("dialog-error", "error")
-            
-            GLib.timeout_add(5000, update_labels)
-
-        GLib.timeout_add(1000, update_labels)
-        self.set_default_size(400, 700)
-        self.set_title("Goldwarden")
-
-class MyApp(Adw.Application):
+class GoldwardenSettingsApp(Adw.Application):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.connect('activate', self.on_activate)
 
     def on_activate(self, app):
-        self.settings_win = SettingsWinvdow(application=app)
-        self.settings_win.present()
+        self.load()
+        self.update()
+        self.window.present()
+        GLib.timeout_add(100, self.update)
 
-def show_login():
-    dialog = Gtk.Dialog(title="Goldwarden")
+    def load(self):
+        builder = load_template("settings.ui")
+        self.window = builder.get_object("window")
+        self.window.set_application(self)
+        self.stack = builder.get_object("stack")
 
-    auth_preference_group = Adw.PreferencesGroup()
-    auth_preference_group.set_title("Authentication")
-    auth_preference_group.set_margin_top(10)
-    auth_preference_group.set_margin_bottom(10)
-    auth_preference_group.set_margin_start(10)
-    auth_preference_group.set_margin_end(10)
-    dialog.get_content_area().append(auth_preference_group)
+        self.set_pin_status_box = builder.get_object("set_pin_status")
+        self.set_pin_button = builder.get_object("set_pin_button")
+        self.set_pin_button.connect("clicked", lambda x: goldwarden.enable_pin())
 
-    email_entry = Adw.EntryRow()
-    email_entry.set_title("Email")
-    email_entry.set_text("")
-    auth_preference_group.add(email_entry)
+        self.unlock_status_box = builder.get_object("unlock_status")
+        self.unlock_button = builder.get_object("unlock_button")
+        self.unlock_button.connect("clicked", lambda x: goldwarden.unlock())
+        
+        self.login_status_box = builder.get_object("login_status")
+        self.login_button = builder.get_object("login_button")
+        self.login_button.connect("clicked", lambda x: run_window("login", self.token))
 
-    client_id_entry = Adw.EntryRow()
-    client_id_entry.set_title("Client ID (optional)")
-    client_id_entry.set_text("")
-    auth_preference_group.add(client_id_entry)
+        self.settings_view = builder.get_object("settings_view")
+        self.lock_button = builder.get_object("lock_button")
+        self.lock_button.connect("clicked", lambda x: goldwarden.lock())
+        self.logout_button = builder.get_object("logout_button")
+        self.logout_button.connect("clicked", lambda x: goldwarden.purge())
+        self.update_pin_button = builder.get_object("update_pin_button")
+        self.update_pin_button.connect("clicked", lambda x: goldwarden.enable_pin())
+        self.quickaccess_button = builder.get_object("quickaccess_button")
+        self.quickaccess_button.connect("clicked", lambda x: run_window("quickaccess", self.token))
+        self.last_sync_row = builder.get_object("last_sync_row")
+        self.websocket_connected_row = builder.get_object("websocket_connected_row")
+        self.logins_row = builder.get_object("logins_row")
+        self.notes_row = builder.get_object("notes_row")
 
-    client_secret_entry = Adw.EntryRow()
-    client_secret_entry.set_title("Client Secret (optional)")
-    client_secret_entry.set_text("")
-    auth_preference_group.add(client_secret_entry)
+        self.menu_button = builder.get_object("menu_button")
+        menu = Gio.Menu.new()
+        self.popover = Gtk.PopoverMenu() 
+        self.popover.set_menu_model(menu)
+        self.menu_button.set_popover(self.popover)
 
-    dialog.add_button("Login", Gtk.ResponseType.OK)
-    def on_save(res):
-        if res != Gtk.ResponseType.OK:
+        action = Gio.SimpleAction.new("shortcuts", None)
+        action.connect("activate", lambda action, parameter: run_window("shortcuts", self.token))
+        self.window.add_action(action)
+        menu.append("Keyboard Shortcuts", "win.shortcuts") 
+
+        action = Gio.SimpleAction.new("ssh", None)
+        action.connect("activate", lambda action, parameter: run_window("ssh", self.token))
+        self.window.add_action(action)
+        menu.append("SSH Agent", "win.ssh")
+
+        action = Gio.SimpleAction.new("browserbiometrics", None)
+        action.connect("activate", lambda action, parameter: run_window("browserbiometrics", self.token))
+        self.window.add_action(action)
+        menu.append("Browser Biometrics", "win.browserbiometrics")
+
+        action = Gio.SimpleAction.new("about", None)
+        action.connect("activate", lambda action, parameter: self.show_about())
+        self.window.add_action(action)
+        menu.append("About", "win.about")
+    
+    def update(self):
+        self.render()
+        return True
+
+    def render(self):
+        pin_set = goldwarden.is_pin_enabled()
+        status = goldwarden.get_vault_status()
+        runtimeCfg = goldwarden.get_runtime_config()
+        if status == None:
+            is_daemon_running = goldwarden.is_daemon_running()
+            if not is_daemon_running:
+                self.status_row.set_subtitle("Daemon not running")
+                self.vault_status_icon.set_icon("dialog-error", "error")
             return
-        goldwarden.set_url(url_entry.get_text())
-        goldwarden.set_client_id(client_id_entry.get_text())
-        goldwarden.set_client_secret(client_secret_entry.get_text())
-        def login():
-            res = goldwarden.login_with_password(email_entry.get_text(), "password")
-            def handle_res():
-                if res == "ok":
-                    dialog.close()
-                # elif res == "badpass":
-                #     bad_pass_diag = Gtk.MessageDialog(transient_for=dialog, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text="Bad password")
-                #     bad_pass_diag.connect("response", lambda dialog, response: bad_pass_diag.close())
-                #     bad_pass_diag.present()
-            GLib.idle_add(handle_res)
 
-        login_thread = Thread(target=login)
-        login_thread.start()
+        logged_in = status["loggedIn"]
+        unlocked = not status["locked"]
+        if not pin_set:
+            self.stack.set_visible_child(self.set_pin_status_box)
+            return
+        if not unlocked:
+            self.stack.set_visible_child(self.unlock_status_box)
+            return
+        if not logged_in:
+            self.stack.set_visible_child(self.login_status_box)
+            return
+        self.stack.set_visible_child(self.settings_view)
 
-    preference_group = Adw.PreferencesGroup()
-    preference_group.set_title("Config")
-    preference_group.set_margin_top(10)
-    preference_group.set_margin_bottom(10)
-    preference_group.set_margin_start(10)
-    preference_group.set_margin_end(10)
+        self.last_sync_row.set_subtitle(status["lastSynced"])
+        self.websocket_connected_row.set_subtitle("Yes" if status["websocketConnected"] else "No")
+        self.logins_row.set_subtitle(str(status["loginEntries"]))
+        self.notes_row.set_subtitle(str(status["noteEntries"]))
 
-    dialog.get_content_area().append(preference_group)
+    def show_about(self):
+        dialog = Adw.AboutWindow(transient_for=app.get_active_window()) 
+        dialog.set_application_name("Goldwarden") 
+        dialog.set_version("dev")
+        dialog.set_developer_name("Bernd Schoolmann (Quexten)") 
+        dialog.set_license_type(Gtk.License(Gtk.License.MIT_X11)) 
+        dialog.set_comments("A Bitwarden compatible password manager") 
+        dialog.set_website("https://github.com/quexten/goldwarden") 
+        dialog.set_issue_url("https://github.com/quexten/goldwarden/issues") 
+        dialog.add_credit_section("Contributors", ["Bernd Schoolmann"]) 
+        dialog.set_copyright("© 2024 Bernd Schoolmann") 
+        dialog.set_developers(["Bernd Schoolmann"]) 
+        dialog.set_application_icon("com.quexten.Goldwarden")
+        dialog.set_visible(True)
 
-    url_entry = Adw.EntryRow()
-    url_entry.set_title("Base Url")
-    url_entry.set_text("https://vault.bitwarden.com/")
-    preference_group.add(url_entry)
+if __name__ == "__main__":
+    settings = Gtk.Settings.get_default()
+    settings.set_property("gtk-error-bell", False)
 
-    #ok response
-    dialog.connect("response", lambda dialog, response: on_save(response))
-    dialog.set_default_size(400, 200)
-    dialog.set_modal(True)
-    dialog.present()
+    token = sys.stdin.readline().strip()
 
-isflatpak = os.path.exists("/.flatpak-info")
-pathprefix = "/app/bin/" if isflatpak else "./"
-css_provider = Gtk.CssProvider()
-css_provider.load_from_path(pathprefix+"style.css")
-Gtk.StyleContext.add_provider_for_display(
-    Gdk.Display.get_default(),
-    css_provider,
-    Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-)
-
-app = MyApp(application_id="com.quexten.Goldwarden.settings")
-app.run(sys.argv)
+    goldwarden.create_authenticated_connection(None)
+    app = GoldwardenSettingsApp(application_id="com.quexten.Goldwarden.settings")
+    app.token = token
+    app.run(sys.argv)

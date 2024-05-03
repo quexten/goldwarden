@@ -1,0 +1,149 @@
+using Gtk 4.0;
+using Adw 1;
+
+
+Adw.ApplicationWindow window {
+  default-width: 400;
+  default-height: 700;
+
+  Adw.ToolbarView view {
+    content: Box{
+      orientation: vertical;
+
+      Stack stack {
+        Box set_pin_status  {
+          orientation: vertical;
+          Adw.StatusPage {
+            margin-top: 100;
+            title: "Pin required";
+            icon-name: "dialog-password-symbolic";
+          }
+          Button set_pin_button {
+            label: "Set pin";
+            margin-start: 20;
+            margin-end: 20;
+            styles [
+              "suggested-action",
+              "pill"
+            ]
+          }
+        }
+
+        Box unlock_status {
+          orientation: vertical;
+          Adw.StatusPage {
+            margin-top: 100;
+            title: "Vault locked";
+            icon-name: "security-high-symbolic";
+          }
+          Button unlock_button {
+            label: "Unlock";
+            margin-start: 20;
+            margin-end: 20;
+            styles [
+              "suggested-action",
+              "pill"
+            ]
+          }
+        }
+
+        Box login_status {
+          orientation: vertical;
+          Adw.StatusPage {
+            margin-top: 100;
+            title: "Logged out";
+            icon-name: "system-users-symbolic";
+          }
+          Button login_button {
+            label: "Log in";
+            margin-start: 20;
+            margin-end: 20;
+            styles [
+              "suggested-action",
+              "pill"
+            ]
+          }
+        }
+
+        ScrolledWindow settings_view {
+          vexpand: true;
+          hexpand: true;
+          child: Box content {
+            orientation: vertical;
+            Adw.PreferencesPage preferences_page {
+              title: "General";
+              Adw.PreferencesGroup {
+                title: "Actions";
+                Button quickaccess_button {
+                  label: "Quick Access";
+                  styles [
+                    "suggested-action"
+                  ]
+                }
+                Button update_pin_button {
+                  label: "Update pin";
+                  margin-top: 20;
+                  styles [
+                    "suggested-action"
+                  ]
+                }
+                Button lock_button {
+                  label: "Lock";
+                  margin-top: 20;
+                  styles [
+                    "suggested-action"
+                  ]
+                }
+                Button logout_button {
+                  label: "Logout";
+                  margin-top: 20;
+                  styles [
+                    "destructive-action"
+                  ]
+                }
+              }
+              Adw.PreferencesGroup {
+                title: "Vault Status";
+                Adw.ActionRow last_sync_row {
+                  title: "Last Sync";
+                  subtitle: "Never";
+                  icon-name: "emblem-synchronizing-symbolic";
+                }
+                Adw.ActionRow websocket_connected_row {
+                  title: "Websocked Connected";
+                  subtitle: "False";
+                }
+                Adw.ActionRow logins_row {
+                  title: "Vault Login Entries";
+                  subtitle: "0";
+                  icon-name: "dialog-password-symbolic";
+                }
+                Adw.ActionRow notes_row {
+                  title: "Vault Notes";
+                  subtitle: "0";
+                  icon-name: "emblem-documents-symbolic";
+                }
+              }
+            }
+          };
+        }
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'Goldwarden';
+      };
+
+      [end]
+      MenuButton menu_button {
+        icon-name: "open-menu-symbolic";
+      }
+
+      valign: start;
+    }
+  }
+}

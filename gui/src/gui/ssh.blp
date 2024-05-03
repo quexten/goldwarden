@@ -1,0 +1,57 @@
+using Gtk 4.0;
+using Adw 1;
+
+
+Adw.Window window {
+  default-width: 400;
+  default-height: 700;
+
+  Adw.ToolbarView view {
+    content: Box{
+      orientation: vertical;
+      ScrolledWindow {
+        vexpand: true;
+        hexpand: true;
+        child: Box content {
+          orientation: vertical;
+          Adw.PreferencesPage {
+            title: "General";
+
+            Adw.PreferencesGroup add_ssh_key_group {
+              title: "Add an SSH Key";
+              Adw.ActionRow add_ssh_key_row {
+                subtitle: "flatpak run --command=goldwarden com.quexten.Goldwarden ssh add --name MY_KEY_NAME";
+                subtitle-selectable: true;
+              }
+            }
+
+            Adw.PreferencesGroup ssh_socket_path_group {
+              title: "SSH Socket Path";
+              description: "Add this to your environment variables";
+              Adw.ActionRow ssh_socket_path_row {
+                subtitle: "export SSH_AUTH_SOCK=/home/$USER/.var/app/com.quexten.Goldwarden/data/ssh-auth-sock";
+                subtitle-selectable: true;
+              }
+            }
+
+            Adw.PreferencesGroup git_signing_group {
+              title: "Git Signing";
+              description: "Check the wiki for more information";
+            }
+          }
+        };
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'SSH Configuration';
+      };
+
+      valign: start;
+    }
+  }
+}

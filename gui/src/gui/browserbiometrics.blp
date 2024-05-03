@@ -1,0 +1,44 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window window {
+  default-width: 500;
+  default-height: 500;
+
+  Adw.ToolbarView view {
+    content: Box{
+      orientation: vertical;
+      ScrolledWindow {
+        vexpand: true;
+        hexpand: true;
+        child: Box content {
+          orientation: vertical;
+          Adw.PreferencesPage preferences_page {
+            title: "General";
+
+            Adw.PreferencesGroup register_browser_biometrics_group {
+              title: "Register Browser Biometrics";
+              description: "Run the following command in your terminal to set up the browser biometrics integration";
+
+              Adw.ActionRow setup_command_row {
+                subtitle: "flatpak run --filesystem=home --command=goldwarden com.quexten.Goldwarden setup browserbiometrics";
+                subtitle-selectable: true;
+              }
+            }
+          }
+        };
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'Goldwarden Browser Biometrics Setup';
+      };
+
+      valign: start;
+    }
+  }
+}
