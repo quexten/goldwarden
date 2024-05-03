@@ -1,1 +1,2 @@
 tendo==0.3.0
+python3-xlib==0.15
