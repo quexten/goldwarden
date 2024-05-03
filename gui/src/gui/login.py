@@ -31,6 +31,19 @@ class GoldwardenLoginApp(Adw.Application):
         self.server_row = builder.get_object("server_row")
         self.login_button = builder.get_object("login_button")
         self.login_button.connect("clicked", lambda x: self.on_login())
+
+        evk = Gtk.EventControllerKey.new()
+        evk.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        evk.connect("key-pressed", self.key_press)
+        self.window.add_controller(evk)  
+
+    def key_press(self, event, keyval, keycode, state):
+        if keyval == Gdk.KEY_Escape:
+            os._exit(0)
+
+        if keyval == Gdk.KEY_Return and state & Gdk.ModifierType.CONTROL_MASK:
+            self.on_login()
+            return True
         
     def on_login(self):
         email = self.email_row.get_text()
@@ -43,6 +56,7 @@ class GoldwardenLoginApp(Adw.Application):
         if client_secret != "":
             goldwarden.set_client_secret(client_secret)
         goldwarden.login_with_password(email, "")
+        self.window.close()
 
 if __name__ == "__main__":
     settings = Gtk.Settings.get_default()
