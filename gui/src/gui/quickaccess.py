@@ -20,6 +20,7 @@ class GoldwardenQuickAccessApp(Adw.Application):
         self.filtered_logins = []
         self.query = ""
         self.connect('activate', self.on_activate)
+        self.selected_index = 0
 
     def on_activate(self, app):
         self.load()
@@ -36,14 +37,82 @@ class GoldwardenQuickAccessApp(Adw.Application):
         self.text_view.connect("changed", self.on_type)
         self.window.set_application(self)
 
+        evk = Gtk.EventControllerKey.new()
+        evk.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        evk.connect("key-pressed", self.key_press)
+        self.window.add_controller(evk)  
+
+    def key_press(self, event, keyval, keycode, state):
+        print(keyval, keycode)
+
+        if keyval == Gdk.KEY_Escape:
+            os._exit(0)
+
+        if keyval == Gdk.KEY_Tab:
+            return True
+
+        if keyval == Gdk.KEY_Up:
+            self.selected_index = self.selected_index - 1
+            if self.selected_index < 0:
+                self.selected_index = 0
+            self.render_list()
+            return True
+        elif keyval == Gdk.KEY_Down:
+            self.selected_index = self.selected_index + 1
+            if self.selected_index >= len(self.filtered_logins):
+                self.selected_index = len(self.filtered_logins) - 1
+            self.render_list()
+            return True
+
+        if self.selected_index >= len(self.filtered_logins) or self.selected_index < 0:
+            self.selected_index = 0
+
+        auto_type_combo = state & Gdk.ModifierType.CONTROL_MASK and state & Gdk.ModifierType.SHIFT_MASK
+        copy_combo = state & Gdk.ModifierType.CONTROL_MASK and not state & Gdk.ModifierType.SHIFT_MASK
+
+        # totp code
+        if keyval == Gdk.KEY_t or keyval == Gdk.KEY_T:
+            if auto_type_combo:
+                print("TOTP type")
+                self.autotype(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
+            if copy_combo:
+                print("TOTP copy")
+                self.set_clipboard(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
+
+        if keyval == Gdk.KEY_u or keyval == Gdk.KEY_U:
+            if auto_type_combo:
+                print("Username type")
+                self.autotype(self.filtered_logins[self.selected_index]["username"])
+            if copy_combo:
+                print("Username copy")
+                self.set_clipboard(self.filtered_logins[self.selected_index]["username"])
+        
+        if keyval == Gdk.KEY_p or keyval == Gdk.KEY_P:
+            if auto_type_combo:
+                print("Password type")
+                self.autotype(self.filtered_logins[self.selected_index]["password"])
+            if copy_combo:
+                print("Password copy")
+                self.set_clipboard(self.filtered_logins[self.selected_index]["password"])
+
+        if keyval == Gdk.KEY_Return:
+            if auto_type_combo:
+                self.autotype(f"{self.filtered_logins[self.selected_index]['username']}\t{self.filtered_logins[self.selected_index]['password']}")
+
     def update(self):
         self.update_list()
         self.render_list()
+        return True
 
     def autotype(self, text):
-        goldwarden.autotype(text)
-        time.sleep(0.1)
-        os._exit(0)
+        def perform_autotype(text):
+            self.window.hide()
+            time.sleep(0.1)
+            goldwarden.autotype(text)
+            time.sleep(0.1)
+            os._exit(0)
+        thread = Thread(target=perform_autotype, args=(text,))
+        thread.start()
 
     def set_clipboard(self, text):
         Gdk.Display.get_clipboard(Gdk.Display.get_default()).set_content(
@@ -91,6 +160,12 @@ class GoldwardenQuickAccessApp(Adw.Application):
             action_row.uri = i["uri"]
             action_row.totp = i["totp"]
             self.results_list.append(action_row)
+        
+        # select the nth item
+        if len(self.filtered_logins) > 0:
+            self.results_list.select_row(self.results_list.get_row_at_index(self.selected_index))
+            self.results_list.set_focus_child(self.results_list.get_row_at_index(self.selected_index))
+        
         self.starts_with_logins = None
         self.other_logins = None
 
