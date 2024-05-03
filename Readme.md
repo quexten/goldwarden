@@ -46,8 +46,11 @@ should be enough to install goldwarden on your system.
 For deb/rpm, download the deb/rpm from the latest release on GitHub and install it using your package manager.
 
 #### NixOS
-https://github.com/NixOS/nixpkgs/pull/278362
-
+```
+environment.systemPackages = [
+  pkgs.goldwarden
+];
+```
 ##### Github Binary Releases
 On other distributions, Mac and Windows, you can download it from the latest release on GitHub and put it into a location you want to have it in, f.e `/usr/bin`.
 
