@@ -1,0 +1,95 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window window {
+  default-width: 400;
+  default-height: 700;
+
+  Adw.ToolbarView view {
+    content: Box{
+      orientation: vertical;
+      Adw.Banner pin_banner {
+        title: 'No pin set, please set it now';
+        button-label: 'Set Pin';
+        revealed: false;
+      }
+
+      ScrolledWindow {
+        vexpand: true;
+        hexpand: true;
+        child: Box content {
+          orientation: vertical;
+          Adw.PreferencesPage preferences_page {
+            title: "General";
+
+            Adw.PreferencesGroup global_preferences_group {
+              title: "Global Shortcuts";
+
+              Adw.ActionRow autofill_row {
+                title: "Autofill Shortcut";
+                subtitle: "Not implemented - check the wiki for manual setup";
+              }
+            }
+
+            Adw.PreferencesGroup quick_access_preferences_group {
+              title: "Quick Access Shortcuts";
+              Adw.ActionRow {
+                title: "Copy Username Shortcut";
+                subtitle: "CTRL + U";
+              }
+              Adw.ActionRow {
+                title: "Autotype Username Shortcut";
+                subtitle: "CTRL + ALT + U";
+              }
+              Adw.ActionRow {
+                title: "Copy Password Shortcut";
+                subtitle: "CTRL + P";
+              }
+              Adw.ActionRow {
+                title: "Autotype Password Shortcut";
+                subtitle: "CTRL + ALT + P";
+              }
+              Adw.ActionRow {
+                title: "Copy TOTP Shortcut";
+                subtitle: "CTRL + T";
+              }
+              Adw.ActionRow {
+                title: "Autotype TOTP Shortcut";
+                subtitle: "CTRL + ALT + T";
+              }
+              Adw.ActionRow {
+                title: "Launch URI Shortcut";
+                subtitle: "CTRL + L";
+              }
+              Adw.ActionRow {
+                title: "Launch Web Vault Shortcut";
+                subtitle: "CTRL + V";
+              }
+              Adw.ActionRow {
+                title: "Focus Search Shortcut";
+                subtitle: "F";
+              }
+              Adw.ActionRow {
+                title: "Quit Shortcut";
+                subtitle: "Esc";
+              }
+            }
+          }
+        };
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'Settings';
+      };
+
+      valign: start;
+    }
+  }
+}
+
+
