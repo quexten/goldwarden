@@ -67,6 +67,6 @@ For instructions on specific features, also consult the wiki page for the featur
 ### Contributing
 Interested in contributing a feature or bug-fix? Great! Here is some information on how to set up your development environment:
 
-https://github.com/quexten/goldwarden/cli/wiki/Setting-up-the-Development-Environment
+https://github.com/quexten/goldwarden/wiki/Setting-up-the-Development-Environment
 
 After that, create a PR. If you encounter any issues, feel free to open a discussion thread.
