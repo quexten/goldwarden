@@ -31,8 +31,8 @@ There is a flatpak that includes a small UI, autotype functionality and autostar
 
 [<img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png' />](https://flathub.org/apps/details/com.quexten.Goldwarden)
 
-<img src='https://github.com/quexten/goldwarden/cli/assets/11866552/fd302636-3494-4f92-a51d-50ac863885f2' width='400'>
-<img src='https://github.com/quexten/goldwarden/cli/assets/11866552/683f0ed4-e4cb-4088-9fb0-d08fcec3fa22' width='400'>
+![image](https://github.com/quexten/goldwarden/assets/11866552/ae081005-00bf-4127-a208-1476ed856ef1)
+![image](https://github.com/quexten/goldwarden/assets/11866552/b7f4c261-f801-4b61-9507-8a9bef793de4)
 
 #### CLI
 ##### Arch (AUR)
