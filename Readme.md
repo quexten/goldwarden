@@ -31,8 +31,8 @@ There is a flatpak that includes a small UI, autotype functionality and autostar
 
 [<img width='240' alt='Download on Flathub' src='https://flathub.org/assets/badges/flathub-badge-en.png' />](https://flathub.org/apps/details/com.quexten.Goldwarden)
 
-<img src='https://github.com/quexten/goldwarden/assets/11866552/fd302636-3494-4f92-a51d-50ac863885f2' width='400'>
-<img src='https://github.com/quexten/goldwarden/assets/11866552/683f0ed4-e4cb-4088-9fb0-d08fcec3fa22' width='400'>
+<img src='https://github.com/quexten/goldwarden/cli/assets/11866552/fd302636-3494-4f92-a51d-50ac863885f2' width='400'>
+<img src='https://github.com/quexten/goldwarden/cli/assets/11866552/683f0ed4-e4cb-4088-9fb0-d08fcec3fa22' width='400'>
 
 #### CLI
 ##### Arch (AUR)
@@ -61,12 +61,12 @@ go install github.com/quexten/goldwarden@latest
 ```
 
 ### Setup and Usage
-To get started, follow the instructions provided in the wiki https://github.com/quexten/goldwarden/wiki/Getting-Started.
+To get started, follow the instructions provided in the wiki https://github.com/quexten/goldwarden/cli/wiki/Getting-Started.
 For instructions on specific features, also consult the wiki page for the feature.
 
 ### Contributing
 Interested in contributing a feature or bug-fix? Great! Here is some information on how to set up your development environment:
 
-https://github.com/quexten/goldwarden/wiki/Setting-up-the-Development-Environment
+https://github.com/quexten/goldwarden/cli/wiki/Setting-up-the-Development-Environment
 
 After that, create a PR. If you encounter any issues, feel free to open a discussion thread.

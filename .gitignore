@@ -6,3 +6,4 @@ flatpak-pip-generator
 repo
 __debug*
 .templates
+vendor

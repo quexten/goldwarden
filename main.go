@@ -4,9 +4,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/quexten/goldwarden/agent/config"
-	"github.com/quexten/goldwarden/browserbiometrics"
-	"github.com/quexten/goldwarden/cmd"
+	"github.com/quexten/goldwarden/cli/agent/config"
+	"github.com/quexten/goldwarden/cli/browserbiometrics"
+	"github.com/quexten/goldwarden/cli/cmd"
 )
 
 func main() {

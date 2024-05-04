@@ -1,0 +1,55 @@
+id: com.quexten.Goldwarden
+runtime: org.gnome.Platform
+runtime-version: '45'
+sdk: org.gnome.Sdk
+command: goldwarden_ui_main.py
+finish-args:
+  # Allow network access for sync
+  - --share=network
+
+  # GUI
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+
+  # Lock on screensave
+  - --talk-name=org.gnome.ScreenSaver
+  - --talk-name=org.freedesktop.ScreenSaver
+
+  #  Lock on idle
+  - --talk-name=org.gnome.Mutter.IdleMonitor
+
+  # pinentry & approval
+  - --talk-name=org.gnome.keyring.SystemPrompter
+  # biometric / user password auth
+  - --system-talk-name=org.freedesktop.PolicyKit1
+modules:
+  - name: "blueprint-compiler"
+    buildsystem: meson
+    cleanup: ['*']
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/jwestman/blueprint-compiler
+        tag: v0.12.0
+  - ../gui/python3-requirements.json
+  - name: goldwarden-python-ui
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/bin
+      - cp -R ./* /app/bin
+      - chmod +x /app/bin/goldwarden_ui_main.py
+      - install -D ./com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
+      - install -D ./goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - install -Dm644 ./com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
+      - blueprint-compiler batch-compile /app/bin/src/gui/.templates/ /app/bin/src/gui/ /app/bin/src/gui/*.blp
+    sources:
+      - type: dir
+        path: ../gui/
+  - name: goldwarden-core-daemon
+    buildsystem: simple
+    build-commands:
+      - install -D goldwarden /app/bin/goldwarden
+    sources:
+      - type: file
+        path: ../goldwarden
