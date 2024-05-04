@@ -71,6 +71,8 @@ class GoldwardenQuickAccessApp(Adw.Application):
 
         # totp code
         if keyval == Gdk.KEY_t or keyval == Gdk.KEY_T:
+            if self.filtered_logins[self.selected_index]["totp"] == "":
+                return
             if auto_type_combo:
                 self.run_autotype(totp.totp(self.filtered_logins[self.selected_index]["totp"]))
             if copy_combo:
@@ -154,15 +156,34 @@ class GoldwardenQuickAccessApp(Adw.Application):
 
         for i in self.filtered_logins:
             action_row = Adw.ActionRow()
-            action_row.set_title(i["name"])
-            action_row.set_subtitle(i["username"])
+            if "name" in i:
+                action_row.set_title(i["name"])
+            else:
+                action_row.set_title("[no name]")
+            if "username" in i:
+                action_row.set_subtitle(i["username"])
+                action_row.username = i["username"]
+            else:
+                action_row.set_subtitle("[no username]")
+                action_row.username = "[no username]"
+            if "password" in i:
+                action_row.password = i["password"]
+            else:
+                action_row.password = "[no password]"
+            if "uri" in i:
+                action_row.uri = i["uri"]
+            else:
+                action_row.uri = "[no uri]"
+            if "uuid" in i:
+                action_row.uuid = i["uuid"]
+            else:
+                action_row.uuid = "[no uuid]"
+            if "totp" in i:
+                action_row.totp = i["totp"]
+            else:
+                action_row.totp = ""
             action_row.set_icon_name("dialog-password")
             action_row.set_activatable(True)
-            action_row.password = i["password"]
-            action_row.username = i["username"]
-            action_row.uuid = i["uuid"]
-            action_row.uri = i["uri"]
-            action_row.totp = i["totp"]
             self.results_list.append(action_row)
         
         # select the nth item
