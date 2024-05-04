@@ -207,8 +207,13 @@ jobs:
         uses: actions/checkout@v1
       - name: Write version
         run: echo "${GITHUB_REF#refs/tags/}" > ./cli/cmd/version.txt
+      - name: Write release version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo Version: $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
       - name: Replace version in PKGBUILD
-        run: sed -i "s/pkgver=.*/pkgver=${{ github.event.release.tag_name }}/" ./.github/workflows/PKGBUILD
+        run: sed -i "s/pkgver=.*/pkgver=${VERSION}/" ./.github/workflows/PKGBUILD
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
         with:
