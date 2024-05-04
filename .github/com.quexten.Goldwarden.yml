@@ -52,4 +52,4 @@ modules:
       - install -D goldwarden /app/bin/goldwarden
     sources:
       - type: file
-        path: ./goldwarden
+        path: ../goldwarden
