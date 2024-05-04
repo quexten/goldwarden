@@ -32,7 +32,7 @@ modules:
       - type: git
         url: https://gitlab.gnome.org/jwestman/blueprint-compiler
         tag: v0.12.0
-  - ./gui/python3-requirements.json
+  - ../gui/python3-requirements.json
   - name: goldwarden-python-ui
     buildsystem: simple
     build-commands:
@@ -45,7 +45,7 @@ modules:
       - blueprint-compiler batch-compile /app/bin/src/gui/.templates/ /app/bin/src/gui/ /app/bin/src/gui/*.blp
     sources:
       - type: dir
-        path: ./
+        path: ../gui/
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
