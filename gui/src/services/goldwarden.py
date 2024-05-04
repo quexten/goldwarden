@@ -142,7 +142,7 @@ def autotype(text):
 
 def version():
     result = send_authenticated_command(f"version")
-    return result
+    return result.strip()
 
 def is_daemon_running():
     result = send_authenticated_command(f"vault status")

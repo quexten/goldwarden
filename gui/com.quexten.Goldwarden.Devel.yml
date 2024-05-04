@@ -1,9 +1,7 @@
 id: com.quexten.Goldwarden
 runtime: org.gnome.Platform
 runtime-version: '45'
-sdk: org.freedesktop.Sdk//23.08
-sdk-extensions:
-    - org.freedesktop.Sdk.Extension.golang
+sdk: org.gnome.Sdk
 command: goldwarden_ui_main.py
 finish-args:
   # Allow network access for sync
@@ -26,6 +24,12 @@ finish-args:
   - --talk-name=org.gnome.keyring.SystemPrompter
   # biometric / user password auth
   - --system-talk-name=org.freedesktop.PolicyKit1
+
+build-options:
+  env:
+    - GOBIN=/app/bin/.buildtools/golang/bin/
+    - GOROOT=/app/bin/.buildtools/golang/
+
 modules:
   - name: golang
     buildsystem: simple
@@ -51,16 +55,32 @@ modules:
           stable-only: true
           url-template: https://go.dev/dl/go$version.linux-amd64.tar.gz
     build-commands:
-      - install -d /usr/lib/sdk/golang
-      - cp -rpv * /usr/lib/sdk/golang/
+      - mkdir -p /app/bin/.buildtools/golang/
+      - install -d /app/bin/.buildtools/golang/
+      - cp -rpv * /app/bin/.buildtools/golang/
+  - name: go-vendor
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/vendor/
+      - cp -r ./* /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/vendor/
+    sources:
+      - type: dir
+        path: ../vendor/
+  - name: go-cli 
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/cli/
+      - cp -r ./* /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/cli/
+    sources:
+      - type: dir
+        path: ../cli/
   - name: goldwarden-core-daemon
     buildsystem: simple
     build-commands:
-      - go build -o goldwarden ./main.go
-      - install -D goldwarden /app/bin/goldwarden
+      - cp -r ./* /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/
+      - cd /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/ && /app/bin/.buildtools/golang/bin/go build -o goldwarden . 
+      - cd /app/bin/.buildtools/golang/src/github.com/quexten/goldwarden/ && install -D goldwarden /app/bin/goldwarden
     sources:
-      - type: dir
-        path: ../gui/
       - type: file
         path: ../main.go
       - type: file
