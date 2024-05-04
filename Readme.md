@@ -7,7 +7,7 @@ do not (yet) have or are not willing to add (for example, because the integratio
 and enhanced security measures that other tools do not provide, such as:
 
 - Support for SSH Agent (Git signing and SSH login)
-- System wide autotype (Linux - Gnome, KDE only for now)
+- System wide autotype (On Linux (Wayland/XOrg), Mac and Windows)
 - Biometric authentication
 - Implements Bitwarden browser-extension biometrics on Linux
 - Support for injecting environment variables into the environment of a cli command
