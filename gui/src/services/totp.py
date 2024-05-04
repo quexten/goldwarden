@@ -17,4 +17,8 @@ def hotp(key, counter, digits=6, digest='sha1'):
 
 
 def totp(key, time_step=30, digits=6, digest='sha1'):
+    if key.startswith('otpauth://'):
+        key = key.split('secret=')[1].split('&')[0]
+    key = key.replace(' ', '')
+    key = key.strip()
     return hotp(key, int(time.time() / time_step), digits, digest)

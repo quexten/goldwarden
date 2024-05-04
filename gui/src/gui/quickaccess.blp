@@ -1,0 +1,54 @@
+using Gtk 4.0;
+using Adw 1;
+
+
+Adw.Window window {
+  default-width: 400;
+  default-height: 700;
+
+  Adw.ToolbarView view {
+    content: Box{
+      orientation: vertical;
+      Box {
+        orientation: vertical;
+        
+        Adw.PreferencesPage preferences_page {
+          Adw.PreferencesGroup {
+            Adw.EntryRow search_row {
+              title: "Search";
+            }
+          }
+        }
+
+        Adw.StatusPage status_page {
+          visible: true;
+          margin-top: 100;
+          title: "Type to search";
+          icon-name: "system-search-symbolic";
+        }
+
+        ListBox results_list {
+          margin-start: 10;
+          margin-end: 10;
+          margin-top: 10;
+          margin-bottom: 10;
+          visible: false;
+          styles [
+            "boxed-list"
+          ]
+        }
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'QuickAccess';
+      };
+
+      valign: start;
+    }
+  }
+}

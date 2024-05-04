@@ -1,0 +1,43 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window window {
+  default-width: 400;
+  default-height: 200;
+
+  Adw.ToolbarView view {
+    content: Box {
+      orientation: vertical;
+      spacing: 6;
+      
+      Label message {
+        label: 'Dynamic Message';
+      }
+      
+      Box button_box {
+        spacing: 6;
+        
+        Button cancel_button {
+          label: "Cancel";
+          hexpand: true;
+        }
+        
+        Button approve_button {
+          label: "Approve";
+          hexpand: true;
+        }
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'Goldwarden Approval';
+      };
+
+      valign: start;
+    }
+  }
+}

@@ -43,6 +43,6 @@ jobs:
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
       with:
         bundle: goldwarden.flatpak
-        manifest-path: com.quexten.Goldwarden.yml
+        manifest-path: .github/com.quexten.Goldwarden.yml
         cache-key: flatpak-builder-${{ github.sha }}
         arch: ${{ matrix.arch }}

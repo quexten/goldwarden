@@ -1,0 +1,69 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.Window window {
+  default-width: 400;
+  default-height: 550;
+
+  Adw.ToolbarView view {
+    content: Box {
+      orientation: vertical;
+      spacing: 6;
+      
+      Adw.PreferencesPage preferences_page {
+        Adw.PreferencesGroup {
+          title: "Authentication";
+          margin-start: 12;
+          margin-end: 12;
+          margin-bottom: 12;
+          Adw.EntryRow email_row {
+            title: "Email";
+            text: "";
+          }
+          Adw.EntryRow client_id_row {
+            title: "Client ID (optional)";
+            text: "";
+          }
+          Adw.EntryRow client_secret_row {
+            title: "Client Secret (optional)";
+            text: "";
+          }
+        }
+        Adw.PreferencesGroup {
+          title: "Server";
+          margin-start: 12;
+          margin-end: 12;
+          margin-top: 12;
+          margin-bottom: 12;
+          Adw.EntryRow server_row {
+            title: "Server URL";
+            text: "https://vault.bitwarden.com";
+          }
+        }
+        Adw.PreferencesGroup {
+          margin-start: 12;
+          margin-end: 12;
+          margin-top: 12;
+          margin-bottom: 12;
+          Button login_button {
+            label: "Login";
+            styles [
+              "suggested-action"
+            ]  
+          }
+        }
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      halign: baseline;
+
+      title-widget: Adw.WindowTitle {
+        title: 'Goldwarden Login';
+      };
+
+      valign: start;
+    }
+  }
+}

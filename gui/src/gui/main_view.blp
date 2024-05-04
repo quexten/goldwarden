@@ -1,0 +1,43 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ToolbarView view {
+  content: Box{
+    orientation: vertical;
+    Adw.Banner paused_banner {
+      title: 'Backups paused due to Power Saver Mode';
+      revealed: false;
+    }
+
+    ScrolledWindow {
+      vexpand: true;
+      hexpand: true;
+      margin-top: 20;
+      child: Box content {
+        orientation: vertical;
+        spacing: 6;
+        margin-start: 80;
+        margin-end: 80;
+      };
+    }
+  };
+
+  [top]
+  Adw.HeaderBar {
+    halign: baseline;
+
+    title-widget: Adw.WindowTitle {
+      title: 'Backup View';
+    };
+
+    valign: start;
+
+    Button add_button {
+      label: 'Add Backup';
+
+      styles [
+        "suggested-action",
+      ]
+    }
+  }
+}
