@@ -61,7 +61,7 @@ go install github.com/quexten/goldwarden@latest
 ```
 
 ### Setup and Usage
-To get started, follow the instructions provided in the wiki https://github.com/quexten/goldwarden/cli/wiki/Getting-Started.
+To get started, follow the instructions provided in the wiki [https://github.com/quexten/goldwarden/cli/wiki/Getting-Started](https://github.com/quexten/goldwarden/wiki/Getting-Started).
 For instructions on specific features, also consult the wiki page for the feature.
 
 ### Contributing
