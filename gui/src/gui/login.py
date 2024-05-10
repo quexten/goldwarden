@@ -52,9 +52,9 @@ class GoldwardenLoginApp(Adw.Application):
         server = self.server_row.get_text()
         goldwarden.set_url(server)
         if client_id != "":
-            goldwarden.set_client_id(client_id)
+            print("set client id result", goldwarden.set_client_id(client_id.strip()))
         if client_secret != "":
-            goldwarden.set_client_secret(client_secret)
+            print("set client secret result", goldwarden.set_client_secret(client_secret.strip()))
         goldwarden.login_with_password(email, "")
         self.window.close()
 
