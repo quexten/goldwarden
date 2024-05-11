@@ -70,8 +70,8 @@ def set_notification_url(url):
 def set_vault_url(url):
     send_authenticated_command(f"config set-vault-url {url}")
 
-def set_url(url):
-    send_authenticated_command(f"config set-url {url}")
+def set_server(url):
+    send_authenticated_command(f"config set-server {url}")
 
 def get_environment():
     result = send_authenticated_command(f"config get-environment")

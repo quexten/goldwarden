@@ -69,6 +69,9 @@ class GoldwardenQuickAccessApp(Adw.Application):
         auto_type_combo = state & Gdk.ModifierType.CONTROL_MASK and state & Gdk.ModifierType.SHIFT_MASK
         copy_combo = state & Gdk.ModifierType.CONTROL_MASK and not state & Gdk.ModifierType.SHIFT_MASK
 
+        if not len(self.filtered_logins) > 0:
+            return
+
         # totp code
         if keyval == Gdk.KEY_t or keyval == Gdk.KEY_T:
             if self.filtered_logins[self.selected_index]["totp"] == "":
