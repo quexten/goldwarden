@@ -50,7 +50,7 @@ class GoldwardenLoginApp(Adw.Application):
         client_id = self.client_id_row.get_text()
         client_secret = self.client_secret_row.get_text()
         server = self.server_row.get_text()
-        goldwarden.set_url(server)
+        print("setting server to", server, "with result", goldwarden.set_server(server))
         if client_id != "":
             goldwarden.set_client_id(client_id)
         if client_secret != "":
