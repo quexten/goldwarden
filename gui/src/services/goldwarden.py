@@ -70,8 +70,10 @@ def set_notification_url(url):
 def set_vault_url(url):
     send_authenticated_command(f"config set-vault-url {url}")
 
-def set_url(url):
-    send_authenticated_command(f"config set-url {url}")
+def set_server(url):
+    result = send_authenticated_command(f"config set-server {url}")
+    if result.strip() != "Done":
+        raise Exception("Failed to set server")
 
 def get_environment():
     result = send_authenticated_command(f"config get-environment")
@@ -88,9 +90,12 @@ def set_client_secret(client_secret):
 
 def login_with_password(email, password):
     result = send_authenticated_command(f"vault login --email {email}")
-    if not "Logged in" in result:
-        return "badpass"
-    return "ok"
+    if "Login failed" in result and "username or password" in result.lower():
+        raise Exception("errorbadpassword")
+    if "Login failed" in result and ("error code 7" in result.lower() or "error code 6" in result.lower()):
+        raise Exception("errorcaptcha")
+    if "Login failed" in result and "two-factor" in result.lower():
+        raise Exception("errortotp")
 
 def login_passwordless(email):
     send_authenticated_command(f"vault login --email {email} --passwordless")
