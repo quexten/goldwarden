@@ -47,15 +47,45 @@ class GoldwardenLoginApp(Adw.Application):
         
     def on_login(self):
         email = self.email_row.get_text()
-        client_id = self.client_id_row.get_text()
-        client_secret = self.client_secret_row.get_text()
+        client_id = self.client_id_row.get_text().strip()
+        client_secret = self.client_secret_row.get_text().strip()
         server = self.server_row.get_text()
-        goldwarden.set_url(server)
+        try:
+            goldwarden.set_server(server)
+        except:
+            print("set server failed")
+            dialog = Adw.MessageDialog.new(self.window,
+             "Failed to set server",
+             "The server you entered is invalid, please try again.",
+            )
+            dialog.add_response("ok", "Dismiss")
+            dialog.present()
+            return
+
         if client_id != "":
             goldwarden.set_client_id(client_id)
         if client_secret != "":
             goldwarden.set_client_secret(client_secret)
-        goldwarden.login_with_password(email, "")
+
+        try:
+            goldwarden.login_with_password(email, "")
+        except Exception as e:
+            if "errorbadpassword" in str(e):
+                dialog = Adw.MessageDialog.new(self.window, "Bad Password", "The username or password you entered is incorrect.")
+                dialog.add_response("ok", "Dismiss")
+                dialog.present()
+                return
+            if "errorcaptcha" in str(e):
+                dialog = Adw.MessageDialog.new(self.window, "Unusual traffic error", "Traffic is unusual, please set up api client id and client secret.")
+                dialog.add_response("ok", "Dismiss")
+                dialog.present()
+                return
+            if "errortotp" in str(e):
+                dialog = Adw.MessageDialog.new(self.window, "TOTP Invalid", "The TOTP code you entered is invalid.")
+                dialog.add_response("ok", "Dismiss")
+                dialog.present()
+                return
+
         self.window.close()
 
 if __name__ == "__main__":
