@@ -83,10 +83,10 @@ def get_environment():
         return None
 
 def set_client_id(client_id):
-    send_authenticated_command(f"config set-client-id \"{client_id}\"")
+    return send_authenticated_command(f"config set-client-id {client_id}")
 
 def set_client_secret(client_secret):
-    send_authenticated_command(f"config set-client-secret \"{client_secret}\"")
+    return send_authenticated_command(f"config set-client-secret {client_secret}")
 
 def login_with_password(email, password):
     result = send_authenticated_command(f"vault login --email {email}")

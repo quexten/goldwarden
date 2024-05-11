@@ -47,8 +47,8 @@ class GoldwardenLoginApp(Adw.Application):
         
     def on_login(self):
         email = self.email_row.get_text()
-        client_id = self.client_id_row.get_text()
-        client_secret = self.client_secret_row.get_text()
+        client_id = self.client_id_row.get_text().strip()
+        client_secret = self.client_secret_row.get_text().strip()
         server = self.server_row.get_text()
         try:
             goldwarden.set_server(server)
@@ -61,10 +61,12 @@ class GoldwardenLoginApp(Adw.Application):
             dialog.add_response("ok", "Dismiss")
             dialog.present()
             return
+
         if client_id != "":
             goldwarden.set_client_id(client_id)
         if client_secret != "":
             goldwarden.set_client_secret(client_secret)
+
         try:
             goldwarden.login_with_password(email, "")
         except Exception as e:
@@ -83,6 +85,7 @@ class GoldwardenLoginApp(Adw.Application):
                 dialog.add_response("ok", "Dismiss")
                 dialog.present()
                 return
+
         self.window.close()
 
 if __name__ == "__main__":
