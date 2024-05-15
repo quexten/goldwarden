@@ -19,7 +19,7 @@ require (
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/rymdport/portal v0.2.2
+	github.com/rymdport/portal v0.2.3
 	github.com/spf13/cobra v1.8.0
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.1.0
@@ -56,5 +56,3 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 )
-
-replace github.com/rymdport/portal => github.com/quexten/portal v0.0.0-20240429200240-156297fa11c5
