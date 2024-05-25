@@ -7,6 +7,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import GLib, Gio
 import sys
+from threading import Timer
 
 def set_status(message):
     bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
@@ -29,9 +30,13 @@ def set_status(message):
         sys.exit(0)
     except Exception as e:
         print(e)
+        sys.exit(0)
 
 if len(sys.argv) > 1:
     set_status(sys.argv[1])
+
+thread = Timer(10, sys.exit, [0])
+thread.start()
 
 loop = GLib.MainLoop()
 loop.run()
