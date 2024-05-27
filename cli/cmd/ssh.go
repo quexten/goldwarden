@@ -18,12 +18,12 @@ var sshCmd = &cobra.Command{
 	},
 }
 
-// runCmd represents the run command
+// sshAddCmd represents the ssh add command
 var sshAddCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Runs a command with environment variables from your vault",
-	Long: `Runs a command with environment variables from your vault.
-	The variables are stored as a secure note. Consult the documentation for more information.`,
+	Short: "Creates a new SSH key and adds it to the SSH Agent.",
+	Long: `Creates a new SSH key and adds it to the SSH Agent.
+	The key is stored as a secure note. Consult the documentation for more information.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := loginIfRequired()
 		if err != nil {
