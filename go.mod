@@ -22,7 +22,7 @@ require (
 	github.com/rymdport/portal v0.2.3
 	github.com/spf13/cobra v1.8.0
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
-	github.com/tink-crypto/tink-go/v2 v2.1.0
+	github.com/tink-crypto/tink-go/v2 v2.2.0
 	github.com/twpayne/go-pinentry v0.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/crypto v0.22.0
