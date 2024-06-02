@@ -101,8 +101,7 @@ class GoldwardenSettingsApp(Adw.Application):
         if status == None:
             is_daemon_running = goldwarden.is_daemon_running()
             if not is_daemon_running:
-                self.status_row.set_subtitle("Daemon not running")
-                self.vault_status_icon.set_icon("dialog-error", "error")
+                print("Daemon not running")
             return
 
         logged_in = status["loggedIn"]
