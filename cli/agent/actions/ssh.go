@@ -16,12 +16,24 @@ import (
 func handleAddSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	req := messages.ParsePayload(msg).(messages.CreateSSHKeyRequest)
 
-	cipher, publicKey := ssh.NewSSHKeyCipher(req.Name, vault.Keyring)
+	cipher, publicKey, err := ssh.NewSSHKeyCipher(req.Name, vault.Keyring)
+	if err != nil {
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
 	_, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 		Success: true,
 	})
 	if err != nil {
-		panic(err)
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
 	}
 
 	token, err := cfg.GetToken()
@@ -56,7 +68,49 @@ func handleListSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vau
 	return
 }
 
+func handleImportSSH(msg messages.IPCMessage, cfg *config.Config, vault *vault.Vault, callingContext *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	req := messages.ParsePayload(msg).(messages.ImportSSHKeyRequest)
+
+	cipher, _, err := ssh.SSHKeyCipherFromKey(req.Name, req.Key, vault.Keyring)
+	if err != nil {
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	_, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+		Success: true,
+	})
+	if err != nil {
+		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	token, err := cfg.GetToken()
+	if err != nil {
+		actionsLog.Warn(err.Error())
+	}
+	ctx := context.WithValue(context.TODO(), bitwarden.AuthToken{}, token.AccessToken)
+	postedCipher, err := bitwarden.PostCipher(ctx, cipher, cfg)
+	if err == nil {
+		vault.AddOrUpdateSecureNote(postedCipher)
+	} else {
+		actionsLog.Warn("Error posting ssh key cipher: " + err.Error())
+	}
+
+	response, err = messages.IPCMessageFromPayload(messages.ImportSSHKeyResponse{
+		Success: true,
+	})
+	return
+}
+
 func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.CreateSSHKeyRequest{}), ensureEverything(systemauth.SSHKey, handleAddSSH))
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetSSHKeysRequest{}), ensureIsNotLocked(ensureIsLoggedIn(handleListSSH)))
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.ImportSSHKeyRequest{}), ensureEverything(systemauth.SSHKey, handleImportSSH))
 }
