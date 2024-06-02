@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 
@@ -92,6 +93,59 @@ var listSSHCmd = &cobra.Command{
 	},
 }
 
+var importSSHCmd = &cobra.Command{
+	Use:   "import",
+	Short: "Imports an SSH key into your vault",
+	Long:  `Imports an SSH key into your vault.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		filename := args[0]
+		fmt.Println("Importing SSH key from " + filename)
+
+		name, _ := cmd.Flags().GetString("name")
+		if name == "" {
+			name = "Imported SSH Key"
+		}
+
+		if _, err := os.Stat(filename); os.IsNotExist(err) {
+			fmt.Println("Error: File does not exist")
+			return
+		}
+
+		file, err := os.Open(filename)
+		if err != nil {
+			fmt.Println("Error: " + err.Error())
+			return
+		}
+
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(file)
+		key := buf.String()
+
+		result, err := commandClient.SendToAgent(messages.ImportSSHKeyRequest{
+			Key:  key,
+			Name: name,
+		})
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ImportSSHKeyResponse:
+			response := result.(messages.ImportSSHKeyResponse)
+			if response.Success {
+				fmt.Println("Success")
+			} else {
+				fmt.Println("Error: " + response.ErrorMsg)
+			}
+			return
+		case messages.ActionResponse:
+			fmt.Println("Error: " + result.(messages.ActionResponse).Message)
+			return
+		}
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(sshCmd)
 	sshCmd.AddCommand(sshAddCmd)
@@ -99,4 +153,6 @@ func init() {
 	_ = sshAddCmd.MarkFlagRequired("name")
 	sshAddCmd.PersistentFlags().Bool("clipboard", false, "Copy the public key to the clipboard")
 	sshCmd.AddCommand(listSSHCmd)
+	importSSHCmd.PersistentFlags().String("name", "", "")
+	sshCmd.AddCommand(importSSHCmd)
 }

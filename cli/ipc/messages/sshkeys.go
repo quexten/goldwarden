@@ -17,6 +17,16 @@ type GetSSHKeysResponse struct {
 	Keys []string
 }
 
+type ImportSSHKeyRequest struct {
+	Key  string
+	Name string
+}
+
+type ImportSSHKeyResponse struct {
+	Success  bool
+	ErrorMsg string
+}
+
 func init() {
 	registerPayloadParser(func(payload []byte) (interface{}, error) {
 		var req CreateSSHKeyRequest
@@ -53,4 +63,22 @@ func init() {
 		}
 		return req, nil
 	}, GetSSHKeysResponse{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req ImportSSHKeyRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, ImportSSHKeyRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req ImportSSHKeyResponse
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, ImportSSHKeyResponse{})
 }
