@@ -1,5 +1,5 @@
 from ..goldwarden import autotype
 
-def libportal_autotype(text):
+def autotype_libportal(text):
     print("autotypeing with libportal")
     goldwarden.autotype(text)
