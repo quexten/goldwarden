@@ -1,10 +1,10 @@
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
-gi.require_version('Notify', '0.7')
+# gi.require_version('Notify', '0.7')
 import gc
 import time
-from gi.repository import Gtk, Adw, GLib, Notify, Gdk
+from gi.repository import Gtk, Adw, GLib, Gdk
 from ..services import goldwarden
 from ..services.autotype import autotype
 from threading import Thread
@@ -12,7 +12,6 @@ from .resource_loader import load_template
 import sys
 import os
 from ..services import totp
-Notify.init("Goldwarden")
 
 class GoldwardenQuickAccessApp(Adw.Application):
     def __init__(self, **kwargs):
@@ -115,8 +114,8 @@ class GoldwardenQuickAccessApp(Adw.Application):
 
     def run_autotype(self, text):
         def perform_autotype(text):
-            self.window.hide()
-            time.sleep(0.1)
+            GLib.idle_add(self.window.hide)
+            time.sleep(2)
             autotype.autotype(text)
             time.sleep(0.1)
             os._exit(0)
@@ -148,7 +147,7 @@ class GoldwardenQuickAccessApp(Adw.Application):
             self.filtered_logins = self.filtered_logins[0:7]
 
     def render_list(self):
-        if len(self.filtered_logins) > 1:
+        if len(self.filtered_logins) > 0:
             self.results_list.set_visible(True)
             while self.results_list.get_first_child() != None:
                 self.results_list.remove(self.results_list.get_first_child())

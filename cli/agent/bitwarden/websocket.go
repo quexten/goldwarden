@@ -255,12 +255,11 @@ func parseMessageTypeFromMessagePack(messagePack []byte) (int8, string, bool) {
 		return 0, "", false
 	}
 	if len(value) < 5 {
-		websocketLog.Warn("Invalid message received, length too short")
 		return 0, "", false
 	}
 	value, success := value[4].([]interface{})
 	if len(value) < 1 || !success {
-		websocketLog.Warn("Invalid message received, length too short")
+		websocketLog.Warn("Invalid message received, value length less than 1")
 		return 0, "", false
 	}
 	value1, success := value[0].(map[string]interface{})

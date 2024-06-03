@@ -1,16 +1,22 @@
-//go:build freebsd || linux
+//go:build freebsd || linux || darwin
 
 package pinentry
 
 import (
 	"errors"
+	"runtime"
 
 	"github.com/twpayne/go-pinentry"
 )
 
 func getPassword(title string, description string) (string, error) {
+	binaryClientOption := pinentry.WithBinaryNameFromGnuPGAgentConf()
+	if runtime.GOOS == "darwin" {
+		binaryClientOption = pinentry.WithBinaryName("pinentry-mac")
+	}
+
 	client, err := pinentry.NewClient(
-		pinentry.WithBinaryNameFromGnuPGAgentConf(),
+		binaryClientOption,
 		pinentry.WithGPGTTY(),
 		pinentry.WithTitle(title),
 		pinentry.WithDesc(description),
