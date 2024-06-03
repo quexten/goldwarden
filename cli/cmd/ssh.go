@@ -98,6 +98,11 @@ var importSSHCmd = &cobra.Command{
 	Short: "Imports an SSH key into your vault",
 	Long:  `Imports an SSH key into your vault.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			fmt.Println("Error: No filename for SSH key specified")
+			return
+		}
+
 		filename := args[0]
 		fmt.Println("Importing SSH key from " + filename)
 
