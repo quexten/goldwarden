@@ -20,7 +20,7 @@ type Vault struct {
 	sshKeyNoteIDs      []string
 	envCredentials     map[string]string
 	lastSynced         int64
-	websockedConnected bool
+	websocketConnected bool
 	mu                 sync.Mutex
 }
 
