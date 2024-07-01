@@ -20,7 +20,7 @@ require (
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/rymdport/portal v0.2.3
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.2.0
 	github.com/twpayne/go-pinentry v0.3.0
