@@ -27,7 +27,7 @@ type VaultStatusResponse struct {
 	NumberOfLogins     int
 	NumberOfNotes      int
 	LastSynced         int64
-	WebsockedConnected bool
+	WebsocketConnected bool
 }
 
 func init() {
