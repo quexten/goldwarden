@@ -20,7 +20,7 @@ type Vault struct {
 	sshKeyNoteIDs      []string
 	envCredentials     map[string]string
 	lastSynced         int64
-	websockedConnected bool
+	websocketConnected bool
 	mu                 sync.Mutex
 }
 
@@ -32,7 +32,7 @@ func NewVault(keyring *crypto.Keyring) *Vault {
 		sshKeyNoteIDs:      make([]string, 0),
 		envCredentials:     make(map[string]string),
 		lastSynced:         0,
-		websockedConnected: false,
+		websocketConnected: false,
 	}
 }
 
@@ -424,7 +424,7 @@ func (vault *Vault) GetLastSynced() int64 {
 
 func (vault *Vault) SetWebsocketConnected(connected bool) {
 	vault.lockMutex()
-	vault.websockedConnected = connected
+	vault.websocketConnected = connected
 	vault.unlockMutex()
 }
 
@@ -432,5 +432,5 @@ func (vault *Vault) IsWebsocketConnected() bool {
 	vault.lockMutex()
 	defer vault.unlockMutex()
 
-	return vault.websockedConnected
+	return vault.websocketConnected
 }

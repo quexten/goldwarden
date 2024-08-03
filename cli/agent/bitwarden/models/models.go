@@ -76,6 +76,8 @@ type Cipher struct {
 	Login      *LoginCipher      `json:"login,omitempty"`
 	Notes      *crypto.EncString `json:"notes,omitempty"`
 	SecureNote *SecureNoteCipher `json:"secureNote,omitempty"`
+  
+  Key *crypto.EncString `json:"key,omitempty"`
 }
 
 type CipherType int
@@ -147,8 +149,26 @@ type SecureNoteCipher struct {
 }
 
 func (cipher Cipher) GetKeyForCipher(keyring crypto.Keyring) (crypto.SymmetricEncryptionKey, error) {
+	var key1 crypto.SymmetricEncryptionKey = nil
+	var err error
 	if cipher.OrganizationID != nil {
-		return keyring.GetSymmetricKeyForOrganization(cipher.OrganizationID.String())
+		key1, err = keyring.GetSymmetricKeyForOrganization(cipher.OrganizationID.String())
+	} else {
+		key1, err = keyring.GetAccountKey(), nil
 	}
-	return keyring.GetAccountKey(), nil
+
+	if err != nil {
+		return nil, err
+	}
+
+	if cipher.Key == nil {
+		return key1, nil
+	} else {
+		key, err := crypto.DecryptWith(*cipher.Key, key1)
+		if err != nil {
+			return nil, err
+		} else {
+			return crypto.MemorySymmetricEncryptionKeyFromBytes(key)
+		}
+	}
 }

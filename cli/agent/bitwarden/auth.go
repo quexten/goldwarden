@@ -116,7 +116,7 @@ func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vaul
 
 func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
 	var preLogin preLoginResponse
-	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.ApiUrl+"/accounts/prelogin", &preLogin, preLoginRequest{
+	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/accounts/prelogin", &preLogin, preLoginRequest{
 		Email: email,
 	}); err != nil {
 		notify.Notify("Goldwarden", fmt.Sprintf("Could not pre-login: %v", err), "", 0, func() {})
