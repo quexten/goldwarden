@@ -13,21 +13,21 @@ require (
 	github.com/gen2brain/beeep v0.0.0-20240112042604-c7bb2cd88fea
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
 	github.com/keybase/client/go v0.0.0-20240424154521-52f30ea26cb1
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/rymdport/portal v0.2.3
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.2.0
 	github.com/twpayne/go-pinentry v0.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	golang.org/x/crypto v0.23.0
+	golang.org/x/crypto v0.25.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
-	golang.org/x/sys v0.20.0
+	golang.org/x/sys v0.22.0
 )
 
 require (
