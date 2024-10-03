@@ -40,7 +40,7 @@ modules:
       - cp -R ./* /app/bin
       - chmod +x /app/bin/goldwarden_ui_main.py
       - install -D ./com.quexten.Goldwarden.desktop /app/share/applications/com.quexten.Goldwarden.desktop
-      - install -D ./goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
+      - install -D ./com.quexten.Goldwarden.svg /app/share/icons/hicolor/scalable/apps/com.quexten.Goldwarden.svg
       - install -Dm644 ./com.quexten.Goldwarden.metainfo.xml -t /app/share/metainfo/
       - blueprint-compiler batch-compile /app/bin/src/gui/.templates/ /app/bin/src/gui/ /app/bin/src/gui/*.blp
     sources:
