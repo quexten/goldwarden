@@ -19,7 +19,7 @@ jobs:
       run: sudo apt-get install -y libfido2-dev
     - name: Build
       run: go build -o goldwarden -v .
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: goldwarden
         path: ./goldwarden
