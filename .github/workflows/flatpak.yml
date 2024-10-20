@@ -19,7 +19,7 @@ jobs:
       run: sudo apt-get install -y libfido2-dev
     - name: Build
       run: go build -o goldwarden -v .
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: goldwarden
         path: ./goldwarden
@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download daemon
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: goldwarden
     - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
