@@ -3,6 +3,8 @@ package vault
 import (
 	"errors"
 	"strings"
+	"fmt"
+	"regexp"
 	"sync"
 
 	"github.com/quexten/goldwarden/cli/agent/bitwarden/crypto"
@@ -174,6 +176,26 @@ type SSHKey struct {
 	PublicKey string
 }
 
+func extractKeyMarker(text, pattern string) (string, string, error) {
+	re := regexp.MustCompile(pattern)
+	match := re.FindStringIndex(text)
+
+	if match != nil {
+		// Extract the matched text
+		extracted := re.FindString(text[match[0]:match[1]])
+		if match[0] == 0 {
+			// begin marker
+			return extracted, text[match[1]:], nil
+		} else if match[1] == len(strings.TrimRight(text, "\n\r ")) {
+			// end marker
+			return extracted, text[:match[0]], nil
+		}
+		return "", text, fmt.Errorf("Token found is neither at the beginning nor end: pattern: %s. match idx: %s", pattern, match)
+	}
+
+	return "", text, fmt.Errorf("No match found in pattern %s", pattern)
+}
+
 func (vault *Vault) GetSSHKeys() []SSHKey {
 	vault.lockMutex()
 	defer vault.unlockMutex()
@@ -211,11 +233,19 @@ func (vault *Vault) GetSSHKeys() []SSHKey {
 			}
 		}
 
-		privateKey = strings.Replace(privateKey, "-----BEGIN OPENSSH PRIVATE KEY-----", "", 1)
-		privateKey = strings.Replace(privateKey, "-----END OPENSSH PRIVATE KEY-----", "", 1)
+		beginMarker, privateKey, err := extractKeyMarker(privateKey, `-----\w*BEGIN [a-zA-Z ]+\w*-----`)
+		if err != nil {
+			vaultLog.Error("Failed for note %s: %s", vault.secureNotes[id].Name, err.Error())
+			continue
+		}
+		endMarker, privateKey, err := extractKeyMarker(privateKey, `-----\w*END [a-zA-Z ]+\w*-----`)
+		if err != nil {
+			vaultLog.Error("Failed for note %s: %s", vault.secureNotes[id].Name, err.Error())
+			continue
+		}
 
 		pkParts := strings.Join(strings.Split(privateKey, " "), "\n")
-		privateKeyString := "-----BEGIN OPENSSH PRIVATE KEY-----" + pkParts + "-----END OPENSSH PRIVATE KEY-----"
+		privateKeyString := beginMarker + pkParts + endMarker
 
 		decryptedTitle, err := crypto.DecryptWith(vault.secureNotes[id].Name, key)
 		if err != nil {
