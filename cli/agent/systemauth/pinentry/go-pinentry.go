@@ -9,11 +9,16 @@ import (
 	"github.com/twpayne/go-pinentry"
 )
 
-func getPassword(title string, description string) (string, error) {
+func getBinaryClientOption() (clientOption pinentry.ClientOption) {
 	binaryClientOption := pinentry.WithBinaryNameFromGnuPGAgentConf()
 	if runtime.GOOS == "darwin" {
 		binaryClientOption = pinentry.WithBinaryName("pinentry-mac")
 	}
+	return binaryClientOption
+}
+
+func getPassword(title string, description string) (string, error) {
+	binaryClientOption := getBinaryClientOption()
 
 	client, err := pinentry.NewClient(
 		binaryClientOption,
@@ -49,8 +54,10 @@ func getApproval(title string, description string) (bool, error) {
 		return true, nil
 	}
 
+	binaryClientOption := getBinaryClientOption()
+
 	client, err := pinentry.NewClient(
-		pinentry.WithBinaryNameFromGnuPGAgentConf(),
+		binaryClientOption,
 		pinentry.WithGPGTTY(),
 		pinentry.WithTitle(title),
 		pinentry.WithDesc(description),
