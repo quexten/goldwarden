@@ -55,7 +55,7 @@ func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int,
 
 func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType SessionType) bool {
 	for _, session := range s.Store {
-		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && session.sessionType == sessionType {
+		if session.sessionType == sessionType {
 			if session.Expires.After(time.Now()) {
 				return true
 			}
