@@ -36,8 +36,8 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
-github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5 h1:K7KEFpKgVcjj98jOu2Z3xMBTtTwfYVT90Zmo3ZuWmbE=
-github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5/go.mod h1:VbcN86fRkkUMPX2ufM85Um8zFndLZswoIW1eYtpAcVk=
+github.com/icza/gox v0.2.0 h1:+0N8PCt9/QSx+k0dqe/wdlXJNR/haaPsPwrTJTNDeyk=
+github.com/icza/gox v0.2.0/go.mod h1:rVecw5Q6POJAWBcXgCZdAtwK/hmoNehxCkAP3sMnOIc=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/keybase/backoff v1.0.1-0.20160517061000-726b63b835ec h1:D6qL2WCnAuxucGbmL+mDW8IKRK1pex+R1fw5rKa9nXc=

@@ -14,7 +14,7 @@ require (
 	github.com/go-toast/toast v0.0.0-20190211030409-01e6764cf0a4
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/icza/gox v0.0.0-20230924165045-adcb03233bb5
+	github.com/icza/gox v0.2.0
 	github.com/keybase/client/go v0.0.0-20240424154521-52f30ea26cb1
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
