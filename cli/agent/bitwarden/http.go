@@ -98,6 +98,9 @@ func makeAuthenticatedHTTPRequest(ctx context.Context, req *http.Request, recv i
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
 	req.Header.Set("device-type", deviceType())
+	req.Header.Set("User-Agent", "Goldwarden (github.com/quexten/goldwarden)")
+	req.Header.Set("Bitwarden-Client-Name", "goldwarden")
+	req.Header.Set("Bitwarden-Client-Version", "0.0.0")
 
 	res, err := httpClient.Do(req)
 	if err != nil {
