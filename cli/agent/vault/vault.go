@@ -19,6 +19,7 @@ type Vault struct {
 	Keyring            *crypto.Keyring
 	logins             map[string]models.Cipher
 	secureNotes        map[string]models.Cipher
+	sshKeys            map[string]models.Cipher
 	sshKeyNoteIDs      []string
 	envCredentials     map[string]string
 	lastSynced         int64
@@ -31,6 +32,7 @@ func NewVault(keyring *crypto.Keyring) *Vault {
 		Keyring:            keyring,
 		logins:             make(map[string]models.Cipher),
 		secureNotes:        make(map[string]models.Cipher),
+		sshKeys: 		    make(map[string]models.Cipher),
 		sshKeyNoteIDs:      make([]string, 0),
 		envCredentials:     make(map[string]string),
 		lastSynced:         0,
@@ -89,6 +91,12 @@ func (vault *Vault) AddOrUpdateSecureNote(cipher models.Cipher) {
 		vault.envCredentials[executableName] = cipher.ID.String()
 	}
 
+	vault.unlockMutex()
+}
+
+func (vault *Vault) AddOrUpdateSSHKey(cipher models.Cipher) {
+	vault.lockMutex()
+	vault.sshKeys[cipher.ID.String()] = cipher
 	vault.unlockMutex()
 }
 
@@ -258,6 +266,20 @@ func (vault *Vault) GetSSHKeys() []SSHKey {
 			PublicKey: string(publicKey),
 		})
 	}
+
+	for id, _ := range vault.sshKeys {
+		key, _ := vault.sshKeys[id].GetKeyForCipher(*vault.Keyring)
+		privKey, _ := crypto.DecryptWith(vault.sshKeys[id].SSHKey.PrivateKey, key)
+		pubKey, _ := crypto.DecryptWith(vault.sshKeys[id].SSHKey.PublicKey, key)
+		name, _ := crypto.DecryptWith(vault.sshKeys[id].Name, key)
+
+		sshKeys = append(sshKeys, SSHKey{
+			Name:      string(name),
+			Key:       string(privKey),
+			PublicKey: string(pubKey),
+		})
+	}
+
 	return sshKeys
 }
 
