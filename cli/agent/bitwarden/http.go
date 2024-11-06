@@ -51,7 +51,7 @@ func authenticatedHTTPPost(ctx context.Context, urlstr string, recv, send interf
 	}
 	req.Header.Set("Content-Type", contentType)
 	if authEmail != "" {
-		req.Header.Set("Auth-Email", base64.URLEncoding.EncodeToString([]byte(authEmail)))
+		req.Header.Set("Auth-Email", base64.RawURLEncoding.EncodeToString([]byte(authEmail)))
 	}
 	return makeAuthenticatedHTTPRequest(ctx, req, recv)
 }
@@ -97,8 +97,10 @@ func makeAuthenticatedHTTPRequest(ctx context.Context, req *http.Request, recv i
 	if token, ok := ctx.Value(AuthToken{}).(string); ok {
 		req.Header.Set("Authorization", "Bearer "+token)
 	}
-	req.Header.Set("device-type", deviceType())
+	req.Header.Set("Accept", "*/*")
+    req.Header.Set("Accept-Language", "en-US,en;q=0.5")
 	req.Header.Set("User-Agent", "Goldwarden (github.com/quexten/goldwarden)")
+	req.Header.Set("Device-Type", "10")
 	req.Header.Set("Bitwarden-Client-Name", "goldwarden")
 	req.Header.Set("Bitwarden-Client-Version", "0.0.0")
 

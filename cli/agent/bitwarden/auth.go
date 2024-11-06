@@ -116,6 +116,7 @@ func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vaul
 
 func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Config, vault *vault.Vault) (LoginResponseToken, crypto.MasterKey, string, error) {
 	var preLogin preLoginResponse
+	fmt.Println("Posting prelogin")
 	if err := authenticatedHTTPPost(ctx, cfg.ConfigFile.IdentityUrl+"/accounts/prelogin", &preLogin, preLoginRequest{
 		Email: email,
 	}); err != nil {
@@ -127,12 +128,14 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	var masterKey crypto.MasterKey
 	var hashedPassword string
 
+	fmt.Println("Getting password")
 	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
 		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
 	}
 
+	fmt.Println("Deriving master key")
 	masterKey, err = crypto.DeriveMasterKey([]byte(strings.Clone(password)), email, crypto.KDFConfig{Type: crypto.KDFType(preLogin.KDF), Iterations: uint32(preLogin.KDFIterations), Memory: uint32(preLogin.KDFMemory), Parallelism: uint32(preLogin.KDFParallelism)})
 	if err != nil {
 		notify.Notify("Goldwarden", fmt.Sprintf("Could not derive master key: %v", err), "", 0, func() {})
@@ -142,14 +145,14 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	hashedPassword = b64enc.EncodeToString(pbkdf2.Key(masterKey.GetBytes(), []byte(password), 1, 32, sha256.New))
 
 	values = urlValues(
+		"scope", loginScope,
+		"client_id", "web",
+		"deviceType", "10",
+		"deviceIdentifier", cfg.ConfigFile.DeviceUUID,
+		"deviceName", "firefox",
 		"grant_type", "password",
 		"username", email,
 		"password", string(hashedPassword),
-		"scope", loginScope,
-		"client_id", "connector",
-		"deviceType", deviceType(),
-		"deviceName", deviceName,
-		"deviceIdentifier", cfg.ConfigFile.DeviceUUID,
 	)
 
 	var loginResponseToken LoginResponseToken
