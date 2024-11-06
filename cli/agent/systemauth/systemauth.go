@@ -55,9 +55,12 @@ func (s *SessionStore) CreateSession(pid int, parentpid int, grandparentpid int,
 
 func (s *SessionStore) verifySession(ctx sockets.CallingContext, sessionType SessionType) bool {
 	for _, session := range s.Store {
-		if session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid && session.sessionType == sessionType {
-			if session.Expires.After(time.Now()) {
-				return true
+		if session.sessionType == sessionType {
+			// only check for ancestor if the session is not a ssh session
+			if sessionType == SSHKey || (session.ParentPid == ctx.ParentProcessPid && session.GrandParentPid == ctx.GrandParentProcessPid) {
+				if session.Expires.After(time.Now()) {
+					return true
+				}
 			}
 		}
 	}

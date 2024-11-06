@@ -59,6 +59,8 @@ func DoFullSync(ctx context.Context, vault *vault.Vault, config *config.Config, 
 			vault.AddOrUpdateLogin(cipher)
 		case models.CipherNote:
 			vault.AddOrUpdateSecureNote(cipher)
+		case models.CipherSSHKey:
+			vault.AddOrUpdateSSHKey(cipher)
 		}
 	}
 

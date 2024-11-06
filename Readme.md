@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/quexten/goldwarden/main/gui/goldwarden.svg" width=200>
+<img src="https://raw.githubusercontent.com/quexten/goldwarden/main/gui/com.quexten.Goldwarden.svg" width=200>
 
 # Goldwarden
 

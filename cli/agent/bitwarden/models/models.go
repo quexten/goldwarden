@@ -76,7 +76,8 @@ type Cipher struct {
 	Login      *LoginCipher      `json:"login,omitempty"`
 	Notes      *crypto.EncString `json:"notes,omitempty"`
 	SecureNote *SecureNoteCipher `json:"secureNote,omitempty"`
-  
+	SSHKey *SSHKeyCipher `json:"sshKey,omitempty"`
+
   Key *crypto.EncString `json:"key,omitempty"`
 }
 
@@ -88,7 +89,14 @@ const (
 	CipherCard                = 3
 	CipherIdentity            = 4
 	CipherNote                = 2
+	CipherSSHKey			  = 5
 )
+
+type SSHKeyCipher struct {
+	PrivateKey crypto.EncString `json:"privateKey"`
+	PublicKey  crypto.EncString `json:"publicKey"`
+	KeyFingerprint crypto.EncString `json:"keyFingerprint"`
+}
 
 type Card struct {
 	CardholderName crypto.EncString `json:"cardholderName"`
