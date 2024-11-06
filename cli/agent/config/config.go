@@ -89,8 +89,8 @@ func DefaultConfig(useMemguard bool) Config {
 		useMemguard,
 		&keyBuffer,
 		ConfigFile{
-			IdentityUrl:                 "https://vault.bitwarden.com/identity",
-			ApiUrl:                      "https://vault.bitwarden.com/api",
+			IdentityUrl:                 "https://identity.bitwarden.com",
+			ApiUrl:                      "https://api.bitwarden.com",
 			NotificationsUrl:            "https://notifications.bitwarden.com",
 			VaultUrl:                    "https://vault.bitwarden.com",
 			EncryptedClientID:           "",
