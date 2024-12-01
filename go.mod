@@ -19,7 +19,7 @@ require (
 	github.com/lox/go-touchid v0.0.0-20170712105233-619cc8e578d0
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-ps v1.0.0
-	github.com/rymdport/portal v0.2.6
+	github.com/rymdport/portal v0.3.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
 	github.com/tink-crypto/tink-go/v2 v2.2.0
