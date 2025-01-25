@@ -276,6 +276,39 @@ var setApiSecretCmd = &cobra.Command{
 	},
 }
 
+var setPinentryBinaryCmd = &cobra.Command{
+	Use:   "set-pinentry-binary",
+	Short: "Set the pinentry binary",
+	Long:  `Set the pinentry binary.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			return
+		}
+
+		binary := args[0]
+		request := messages.SetPinentryBinaryRequest{}
+		request.Value = binary
+
+		result, err := commandClient.SendToAgent(request)
+		if err != nil {
+			handleSendToAgentError(err)
+			return
+		}
+
+		switch result.(type) {
+		case messages.ActionResponse:
+			if result.(messages.ActionResponse).Success {
+				fmt.Println("Done")
+			} else {
+				fmt.Println("Setting vault url failed: " + result.(messages.ActionResponse).Message)
+			}
+		default:
+			fmt.Println("Wrong IPC response type")
+		}
+
+	},
+}
+
 var getRuntimeConfigCmd = &cobra.Command{
 	Use:   "get-runtime-config",
 	Short: "Get the runtime config",
@@ -315,6 +348,7 @@ func init() {
 	configCmd.AddCommand(setIdentityURLCmd)
 	configCmd.AddCommand(setNotificationsURLCmd)
 	configCmd.AddCommand(setVaultURLCmd)
+	configCmd.AddCommand(setPinentryBinaryCmd)
 	configCmd.AddCommand(setURLsAutomaticallyCmd)
 	configCmd.AddCommand(getEnvironmentCmd)
 	configCmd.AddCommand(getRuntimeConfigCmd)
