@@ -40,7 +40,7 @@ func handleGetBiometricsKey(request messages.IPCMessage, cfg *config.Config, vau
 		if !authenticated {
 			// todo, skip when explicitly denied instead of error
 			actionsLog.Info("Browser Biometrics: Biometrics not approved, asking for pin...")
-			pin, err := pinentry.GetPassword("Goldwarden", "Enter your pin to unlock your vault")
+			pin, err := pinentry.GetPassword(cfg, "Goldwarden", "Enter your pin to unlock your vault")
 			if err == nil {
 				authenticated = cfg.VerifyPin(pin)
 				if !authenticated {
@@ -66,7 +66,7 @@ func handleGetBiometricsKey(request messages.IPCMessage, cfg *config.Config, vau
 	}
 
 	actionsLog.Info("Browser Biometrics: Biometrics verified, asking for approval...")
-	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access your vault encryption key for browser biometric unlock.", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval(cfg, "Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access your vault encryption key for browser biometric unlock.", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName)); err != nil || !approved {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",

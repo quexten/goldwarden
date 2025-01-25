@@ -75,7 +75,7 @@ func handleGetLoginCipher(request messages.IPCMessage, cfg *config.Config, vault
 		}
 	}
 
-	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for user %s on entry %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, decryptedLogin.Username, decryptedLogin.Name)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval(cfg, "Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for user %s on entry %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, decryptedLogin.Username, decryptedLogin.Name)); err != nil || !approved {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",

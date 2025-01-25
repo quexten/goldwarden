@@ -577,7 +577,7 @@ func (cfg *Config) TryUnlock(vault *vault.Vault) error {
 		pin = string(pinBytes)
 	} else {
 		var err error
-		pin, err = pinentry.GetPassword("Unlock Goldwarden", "Enter the vault PIN")
+		pin, err = pinentry.GetPassword(cfg, "Unlock Goldwarden", "Enter the vault PIN")
 		if err != nil {
 			return err
 		}

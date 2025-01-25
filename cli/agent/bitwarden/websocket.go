@@ -203,7 +203,7 @@ func connectToWebsocket(ctx context.Context, vault *vault.Vault, cfg *config.Con
 
 					notify.Notify("Passwordless Login Request", authRequest.RequestIpAddress+" - "+authRequest.RequestDeviceType, "", 0, func() {
 						var message = "Do you want to allow " + authRequest.RequestIpAddress + " (" + authRequest.RequestDeviceType + ") to login to your account?"
-						if approved, err := pinentry.GetApproval("Paswordless Login Request", message); err != nil || !approved {
+						if approved, err := pinentry.GetApproval(cfg, "Paswordless Login Request", message); err != nil || !approved {
 							websocketLog.Info("AuthRequest denied")
 							return
 						}

@@ -15,6 +15,9 @@ type Pinentry struct {
 	GetApproval func(title string, description string) (bool, error)
 }
 
+type PinentryConfig interface {
+}
+
 var externalPinentry Pinentry = Pinentry{}
 
 func init() {
@@ -32,7 +35,7 @@ func SetExternalPinentry(pinentry Pinentry) error {
 	return nil
 }
 
-func GetPassword(title string, description string) (string, error) {
+func GetPassword(cfg PinentryConfig, title string, description string) (string, error) {
 	password, err := getPassword(title, description)
 	if err == nil {
 		return password, nil
@@ -45,7 +48,7 @@ func GetPassword(title string, description string) (string, error) {
 	return password, err
 }
 
-func GetApproval(title string, description string) (bool, error) {
+func GetApproval(cfg PinentryConfig, title string, description string) (bool, error) {
 	approval, err := getApproval(title, description)
 	if err == nil {
 		return approval, nil

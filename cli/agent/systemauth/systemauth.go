@@ -97,7 +97,7 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 				}
 			} else {
 				log.Warn("Biometrics is not available, asking for pin")
-				pin, err := pinentry.GetPassword("Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
+				pin, err := pinentry.GetPassword(config, "Enter PIN", "Biometrics is not available. Enter your pin to authorize this action. "+message)
 				if err != nil {
 					return false, err
 				}
@@ -119,14 +119,14 @@ func GetPermission(sessionType SessionType, ctx sockets.CallingContext, config *
 }
 
 // no session
-func CheckBiometrics(callingContext *sockets.CallingContext, approvalType biometrics.Approval) bool {
+func CheckBiometrics(callingContext *sockets.CallingContext, approvalType biometrics.Approval, cfg *config.Config) bool {
 	var message = fmt.Sprintf("Do you want to grant %s>%s>%s one-time access your vault?", callingContext.GrandParentProcessName, callingContext.ParentProcessName, callingContext.ProcessName)
 	var bioApproval = biometrics.CheckBiometrics(approvalType)
 	if !bioApproval {
 		return false
 	}
 
-	approval, err := pinentry.GetApproval("Goldwarden authorization", message)
+	approval, err := pinentry.GetApproval(cfg, "Goldwarden authorization", message)
 	if err != nil {
 		log.Error(err.Error())
 	}

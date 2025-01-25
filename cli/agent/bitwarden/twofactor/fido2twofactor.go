@@ -77,7 +77,7 @@ func Fido2TwoFactor(challengeB64 string, credentials []string, config *config.Co
 
 	var assertion *libfido2.Assertion
 	if hasPin {
-		pin, err := pinentry.GetPassword("Fido2 PIN", "Enter your token's PIN")
+		pin, err := pinentry.GetPassword(config, "Fido2 PIN", "Enter your token's PIN")
 		if err != nil {
 			return "", err
 		}
