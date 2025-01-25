@@ -62,6 +62,7 @@ type ConfigFile struct {
 	EncryptedUserSymmetricKey   string
 	EncryptedMasterPasswordHash string
 	EncryptedMasterKey          string
+	PinentryBinary              string
 	RuntimeConfig               RuntimeConfig `json:"-"`
 }
 
@@ -114,6 +115,10 @@ func (c *Config) IsLocked() bool {
 
 func (c *Config) IsLoggedIn() bool {
 	return c.ConfigFile.EncryptedMasterPasswordHash != ""
+}
+
+func (c *Config) GetPinentryBinary() string {
+	return c.ConfigFile.PinentryBinary
 }
 
 func (c *Config) Unlock(password string) bool {
