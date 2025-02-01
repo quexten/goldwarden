@@ -22,12 +22,12 @@ require (
 	github.com/rymdport/portal v0.2.6
 	github.com/spf13/cobra v1.8.1
 	github.com/tailscale/peercred v0.0.0-20240214030740-b535050b2aa4
-	github.com/tink-crypto/tink-go/v2 v2.2.0
+	github.com/tink-crypto/tink-go/v2 v2.3.0
 	github.com/twpayne/go-pinentry v0.3.0
 	github.com/vmihailenco/msgpack/v5 v5.4.1
-	golang.org/x/crypto v0.28.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
-	golang.org/x/sys v0.26.0
+	golang.org/x/sys v0.28.0
 )
 
 require (
@@ -42,6 +42,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af // indirect
 	golang.org/x/net v0.24.0 // indirect
+	google.golang.org/protobuf v1.36.0 // indirect
 )
 
 require (
