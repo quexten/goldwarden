@@ -35,7 +35,7 @@ func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactor
 		}
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Authenticator]; isInMap {
-		token, err := pinentry.GetPassword("Authenticator Second Factor", "Enter your two-factor auth code")
+		token, err := pinentry.GetPassword(cfg, "Authenticator Second Factor", "Enter your two-factor auth code")
 		if err != nil {
 			twofactorLog.Error("Error during authenticator two-factor authentication: %s", err)
 		} else {
@@ -43,7 +43,7 @@ func PerformSecondFactor(resp *TwoFactorResponse, cfg *config.Config) (TwoFactor
 		}
 	}
 	if _, isInMap := resp.TwoFactorProviders2[Email]; isInMap {
-		token, err := pinentry.GetPassword("Email Second Factor", "Enter your two-factor auth code")
+		token, err := pinentry.GetPassword(cfg, "Email Second Factor", "Enter your two-factor auth code")
 		if err == nil {
 			return Email, []byte(token), err
 		}

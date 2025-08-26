@@ -186,7 +186,7 @@ func handleUpdateVaultPin(request messages.IPCMessage, cfg *config.Config, vault
 			if !authenticated {
 				// todo, skip when explicitly denied instead of error
 				actionsLog.Info("Browser Biometrics: Biometrics not approved, asking for pin...")
-				pin, err := pinentry.GetPassword("Goldwarden", "Enter your pin to unlock your vault")
+				pin, err := pinentry.GetPassword(cfg, "Goldwarden", "Enter your pin to unlock your vault")
 				if err == nil {
 					authenticated = cfg.VerifyPin(pin)
 					if !authenticated {
@@ -213,7 +213,7 @@ func handleUpdateVaultPin(request messages.IPCMessage, cfg *config.Config, vault
 		}
 	}
 
-	pin, err := pinentry.GetPassword("Pin Change", "Enter your desired pin")
+	pin, err := pinentry.GetPassword(cfg, "Pin Change", "Enter your desired pin")
 	if err != nil {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,

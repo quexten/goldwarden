@@ -75,6 +75,23 @@ func handleSetVaultURL(request messages.IPCMessage, cfg *config.Config, vault *v
 	})
 }
 
+func handleSetPinentryBinary(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
+	binary := messages.ParsePayload(request).(messages.SetPinentryBinaryRequest).Value
+	cfg.ConfigFile.PinentryBinary = binary
+	err = cfg.WriteConfig()
+	if err != nil {
+		return messages.IPCMessageFromPayload(messages.ActionResponse{
+			Success: false,
+			Message: err.Error(),
+		})
+	}
+
+	return messages.IPCMessageFromPayload(messages.ActionResponse{
+		Success: true,
+	})
+}
+
+
 type ConfigResponse struct {
 	Version     string `json:"version"`
 	GitHash     string `json:"gitHash"`
@@ -201,6 +218,7 @@ func init() {
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetApiURLRequest{}), handleSetApiURL)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetNotificationsURLRequest{}), handleSetNotifications)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetVaultURLRequest{}), handleSetVaultURL)
+	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetPinentryBinaryRequest{}), handleSetPinentryBinary)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.SetURLsAutomaticallyRequest{}), handleSetURLsAutomatically)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetConfigEnvironmentRequest{}), handleGetConfigEnvironment)
 	AgentActionsRegistry.Register(messages.MessageTypeForEmptyPayload(messages.GetRuntimeConfigRequest{}), handleGetRuntimeConfig)

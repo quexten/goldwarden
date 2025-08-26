@@ -140,7 +140,7 @@ func (vaultAgent vaultAgent) SignWithFlags(key ssh.PublicKey, data []byte, flags
 
 	// todo refactor
 	if !systemauth.GetSSHSession(vaultAgent.context) {
-		if approved, err := pinentry.GetApproval("SSH Key Signing Request", message); err != nil || !approved {
+		if approved, err := pinentry.GetApproval(vaultAgent.config, "SSH Key Signing Request", message); err != nil || !approved {
 			log.Info("Sign Request for key: %s denied", sshKey.Name)
 			return nil, errors.New("Approval not given")
 		}

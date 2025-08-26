@@ -14,7 +14,7 @@ import (
 func handleGetCliCredentials(request messages.IPCMessage, cfg *config.Config, vault *vault.Vault, ctx *sockets.CallingContext) (response messages.IPCMessage, err error) {
 	req := messages.ParsePayload(request).(messages.GetCLICredentialsRequest)
 
-	if approved, err := pinentry.GetApproval("Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, req.ApplicationName)); err != nil || !approved {
+	if approved, err := pinentry.GetApproval(cfg, "Approve Credential Access", fmt.Sprintf("%s on %s>%s>%s is trying to access credentials for %s", ctx.UserName, ctx.GrandParentProcessName, ctx.ParentProcessName, ctx.ProcessName, req.ApplicationName)); err != nil || !approved {
 		response, err = messages.IPCMessageFromPayload(messages.ActionResponse{
 			Success: false,
 			Message: "not approved",

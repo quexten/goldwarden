@@ -97,7 +97,7 @@ func LoginWithApiKey(ctx context.Context, email string, cfg *config.Config, vaul
 		return LoginResponseToken{}, crypto.MasterKey{}, "", fmt.Errorf("could not login via API key: %v", err)
 	}
 
-	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
+	password, err := pinentry.GetPassword(cfg, "Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
 		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err
@@ -129,7 +129,7 @@ func LoginWithMasterpassword(ctx context.Context, email string, cfg *config.Conf
 	var hashedPassword string
 
 	fmt.Println("Getting password")
-	password, err := pinentry.GetPassword("Bitwarden Password", "Enter your Bitwarden password")
+	password, err := pinentry.GetPassword(cfg, "Bitwarden Password", "Enter your Bitwarden password")
 	if err != nil {
 		notify.Notify("Goldwarden", fmt.Sprintf("Could not get password: %v", err), "", 0, func() {})
 		return LoginResponseToken{}, crypto.MasterKey{}, "", err

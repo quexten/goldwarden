@@ -22,6 +22,10 @@ type SetURLsAutomaticallyRequest struct {
 	Value string
 }
 
+type SetPinentryBinaryRequest struct {
+	Value string
+}
+
 type GetConfigEnvironmentRequest struct {
 }
 
@@ -120,6 +124,15 @@ func init() {
 		}
 		return req, nil
 	}, SetVaultURLRequest{})
+
+	registerPayloadParser(func(payload []byte) (interface{}, error) {
+		var req SetPinentryBinaryRequest
+		err := json.Unmarshal(payload, &req)
+		if err != nil {
+			panic("Unmarshal: " + err.Error())
+		}
+		return req, nil
+	}, SetPinentryBinaryRequest{})
 
 	registerPayloadParser(func(payload []byte) (interface{}, error) {
 		var req SetURLsAutomaticallyRequest
